@@ -214,7 +214,7 @@ A mission-phase setting: **In flight / Approaching landing / Post-landing**, wit
 
 ## Implementation audit (Claude, 2026-11-14) and owner decisions (OD-14)
 
-The app implements RULE-01–RULE-30 as written above (`src/rules/`). Thresholds are half-open intervals that follow the wording ("below 90" = < 90; "120–139" = 120 ≤ x < 140). When several rules apply, the most severe tier is shown and every non-Normal finding is listed. Readings no rule classifies are shown as **Not evaluated**, never as Within reference. Tests: `src/rules/evaluate.test.ts` ("audit" and "AU-" blocks).
+The app implements RULE-01–RULE-30 as written above (`src/rules/`). Thresholds are half-open intervals that follow the wording ("below 90" = < 90; "120–139" = 120 ≤ x < 140). When several rules apply, the most severe tier is shown and every non-Normal finding is listed. Readings no rule classifies are shown as **Not evaluated**, never as Normal. Tests: `src/rules/evaluate.test.ts` ("audit" and "AU-" blocks).
 
 | ID | Gap found | Owner decision (OD-14) | Implemented |
 |---|---|---|---|
@@ -242,7 +242,7 @@ Evidence checked against the approved sources (the basis of OD-15):
 - **Precedence:** RULE-16 (≥ 38.0 °C with symptoms, a baseline jump, or no baseline yet) has no upper bound in its approved wording. It still applies up to 40.6 °C, so a higher reading never gets a lower tier than a lower one (tested from 36.0 to 42.0 °C). As a result, a single 39.4–40.5 °C reading still escalates through RULE-16 when there is no baseline yet, when it is more than 0.5 °C above the baseline, or when symptoms are reported. RULE-31 alone (🟡) applies only near an already high baseline without symptoms. See "Open decisions".
 - **Persistence:** not automated. REF-50's "stays at or keeps rising" has no time window or measurement conditions.
 - **Forehead and method-unknown readings:** still Not evaluated. The history page explains that no approved forehead rule exists, that "Not evaluated" does not mean normal, that the method matters, and that an unexpectedly high reading should be verified with a repeat measurement and medically reviewed. No forehead threshold is used.
-- **Symptoms:** every reported symptom is shown next to the latest reading. When the status is Within reference or Not evaluated, the page says that no approved rule assesses these symptoms on their own. This is a display of the data, not a rule.
+- **Symptoms:** every reported symptom is shown next to the latest reading. When the status is Normal or Not evaluated, the page says that no approved rule assesses these symptoms on their own. This is a display of the data, not a rule.
 - **RULE-08 irregular rhythm:** REF-23 (NASA) names "heart arrythmias" as a spaceflight cardiovascular risk but gives no crew procedure. NHLBI (REF-57) lists irregular heartbeat and palpitations as arrhythmia signs. The action "Contact flight surgeon." is a **team design decision**, labeled TDD in the UI, not a NASA protocol.
 - **General references:** RULE-14–RULE-17 and RULE-31 are general adult clinical references (REF-50, REF-30), not validated astronaut-specific escalation thresholds.
 

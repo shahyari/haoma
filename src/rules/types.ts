@@ -5,7 +5,7 @@ export const STATUSES = ['normal', 'attention', 'escalate'] as const
 export type Status = (typeof STATUSES)[number]
 
 export const STATUS_LABELS: Record<Status, string> = {
-  normal: 'Within reference',
+  normal: 'Normal',
   attention: 'Attention',
   escalate: 'Escalate',
 }

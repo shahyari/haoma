@@ -63,14 +63,14 @@ Source: the owner's brainstorm file. This table tracks what is built; details th
 
 | Item | Feature | State |
 |---|---|---|
-| Home: three areas (indicators; body figure with status banners; profile card and tasks card) | F-02 | Built, with placeholders for the figure, profile, and tasks |
+| Home: three areas (indicators; body figure with status banners; profile card and tasks card) | F-02 | Superseded by Section 16 (2026-11-14): separate indicator cards and the body-figure area; profile, Settings, About, and the demo notice in the avatar card (`design.md` → "Information architecture") |
 | Six indicators with latest value and status; open an indicator to enter a value | F-01, F-02 | Built |
 | Yellow/red banner with icon and wording, expandable to instructions and actions | F-05 | Built (RULE-01–RULE-30, evidence labels, REF IDs). Pointing at a body part waits for the figure |
 | Per-indicator history: latest value, chart, data table, personal baseline, approved rules with references | F-03 | Built (owner approval 2026-11-14). No averaged statuses; no reference ranges drawn on charts. Earth values, mission and crew averages, zone values not built |
 | Comparison with other crew members (same time window and total average) | F-03, F-06 | Deferred (owner 2026-11-14) |
 | Clickable human figure, colour-coded per body part | F-04 | Not built. Approved approach: original 2D SVG silhouette as accessible navigation (chest: blood pressure, heart rate; abdomen: glucose; head: sleep, mood; whole body: temperature), not a diagnostic map. Interaction proposal awaiting owner approval (`design.md` → "Body figure") |
 | Profile card (avatar, XP and level, name, role, mission, health score) | F-06, F-08 | One provisional fictional profile (`data-and-limitations.md`) with check-ins completed today and indicators to review, shown separately. No overall health score (owner 2026-11-14). XP and levels deferred |
-| Tasks card (assessments due from the schedule) | F-07 | Built as a simple daily check-in (one entry per indicator per day) plus the PHQ-2 14-day cadence. No notifications |
+| Tasks card (assessments due from the schedule) | F-07 | Merged into the indicator cards (Section 16): each card shows whether it was measured today; the Mood card shows the PHQ-2 screening state. No notifications |
 | Reading external sensors and wearables | — | Deferred. Entries record provenance (manual or simulated); an "imported" value is added when an import exists |
 | Display settings (Section 14) | — | Built (`design.md` → "Display settings") |
 | Roles: Director, Admin, User (Section 15) | — | Deferred until a backend is approved. Clinical rules stay read-only (owner 2026-11-14) |

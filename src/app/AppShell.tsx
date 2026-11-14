@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 
 import { Logo } from '@/components/Logo'
+import { ProfileMenu } from '@/features/profile/ProfileMenu'
 import { INDICATOR_IDS, INDICATORS } from '@/domain/indicators'
-import { cn } from '@/lib/utils'
 
 import { DISCLAIMER } from './disclaimer'
 import { APP_ROUTES } from './routes'
@@ -24,7 +24,7 @@ function useDocumentTitle() {
   }, [pathname])
 }
 
-/** Neutral placeholder shell: header with navigation, main region, footer with the disclaimer. */
+/** Shell (owner brainstorm Section 16): logo linking Home, avatar card, full-width main region, footer with the disclaimer. */
 export function AppShell() {
   useDocumentTitle()
 
@@ -38,44 +38,28 @@ export function AppShell() {
       </a>
 
       <header className="border-b">
-        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3">
-          <span className="inline-flex items-center gap-2 text-lg font-semibold">
-            <Logo className="size-6 shrink-0" />
-            {APP_NAME}
-          </span>
+        <div className="flex w-full items-center justify-between gap-4 px-4 py-2 lg:px-6">
           <nav aria-label="Main">
-            <ul className="flex flex-wrap gap-1">
-              {APP_ROUTES.filter((route) => !route.hidden).map((route) => (
-                <li key={route.path}>
-                  <NavLink
-                    to={route.path}
-                    end
-                    className={({ isActive }) =>
-                      cn(
-                        'inline-flex min-h-11 items-center rounded-md px-3 text-sm outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
-                        isActive && 'bg-muted font-medium underline underline-offset-4',
-                      )
-                    }
-                  >
-                    {route.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
+            <NavLink
+              to="/"
+              end
+              aria-label={`${APP_NAME}, Home`}
+              className="inline-flex min-h-11 items-center gap-2 rounded-md px-1 text-lg font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Logo className="size-7 shrink-0" />
+              <span aria-hidden="true">{APP_NAME}</span>
+            </NavLink>
           </nav>
+          <ProfileMenu />
         </div>
       </header>
 
-      <main
-        id="main"
-        tabIndex={-1}
-        className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 outline-none"
-      >
+      <main id="main" tabIndex={-1} className="w-full flex-1 px-4 py-6 outline-none lg:px-6">
         <Outlet />
       </main>
 
       <footer className="border-t">
-        <div className="mx-auto w-full max-w-5xl space-y-1 px-4 py-4 text-sm text-muted-foreground">
+        <div className="w-full space-y-1 px-4 py-4 text-sm text-muted-foreground lg:px-6">
           <p>{DISCLAIMER}</p>
           <p>This project is not endorsed by NASA.</p>
         </div>

@@ -6,49 +6,77 @@ import { daysAgo, renderApp } from '@/test/render'
 
 afterEach(cleanup)
 
-const row = (label: string) =>
-  within(screen.getByRole('region', { name: 'Indicators' })).getByRole('link', {
-    name: new RegExp(`^${label}`),
+const LABELS = [
+  'Heart rate',
+  'Blood pressure',
+  'Blood glucose',
+  'Body temperature',
+  'Sleep',
+  'Mood',
+]
+
+const indicators = () => within(screen.getByRole('region', { name: 'Indicators' }))
+const card = (label: string) => indicators().getByRole('link', { name: new RegExp(`^${label}`) })
+const openProfile = () => {
+  fireEvent.click(screen.getByRole('button', { name: /^Profile: Alex Morgan/ }))
+  return within(screen.getByRole('dialog'))
+}
+
+describe('HomePage (owner brainstorm Section 16)', () => {
+  it('shows six separate indicator cards in the owner’s order, with no visible "Indicators" label', () => {
+    renderApp()
+    const cards = indicators().getAllByRole('link')
+    expect(cards.map((c) => LABELS.find((label) => c.textContent?.startsWith(label)))).toEqual(
+      LABELS,
+    )
+    expect(indicators().getAllByRole('listitem').length).toBe(6)
+    expect(screen.getByRole('heading', { name: 'Indicators' }).className).toContain('sr-only')
   })
 
-describe('HomePage', () => {
   it('shows "No measurement" for every indicator at first, never a status tier', () => {
     renderApp()
-    for (const label of [
-      'Blood pressure',
-      'Heart rate',
-      'Blood glucose',
-      'Body temperature',
-      'Sleep',
-      'Mood',
-    ]) {
-      expect(row(label).textContent).toContain('No measurement')
-      expect(row(label).textContent).not.toMatch(
-        /Within reference|Attention|Escalate|Not evaluated/,
-      )
+    for (const label of LABELS) {
+      expect(card(label).textContent).toContain('No measurement')
+      expect(card(label).textContent).not.toMatch(/Normal|Attention|Escalate|Not evaluated/)
     }
-    expect(screen.getByText('0 of 6')).toBeTruthy()
   })
 
-  it('keeps "Within reference", "Not evaluated" and "No measurement" distinct', () => {
+  it('keeps "Normal", "Not evaluated" and "No measurement" distinct', () => {
     renderApp('/', [
       { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
       { ...daysAgo(0), indicator: 'bloodGlucose', mgDl: 140, context: 'nonFasting', device: 'cgm' },
       { ...daysAgo(0), indicator: 'sleep', hours: 5, source: 'selfReport' },
     ])
-    expect(row('Heart rate').textContent).toContain('Within reference')
-    expect(row('Blood glucose').textContent).toContain('Not evaluated')
-    expect(row('Blood glucose').textContent).toContain('trend only')
-    expect(row('Sleep').textContent).toContain('Below general sleep recommendation')
-    expect(row('Sleep').textContent).not.toContain('Escalate')
-    expect(row('Blood pressure').textContent).toContain('No measurement')
+    expect(card('Heart rate').textContent).toContain('Normal')
+    expect(card('Heart rate').textContent).not.toContain('Within reference')
+    expect(card('Blood glucose').textContent).toContain('Not evaluated')
+    expect(card('Blood glucose').textContent).toContain('trend only')
+    expect(card('Sleep').textContent).toContain('Below general sleep recommendation')
+    expect(card('Blood pressure').textContent).toContain('No measurement')
+  })
+
+  it('merges the daily check-in into the cards', () => {
+    renderApp('/', [
+      { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
+      { ...daysAgo(1), indicator: 'sleep', hours: 7.5, source: 'selfReport' },
+    ])
+    expect(card('Heart rate').textContent).toContain('Checked in today')
+    expect(card('Sleep').textContent).toContain('Not yet measured today')
+    expect(card('Mood').textContent).toContain('Daily rating not yet today')
+    expect(card('Mood').textContent).toContain('PHQ-2 screening: Not assessed')
+    expect(screen.queryByText('Today’s check-in')).toBeNull()
+    // One link per indicator: the check-in no longer duplicates the destination.
+    const sleepLinks = screen
+      .getAllByRole('link')
+      .filter((a) => a.getAttribute('href') === '/indicators/sleep')
+    expect(sleepLinks.length).toBe(1)
   })
 
   it('shows an expandable banner with the approved action and evidence for Attention and Escalate', () => {
     renderApp('/', [
       { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
     ])
-    expect(row('Blood pressure').textContent).toContain('Escalate')
+    expect(card('Blood pressure').textContent).toContain('Escalate')
     expect(screen.getByText('Report at next flight-surgeon contact.')).toBeTruthy()
     expect(
       screen.getByText(/Threshold: General clinical reference\. Action: Team design decision\./),
@@ -58,42 +86,47 @@ describe('HomePage', () => {
     )
   })
 
-  it('counts completed check-ins and indicators to review separately, with no overall score', () => {
-    renderApp('/', [
-      { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
-      { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
-      { ...daysAgo(1), indicator: 'sleep', hours: 6.5, source: 'selfReport' },
-    ])
-    const profile = within(screen.getByRole('region', { name: 'Profile' }))
-    expect(profile.getByText('2 of 6')).toBeTruthy()
+  it('keeps the body-figure placeholder next to the cards', () => {
+    renderApp()
     expect(
-      profile.getByText('Indicators to review (Attention or Escalate)').nextElementSibling
-        ?.textContent,
-    ).toBe('2')
-    expect(profile.getByText('Fictional profile')).toBeTruthy()
-    expect(document.body.textContent).not.toMatch(/health score/i)
+      within(screen.getByRole('region', { name: 'Health status' })).getByText('Body figure'),
+    ).toBeTruthy()
   })
 
-  it('loads the simulated demo history and labels it', () => {
+  it('replaces the demo disclaimer on the main screen with a "Demo data" chip', () => {
     const store = renderApp()
-    fireEvent.click(screen.getByRole('button', { name: 'Load simulated demo history' }))
-    expect(screen.getByText(/entries marked “Simulated”\s+are invented/)).toBeTruthy()
-    expect(row('Heart rate').textContent).toContain('Simulated')
-    const profile = within(screen.getByRole('region', { name: 'Profile' }))
-    expect(profile.getByText('Alex Morgan')).toBeTruthy()
-    expect(profile.getByText('Fictional profile')).toBeTruthy()
-    expect(profile.getByText('Aster-1 Lunar Transit Mission')).toBeTruthy()
-    expect(profile.getByText(/All health measurements in the demo are simulated/)).toBeTruthy()
-    expect(screen.getByText(/PHQ-2 screening/).textContent).toContain('Below screening cutoff')
+    fireEvent.click(openProfile().getByRole('button', { name: 'Load simulated demo history' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.getByText('Demo data')).toBeTruthy()
+    expect(screen.queryByText(/are invented for this demonstration/)).toBeNull()
+    expect(card('Heart rate').textContent).toContain('Simulated')
     const { entries } = store.load().data
     expect(entries.length).toBe(14 * 6 + 1)
     expect(entries.every((e) => e.origin === 'simulated')).toBe(true)
+    expect(document.body.textContent).not.toMatch(/health score/i)
+  })
+})
+
+describe('Avatar card', () => {
+  it('holds the fictional profile, the demo-data notice, and links to Settings and About', () => {
+    renderApp('/', [
+      { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
+    ])
+    const profile = openProfile()
+    expect(profile.getByText('Alex Morgan')).toBeTruthy()
+    expect(profile.getByText('Fictional profile')).toBeTruthy()
+    expect(profile.getByText('Aster-1 Lunar Transit Mission')).toBeTruthy()
+    expect(profile.getByText('Indicators to review').nextElementSibling?.textContent).toBe('1')
+    expect(profile.getByText(/are invented for this demonstration/)).toBeTruthy()
+    expect(profile.getByRole('link', { name: 'About' }).getAttribute('href')).toBe('/about')
+    fireEvent.click(profile.getByRole('link', { name: 'Settings' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.getByRole('heading', { level: 1, name: 'Settings' })).toBeTruthy()
   })
 
-  it('reaches every indicator and check-in item with native links', () => {
-    renderApp()
-    const links = screen.getAllByRole('link')
-    expect(links.filter((a) => a.getAttribute('href')?.startsWith('/indicators/')).length).toBe(13)
-    for (const link of links) expect(link.tabIndex).toBe(0)
+  it('the logo links back to Home', () => {
+    renderApp('/about')
+    fireEvent.click(screen.getByRole('link', { name: 'haoma, Home' }))
+    expect(screen.getByRole('heading', { level: 1, name: 'Home' })).toBeTruthy()
   })
 })

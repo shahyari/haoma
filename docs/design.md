@@ -9,7 +9,13 @@
 
 ## Information architecture
 
-TODO: screens / navigation hierarchy (screens are listed in `product.md`)
+Owner brainstorm Section 16 (2026-11-14):
+
+- **Header:** the logo (with the name "haoma") links to Home on the left. The avatar on the right opens the **avatar card**, which holds the fictional profile, indicators to review, the demo-data notice, "Load simulated demo history" (when empty), and the links to **Settings** and **About**. A "Demo data" chip next to the avatar replaces the demo disclaimer on the main screen. There is no separate navigation bar.
+- **Home:** six separate indicator cards (Heart rate, Blood pressure, Blood glucose, Body temperature, Sleep, Mood) in a left column, and the body-figure area on the right, with the status banners and the RULE-30 reminder above it. On narrow screens the cards come first, then the figure area. The layout stretches to the full screen width (no fixed container width).
+- **Indicator card:** icon and name; latest value; date and time · input context (method, device or rest state) · provenance; today's check-in state ("Checked in today" / "Not yet measured today"), which replaces the separate check-in card; PHQ-2 screening state on the Mood card; status badge across the bottom. The whole card links to the indicator's history page.
+- **Status label:** the green tier reads "Normal" (was "Within reference"). "Not evaluated" and "No measurement" stay neutral and distinct.
+- **Indicator icons** (Lucide, Claude's choice; blood pressure follows the owner's example): heart rate HeartPulse, blood pressure Droplet, glucose Pipette, temperature Thermometer, sleep Moon, mood Smile.
 
 ## Display settings (owner brainstorm, Section 14, 2026-11-14)
 

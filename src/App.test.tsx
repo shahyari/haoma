@@ -20,7 +20,10 @@ describe('App shell', () => {
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeTruthy()
     expect(screen.getByRole('main').id).toBe('main')
     expect(screen.getByRole('heading', { level: 1 })).toBeTruthy()
-    expect(screen.getByRole('link', { name: 'Home' }).getAttribute('aria-current')).toBe('page')
+    expect(screen.getByRole('link', { name: 'haoma, Home' }).getAttribute('aria-current')).toBe(
+      'page',
+    )
+    expect(screen.getByRole('button', { name: /^Profile: Alex Morgan/ })).toBeTruthy()
     expect(screen.getByRole('contentinfo').textContent).toContain(DISCLAIMER)
   })
 

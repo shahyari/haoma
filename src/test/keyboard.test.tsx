@@ -13,10 +13,11 @@ describe('keyboard', () => {
     renderApp()
     const indicators = within(screen.getByRole('region', { name: 'Indicators' }))
     const first = indicators.getAllByRole('link')[0]
-    await user.tab()
+    // Skip link, logo and avatar come first; the first card follows.
+    for (let i = 0; i < 4 && document.activeElement !== first; i++) await user.tab()
     expect(document.activeElement).toBe(first)
     await user.keyboard('{Enter}')
-    expect(screen.getByRole('heading', { level: 1, name: 'Blood pressure' })).toBeTruthy()
+    expect(screen.getByRole('heading', { level: 1, name: 'Heart rate' })).toBeTruthy()
   })
 
   it('adds an entry using only the keyboard; Escape closes the dialog and returns focus', async () => {
@@ -42,6 +43,18 @@ describe('keyboard', () => {
     await user.keyboard('{Enter}')
     expect(screen.queryByRole('dialog')).toBeNull()
     expect(store.load().data.entries).toMatchObject([{ indicator: 'sleep', hours: 7.5 }])
+  })
+
+  it('opens the avatar card with the keyboard and closes it with Escape', async () => {
+    const user = userEvent.setup()
+    renderApp()
+    const avatar = screen.getByRole('button', { name: /^Profile: Alex Morgan/ })
+    avatar.focus()
+    await user.keyboard('{Enter}')
+    expect(screen.getByRole('dialog')).toBeTruthy()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(document.activeElement).toBe(avatar)
   })
 
   it('selects radio options and checkboxes with the keyboard', async () => {
