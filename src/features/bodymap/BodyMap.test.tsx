@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { renderApp } from '@/test/render'
 
@@ -150,21 +150,47 @@ describe('Body map: owner changes of 2026-11-14', () => {
     expect(log.queryByText('Max /10')).toBeNull()
   })
 
-  it('defaults the date and time to now, accepts an earlier time, and rejects a future one', async () => {
-    const { store, dialog } = await addAt('Neck')
-    const when = dialog.getByLabelText('Date and time of the pain') as HTMLInputElement
-    expect(Math.abs(new Date(when.value).getTime() - Date.now())).toBeLessThan(2 * 60_000)
+  it('sets the date with the shadcn calendar and the time below Character, and rejects the future', async () => {
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date(2026, 10, 14, 12, 0) })
+    try {
+      const { store, dialog } = await addAt('Neck')
+      // The date and time come after Character and before the note.
+      const order = ['Character (optional)', 'Date and time of the pain', 'Note (optional)'].map(
+        (t) => dialog.getByText(t),
+      )
+      expect(
+        order[0].compareDocumentPosition(order[1]) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy()
+      expect(
+        order[1].compareDocumentPosition(order[2]) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy()
 
-    fireEvent.change(when, { target: { value: '2099-01-01T10:00' } })
-    fireEvent.click(dialog.getByRole('button', { name: 'Save' }))
-    expect(dialog.getByText('The date and time cannot be in the future.')).toBeTruthy()
-    expect(store.load().data.painLogs).toEqual([])
+      const time = dialog.getByLabelText('Time') as HTMLInputElement
+      expect(time.value).toBe('12:00')
+      expect(dialog.getByRole('button', { name: 'Date' }).textContent).toContain('14 Nov 2026')
 
-    fireEvent.change(when, { target: { value: '2026-11-10T08:30' } })
-    fireEvent.click(dialog.getByRole('button', { name: 'Save' }))
-    expect(store.load().data.painLogs[0].recordedAt).toBe(
-      new Date('2026-11-10T08:30').toISOString(),
-    )
+      fireEvent.change(time, { target: { value: '13:30' } })
+      fireEvent.click(dialog.getByRole('button', { name: 'Save' }))
+      expect(dialog.getByText('The date and time cannot be in the future.')).toBeTruthy()
+      expect(store.load().data.painLogs).toEqual([])
+
+      fireEvent.change(time, { target: { value: '08:30' } })
+      fireEvent.click(dialog.getByRole('button', { name: 'Date' }))
+      const grid = screen.getByRole('grid')
+      expect(
+        within(grid)
+          .getByRole('button', { name: /November 20th, 2026/ })
+          .hasAttribute('disabled'),
+      ).toBe(true)
+      fireEvent.click(within(grid).getByRole('button', { name: /November 10th, 2026/ }))
+      expect(dialog.getByRole('button', { name: 'Date' }).textContent).toContain('10 Nov 2026')
+      fireEvent.click(dialog.getByRole('button', { name: 'Save' }))
+      expect(store.load().data.painLogs[0].recordedAt).toBe(
+        new Date(2026, 10, 10, 8, 30).toISOString(),
+      )
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('saving a report moves the chosen logs into it, shows a banner, and opens the report', async () => {

@@ -7,6 +7,12 @@ import {
 } from '@/domain/format'
 import type { EntryOrigin, HealthEntry, IndicatorId } from '@/domain/indicators'
 import { SYMPTOMS, type SymptomId } from '@/domain/symptoms'
+import {
+  displayGlucose,
+  displayTemperature,
+  glucoseUnitLabel,
+  temperatureUnitLabel,
+} from '@/domain/units'
 
 import type { ChartSeries } from './HistoryChart'
 
@@ -105,10 +111,24 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
   bloodGlucose: [
     {
       id: 'bloodGlucose',
-      unit: 'mg/dL',
-      series: [{ key: 'mgDl', label: 'Glucose', value: pick((e: E<'bloodGlucose'>) => e.mgDl) }],
+      get unit() {
+        return glucoseUnitLabel()
+      },
+      series: [
+        {
+          key: 'mgDl',
+          label: 'Glucose',
+          value: pick((e: E<'bloodGlucose'>) => displayGlucose(e.mgDl)),
+        },
+      ],
       columns: [
-        { header: 'Glucose (mg/dL)', numeric: true, cell: pick((e: E<'bloodGlucose'>) => e.mgDl) },
+        {
+          get header() {
+            return `Glucose (${glucoseUnitLabel()})`
+          },
+          numeric: true,
+          cell: pick((e: E<'bloodGlucose'>) => displayGlucose(e.mgDl)),
+        },
         {
           header: 'Context',
           cell: pick((e: E<'bloodGlucose'>) => GLUCOSE_CONTEXT_LABELS[e.context]),
@@ -122,32 +142,40 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
   bodyTemperature: [
     {
       id: 'bodyTemperature',
-      unit: '°C',
+      get unit() {
+        return temperatureUnitLabel()
+      },
       // One line per method: readings from different methods are never joined (OD-15).
       series: [
         {
           key: 'oral',
           label: 'Oral',
-          value: pick((e: E<'bodyTemperature'>) => (e.method === 'oral' ? e.celsius : undefined)),
+          value: pick((e: E<'bodyTemperature'>) =>
+            e.method === 'oral' ? displayTemperature(e.celsius) : undefined,
+          ),
         },
         {
           key: 'forehead',
           label: 'Forehead sensor',
           value: pick((e: E<'bodyTemperature'>) =>
-            e.method === 'forehead' ? e.celsius : undefined,
+            e.method === 'forehead' ? displayTemperature(e.celsius) : undefined,
           ),
         },
         {
           key: 'unknownMethod',
           label: 'Method not recorded',
-          value: pick((e: E<'bodyTemperature'>) => (e.method ? undefined : e.celsius)),
+          value: pick((e: E<'bodyTemperature'>) =>
+            e.method ? undefined : displayTemperature(e.celsius),
+          ),
         },
       ],
       columns: [
         {
-          header: 'Temperature (°C)',
+          get header() {
+            return `Temperature (${temperatureUnitLabel()})`
+          },
           numeric: true,
-          cell: pick((e: E<'bodyTemperature'>) => e.celsius),
+          cell: pick((e: E<'bodyTemperature'>) => displayTemperature(e.celsius)),
         },
         {
           header: 'Method',

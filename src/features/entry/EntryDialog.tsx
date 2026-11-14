@@ -26,6 +26,14 @@ import { SYMPTOMS, SYMPTOMS_BY_INDICATOR } from '@/domain/symptoms'
 import { formatDate, formatDateTime } from '@/domain/dates'
 import { phq2Schedule } from '@/features/checkin/checkin'
 import { validateEntry, type ValidationIssue } from '@/domain/validation'
+import {
+  displayGlucose,
+  displayTemperature,
+  glucoseUnitLabel,
+  temperatureUnitLabel,
+  toStoredCelsius,
+  toStoredMgDl,
+} from '@/domain/units'
 import { MOOD_SAFETY_MESSAGE } from '@/rules/rules'
 
 type Values = Record<string, string>
@@ -49,8 +57,22 @@ const NUMBER_FIELDS: Record<IndicatorId, NumberFieldSpec[]> = {
     { name: 'diastolicMmHg', label: 'Diastolic (mmHg)' },
   ],
   heartRate: [{ name: 'bpm', label: 'Heart rate (bpm)' }],
-  bloodGlucose: [{ name: 'mgDl', label: 'Glucose (mg/dL)' }],
-  bodyTemperature: [{ name: 'celsius', label: 'Temperature (°C)' }],
+  bloodGlucose: [
+    {
+      name: 'mgDl',
+      get label() {
+        return `Glucose (${glucoseUnitLabel()})`
+      },
+    },
+  ],
+  bodyTemperature: [
+    {
+      name: 'celsius',
+      get label() {
+        return `Temperature (${temperatureUnitLabel()})`
+      },
+    },
+  ],
   sleep: [{ name: 'hours', label: 'Sleep (hours)' }],
   mood: [],
 }
@@ -99,12 +121,12 @@ function valuesOf(entry: HealthEntry): Values {
       set('activity', entry.activity)
       break
     case 'bloodGlucose':
-      set('mgDl', entry.mgDl)
+      set('mgDl', displayGlucose(entry.mgDl))
       set('context', entry.context)
       set('device', entry.device)
       break
     case 'bodyTemperature':
-      set('celsius', entry.celsius)
+      set('celsius', displayTemperature(entry.celsius))
       set('method', entry.method)
       set('exercisedLast30Min', entry.exercisedLast30Min)
       break
@@ -136,6 +158,13 @@ function buildEntry(
     ...(symptoms.length > 0 ? { symptoms } : {}),
   }
   for (const field of NUMBER_FIELDS[indicator]) raw[field.name] = toNumber(v[field.name])
+  // Input in the units chosen in Settings; stored in °C and mg/dL.
+  const convert = (name: string, fn: (n: number) => number) => {
+    const n = raw[name]
+    if (typeof n === 'number' && Number.isFinite(n)) raw[name] = fn(n)
+  }
+  if (indicator === 'bodyTemperature') convert('celsius', toStoredCelsius)
+  if (indicator === 'bloodGlucose') convert('mgDl', toStoredMgDl)
   if (indicator === 'heartRate') raw.activity = v.activity
   if (indicator === 'bloodGlucose') Object.assign(raw, { context: v.context, device: v.device })
   if (indicator === 'bodyTemperature') {

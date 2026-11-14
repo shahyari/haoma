@@ -85,6 +85,7 @@ These are routine tooling choices within the approved stack, delegated to Claude
 | Keyboard tests | `@testing-library/user-event` (MIT), dev-only | Simulates real Tab, Enter, Space, and Escape sequences, which `fireEvent` cannot (added 2026-11-14) |
 | Accessibility checks | `axe-core` (MPL-2.0; dev-only), optional | Automated a11y smoke checks. MPL-2.0 applies to the library itself and is used for testing only. |
 | Validation | Hand-written TypeScript validators (no schema library) | Six indicators don't justify an extra dependency |
+| Date picker | shadcn `calendar` component, which installs `react-day-picker` 10.0.2 (MIT) and `date-fns` 4.4.0 (MIT) | Owner asked for the shadcn default date-time picker instead of the browser's (2026-11-14). Loaded only with the body map chunk |
 
 ## Project structure (Phase A)
 

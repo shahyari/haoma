@@ -3,6 +3,8 @@ import { cleanup, fireEvent, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import type { HealthEntry } from '@/domain/indicators'
+import { DEFAULT_FORMATS, setFormats } from '@/domain/units'
+import { SETTINGS_KEY } from '@/settings/settings'
 import { daysAgo, renderApp } from '@/test/render'
 
 afterEach(cleanup)
@@ -336,5 +338,33 @@ describe('Mood: daily rating and PHQ-2 are separate', () => {
     expect(latest().getAllByText('Screening due').length).toBeGreaterThan(0)
     expect(latest().getByText(/now history only/)).toBeTruthy()
     expect(latest().queryByText('Further assessment recommended')).toBeNull()
+  })
+})
+
+describe('Units chosen in Settings (display only)', () => {
+  afterEach(() => {
+    localStorage.removeItem(SETTINGS_KEY)
+    setFormats(DEFAULT_FORMATS)
+  })
+
+  it('takes a temperature in °F, stores and evaluates it in °C, and shows it in °F', () => {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ temperatureUnit: 'fahrenheit' }))
+    const store = renderApp('/indicators/bodyTemperature')
+    enter({ 'Temperature (°F)': '99.5' }, ['Oral'])
+    expect(store.load().data.entries[0]).toMatchObject({ celsius: 37.5 })
+    expect(latest().getByText('99.5 °F')).toBeTruthy()
+    expect(latest().getByText('Attention')).toBeTruthy()
+    expect(latest().getByText(/RULE-15/)).toBeTruthy()
+    expect(screen.getByText(/Rule levels are stated in the units of their sources/)).toBeTruthy()
+    expect(within(table(/table of readings/)).getByText('99.5')).toBeTruthy()
+  })
+
+  it('shows glucose in mmol/L and stores mg/dL', () => {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ measurementSystem: 'si' }))
+    const store = renderApp('/indicators/bloodGlucose')
+    enter({ 'Glucose (mmol/L)': '7.0' }, ['Fasting', 'Fingerstick'])
+    expect(store.load().data.entries[0]).toMatchObject({ mgDl: 126.1 })
+    expect(latest().getByText('7 mmol/L')).toBeTruthy()
+    expect(latest().getByText('Escalate')).toBeTruthy()
   })
 })

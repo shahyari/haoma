@@ -2,6 +2,15 @@
  * Display settings (docs/design.md -> "Display settings"). Stored separately
  * from health data, under its own versioned key.
  */
+import {
+  DATE_FORMATS,
+  DEFAULT_FORMATS,
+  MEASUREMENT_SYSTEMS,
+  setFormats,
+  TEMPERATURE_UNITS,
+  type Formats,
+} from '@/domain/units'
+
 export const ZONES = ['earth', 'space', 'moon', 'mars'] as const
 export type Zone = (typeof ZONES)[number]
 export const ZONE_LABELS: Record<Zone, string> = {
@@ -23,7 +32,7 @@ export type Contrast = (typeof CONTRASTS)[number]
 export const FONT_SIZES = ['small', 'medium', 'large'] as const
 export type FontSize = (typeof FONT_SIZES)[number]
 
-export interface DisplaySettings {
+export interface DisplaySettings extends Formats {
   /** Where the astronaut is. Drives the automatic theme. */
   zone: Zone
   /** `auto` follows the zone. */
@@ -31,6 +40,7 @@ export interface DisplaySettings {
   mode: Mode
   contrast: Contrast
   fontSize: FontSize
+  /** "Assistive patterns": adds patterns to the status colours. */
   colorBlind: boolean
 }
 
@@ -41,6 +51,7 @@ export const DEFAULT_SETTINGS: DisplaySettings = {
   contrast: 'normal',
   fontSize: 'medium',
   colorBlind: false,
+  ...DEFAULT_FORMATS,
 }
 
 export const SETTINGS_KEY = 'haoma:display:v1'
@@ -66,6 +77,9 @@ export function parseSettings(raw: string | null): DisplaySettings {
     contrast: pick(v.contrast, CONTRASTS, d.contrast),
     fontSize: pick(v.fontSize, FONT_SIZES, d.fontSize),
     colorBlind: typeof v.colorBlind === 'boolean' ? v.colorBlind : d.colorBlind,
+    temperatureUnit: pick(v.temperatureUnit, TEMPERATURE_UNITS, d.temperatureUnit),
+    measurementSystem: pick(v.measurementSystem, MEASUREMENT_SYSTEMS, d.measurementSystem),
+    dateFormat: pick(v.dateFormat, DATE_FORMATS, d.dateFormat),
   }
 }
 
@@ -109,4 +123,5 @@ export function applySettings(
   root.dataset.contrast = settings.contrast
   root.dataset.fontSize = settings.fontSize
   root.dataset.colorblind = String(settings.colorBlind)
+  setFormats(settings)
 }

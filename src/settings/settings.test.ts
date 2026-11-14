@@ -42,6 +42,7 @@ describe('display settings', () => {
     const root = document.createElement('html')
     applySettings(
       {
+        ...DEFAULT_SETTINGS,
         zone: 'earth',
         theme: 'auto',
         mode: 'dark',

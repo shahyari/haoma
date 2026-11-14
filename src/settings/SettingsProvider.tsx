@@ -8,6 +8,8 @@ import {
   type ReactNode,
 } from 'react'
 
+import { setFormats } from '@/domain/units'
+
 import { applySettings, loadSettings, saveSettings, type DisplaySettings } from './settings'
 
 interface SettingsContextValue {
@@ -32,7 +34,11 @@ function useMediaQuery(query: string): boolean {
 }
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState(loadSettings)
+  const [settings, setSettings] = useState(() => {
+    const loaded = loadSettings()
+    setFormats(loaded)
+    return loaded
+  })
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)')
   const deviceWantsMoreContrast = useMediaQuery('(prefers-contrast: more)')
 
@@ -44,6 +50,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSettings((current) => {
       const next = { ...current, ...patch }
       saveSettings(next)
+      // Formatters read units and date format synchronously, before the next render.
+      setFormats(next)
       return next
     })
   }, [])

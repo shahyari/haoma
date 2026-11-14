@@ -159,6 +159,7 @@ E-R7, E-R8, and E-R15 in `challenge.md` require these to be freely available or 
 | TP-14 | @types/react, @types/react-dom, @types/node | DefinitelyTyped contributors | https://github.com/DefinitelyTyped/DefinitelyTyped | Type definitions (dev-only) | MIT | 2026-11-14 |
 | TP-15 | Apache License 2.0 text (`LICENSE`) | Apache Software Foundation | https://www.apache.org/licenses/LICENSE-2.0.txt | Project license | Apache-2.0 | 2026-11-14 |
 | TP-16 | haoma logo (`public/favicon.svg`, `src/components/Logo.tsx`) | Hossein Shahyari (owner) | — | App logo and favicon | Team's own work (project license) | 2026-11-14 |
+| TP-17 | react-day-picker 10.0.2, date-fns 4.4.0 (via the shadcn `calendar` component) | Giampaolo Bellavite and contributors; date-fns contributors | https://daypicker.dev, https://date-fns.org | Date picker in the pain-log dialog | MIT | 2026-11-14 |
 
 Versions and licenses were read from the installed `node_modules` on 2026-11-14. Transitive dependencies (from `package-lock.json`) are licensed MIT, ISC, Apache-2.0, BSD-2-Clause, BSD-3-Clause, 0BSD, BlueOak-1.0.0, MPL-2.0, and CC-BY-4.0 (one data package). TODO: before submission, re-run the license summary and name the MPL-2.0 and CC-BY-4.0 packages.
 

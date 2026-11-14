@@ -8,3 +8,8 @@ globalThis.ResizeObserver ??= class {
 // jsdom has no canvas implementation; return null like a browser without the context.
 HTMLCanvasElement.prototype.getContext = (() =>
   null) as typeof HTMLCanvasElement.prototype.getContext
+
+// jsdom lacks these pointer and scroll APIs, which Radix Select uses.
+Element.prototype.hasPointerCapture ??= () => false
+Element.prototype.releasePointerCapture ??= () => {}
+Element.prototype.scrollIntoView ??= () => {}

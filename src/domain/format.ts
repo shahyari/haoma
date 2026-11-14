@@ -1,4 +1,5 @@
 import type { HealthEntry } from './indicators'
+import { displayGlucose, displayTemperature, glucoseUnitLabel, temperatureUnitLabel } from './units'
 
 export const GLUCOSE_CONTEXT_LABELS = {
   fasting: 'Fasting',
@@ -25,9 +26,9 @@ export function formatValue(entry: HealthEntry): string {
     case 'heartRate':
       return `${entry.bpm} bpm`
     case 'bloodGlucose':
-      return `${entry.mgDl} mg/dL`
+      return `${displayGlucose(entry.mgDl)} ${glucoseUnitLabel()}`
     case 'bodyTemperature':
-      return `${entry.celsius} °C`
+      return `${displayTemperature(entry.celsius)} ${temperatureUnitLabel()}`
     case 'sleep':
       return `${entry.hours} h`
     case 'mood':

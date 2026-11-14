@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
+import userEvent from '@testing-library/user-event'
 
 import { daysAgo, renderApp } from '@/test/render'
 
@@ -106,8 +107,8 @@ describe('HomePage (owner brainstorm Section 16)', () => {
 
   it('replaces the demo disclaimer on the main screen with a "Demo data" chip', () => {
     const store = renderApp()
-    fireEvent.click(openProfile().getByRole('button', { name: 'Load simulated demo history' }))
-    expect(screen.queryByRole('dialog')).toBeNull()
+    fireEvent.click(openProfile().getByRole('button', { name: 'Load demo data' }))
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
     expect(screen.getByText('Demo data')).toBeTruthy()
     expect(screen.queryByText(/are invented for this demonstration/)).toBeNull()
     expect(card('Heart rate').textContent).toContain('Simulated')
@@ -119,16 +120,24 @@ describe('HomePage (owner brainstorm Section 16)', () => {
 })
 
 describe('Avatar card', () => {
-  it('holds the fictional profile, the demo-data notice, and links to Settings and About', () => {
+  it('follows the Section 17 wireframe: profile, links, demo notice, zone, demo data, clear data', () => {
     renderApp('/', [
       { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
     ])
     const profile = openProfile()
     expect(profile.getByText('Alex Morgan')).toBeTruthy()
-    expect(profile.getByText('Fictional profile')).toBeTruthy()
-    expect(profile.getByText('Aster-1 Lunar Transit Mission')).toBeTruthy()
-    expect(profile.getByText('Indicators to review').nextElementSibling?.textContent).toBe('1')
-    expect(profile.getByText(/are invented for this demonstration/)).toBeTruthy()
+    expect(profile.getByText('Fictional Flight Engineer')).toBeTruthy()
+    expect(
+      within(profile.getByRole('navigation', { name: 'Profile menu' }))
+        .getAllByRole('link')
+        .map((a) => a.textContent),
+    ).toEqual(['Reports', 'Settings', 'About'])
+    expect(profile.getByText('Demo data and fictional person')).toBeTruthy()
+    expect(profile.getByText('All health measurements in the demo are simulated.')).toBeTruthy()
+    expect(profile.getByRole('combobox', { name: 'Mission zone' })).toBeTruthy()
+    expect(profile.getByRole('combobox', { name: 'Mission phase' })).toBeTruthy()
+    expect(profile.getByRole('button', { name: 'Load demo data' })).toBeTruthy()
+    expect(profile.getByRole('button', { name: 'Clear data' })).toBeTruthy()
     expect(profile.getByRole('link', { name: 'About' }).getAttribute('href')).toBe('/about')
     fireEvent.click(profile.getByRole('link', { name: 'Settings' }))
     expect(screen.queryByRole('dialog')).toBeNull()
@@ -165,5 +174,30 @@ describe('Owner layout changes of 2026-11-14', () => {
     renderApp('/settings')
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
     expect(screen.getByRole('heading', { level: 1, name: 'Home' })).toBeTruthy()
+  })
+})
+
+describe('Avatar card controls (Section 17)', () => {
+  it('sets the mission zone (which drives the automatic theme) and the mission phase', async () => {
+    const user = userEvent.setup()
+    const store = renderApp('/')
+    const profile = openProfile()
+    await user.click(profile.getByRole('combobox', { name: 'Mission zone' }))
+    await user.click(screen.getByRole('option', { name: 'Mars' }))
+    expect(document.documentElement.dataset.theme).toBe('mars')
+    await user.click(profile.getByRole('combobox', { name: 'Mission phase' }))
+    await user.click(screen.getByRole('option', { name: 'Post-landing' }))
+    expect(store.load().data.missionPhase).toBe('postLanding')
+  })
+
+  it('asks before replacing existing entries with demo data', () => {
+    const store = renderApp('/', [
+      { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
+    ])
+    const profile = openProfile()
+    fireEvent.click(profile.getByRole('button', { name: 'Load demo data' }))
+    expect(store.load().data.entries.length).toBe(1)
+    fireEvent.click(profile.getByRole('button', { name: 'Replace entries with demo data' }))
+    expect(store.load().data.entries.length).toBe(14 * 6 + 1)
   })
 })

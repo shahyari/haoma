@@ -72,7 +72,7 @@ Source: the owner's brainstorm file. This table tracks what is built; details th
 | Profile card (avatar, XP and level, name, role, mission, health score) | F-06, F-08 | One provisional fictional profile (`data-and-limitations.md`) with check-ins completed today and indicators to review, shown separately. No overall health score (owner 2026-11-14). XP and levels deferred |
 | Tasks card (assessments due from the schedule) | F-07 | Merged into the indicator cards (Section 16): each card shows whether it was measured today; the Mood card shows the PHQ-2 screening state. No notifications |
 | Reading external sensors and wearables | — | Deferred. Entries record provenance (manual or simulated); an "imported" value is added when an import exists |
-| Display settings (Section 14) | — | Built (`design.md` → "Display settings") |
+| Display settings (Sections 14 and 17) | — | Built (`design.md` → "Display settings"): Appearances and Units and Formats cards; zone, mission phase, demo data, and clear data in the avatar card |
 | Roles: Director, Admin, User (Section 15) | — | Deferred until a backend is approved. Clinical rules stay read-only (owner 2026-11-14) |
 | Zone-based medical reference values | — | Not built: no supported source. Zone themes stay (owner 2026-11-14) |
 

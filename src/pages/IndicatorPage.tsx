@@ -8,6 +8,12 @@ import { Button } from '@/components/ui/button'
 import { useHealthData } from '@/data/HealthDataProvider'
 import { formatDate, formatDateTime } from '@/domain/dates'
 import { formatContext, formatValue, temperatureMethodLabel } from '@/domain/format'
+import {
+  displayTemperature,
+  displayTemperatureDelta,
+  getFormats,
+  temperatureUnitLabel,
+} from '@/domain/units'
 import { INDICATOR_IDS, INDICATORS, type HealthEntry, type IndicatorId } from '@/domain/indicators'
 import { phq2Schedule } from '@/features/checkin/checkin'
 import { EntryDialog } from '@/features/entry/EntryDialog'
@@ -199,8 +205,18 @@ export function IndicatorPage() {
     indicator === 'bodyTemperature' &&
     baseline?.value !== undefined &&
     latest?.indicator === 'bodyTemperature'
-      ? Math.round((latest.celsius - baseline.value) * 10) / 10
+      ? displayTemperatureDelta(latest.celsius - baseline.value)
       : undefined
+  // Values in the units chosen in Settings; rules and storage stay in °C and mg/dL.
+  const unitLabel =
+    indicator === 'bodyTemperature' ? temperatureUnitLabel() : INDICATORS[indicator].unit
+  const baselineShown =
+    indicator === 'bodyTemperature' && baseline?.value !== undefined
+      ? displayTemperature(baseline.value)
+      : baseline?.value
+  const customUnits =
+    (indicator === 'bodyTemperature' && getFormats().temperatureUnit !== 'celsius') ||
+    (indicator === 'bloodGlucose' && getFormats().measurementSystem !== 'conventional')
   const rules = (Object.values(RULES) as RuleDefinition[]).filter(
     (rule) => rule.indicator === indicator,
   )
@@ -210,7 +226,8 @@ export function IndicatorPage() {
   const elevated = indicator === 'heartRate' ? restingAbove100(data.entries, now) : undefined
 
   return (
-    <div className="space-y-8">
+    // Fixed width like Settings; only Home is full width (owner, 2026-11-14).
+    <div className="mx-auto w-full max-w-5xl space-y-8">
       <div className="space-y-3">
         <Link
           to="/"
@@ -362,21 +379,22 @@ export function IndicatorPage() {
               <>
                 Your usual value before the latest reading is{' '}
                 <span className="num">
-                  {baseline.value} {INDICATORS[indicator].unit}
+                  {baselineShown} {unitLabel}
                 </span>{' '}
                 (median of your last{' '}
                 {indicator === 'heartRate'
                   ? 'resting readings'
                   : `${baselineMethod?.toLowerCase()} readings`}
                 ). It is not matched to the time of day.
-                {difference !== undefined ? (
+                {difference === 0 ? ' The latest reading equals it.' : null}
+                {difference !== undefined && difference !== 0 ? (
                   <>
                     {' '}
                     The latest reading is{' '}
                     <span className="num">
-                      {Math.abs(difference)} {INDICATORS[indicator].unit}
+                      {Math.abs(difference)} {unitLabel}
                     </span>{' '}
-                    {difference >= 0 ? 'above' : 'below'} it.
+                    {difference > 0 ? 'above' : 'below'} it.
                   </>
                 ) : null}
               </>
@@ -407,7 +425,7 @@ export function IndicatorPage() {
             key={view.id}
             view={view}
             entries={entries}
-            baseline={baseline?.value}
+            baseline={baselineShown}
             baselineLabel={baselineMethod ? `Personal baseline (${baselineMethod})` : undefined}
             label={label}
             onEdit={(entry) => {
@@ -424,6 +442,9 @@ export function IndicatorPage() {
           Reference information and approved rules
         </h2>
         <p className="text-sm text-muted-foreground">
+          {customUnits
+            ? 'Rule levels are stated in the units of their sources (°C, mg/dL); your readings are shown in the units chosen in Settings. '
+            : ''}
           These are general references and team rules, not your measurements. General clinical
           references come from general-population guidance and are not validated for astronauts.
           Sources are listed in the{' '}

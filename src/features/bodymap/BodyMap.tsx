@@ -1,8 +1,9 @@
-import { CircleCheck, Crosshair, FileText, Pencil, Save, Trash2 } from 'lucide-react'
+import { ChevronDown, CircleCheck, Crosshair, FileText, Pencil, Save, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { Link } from 'react-router'
 
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import {
@@ -14,8 +15,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useHealthData } from '@/data/HealthDataProvider'
-import { formatDateTime } from '@/domain/dates'
+import { formatDate, formatDateTime } from '@/domain/dates'
 import {
   PAIN_CHARACTERS,
   PAIN_NOTE_MAX_LENGTH,
@@ -52,7 +54,12 @@ interface Draft {
   when: string
 }
 
-/** A Date as the value of an <input type="datetime-local"> in local time. */
+/** A "YYYY-MM-DDTHH:mm" local value as a Date. */
+function fromLocalInput(value: string): Date {
+  return new Date(value)
+}
+
+/** A Date as a "YYYY-MM-DDTHH:mm" value in local time. */
 function toLocalInput(date: Date): string {
   const p2 = (n: number) => String(n).padStart(2, '0')
   return `${date.getFullYear()}-${p2(date.getMonth() + 1)}-${p2(date.getDate())}T${p2(date.getHours())}:${p2(date.getMinutes())}`
@@ -115,6 +122,9 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
   const [highlight, setHighlight] = useState<string | null>(null)
   const [confirmClear, setConfirmClear] = useState(false)
   const [whenError, setWhenError] = useState<string | null>(null)
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
+  // Days after today cannot be chosen (the pain cannot be in the future).
+  const [today] = useState(() => new Date())
   const [saving, setSaving] = useState<Set<string> | null>(null)
   const [saved, setSaved] = useState<{ id: string; count: number } | null>(null)
 
@@ -310,21 +320,6 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
         </div>
       </div>
 
-      {saved ? (
-        <div
-          role="status"
-          className="flex flex-wrap items-center gap-3 border-b bg-muted px-4 py-2 text-sm"
-        >
-          <CircleCheck aria-hidden="true" className="size-4 shrink-0" />
-          <span className="flex-1">
-            Report saved with <span className="num">{saved.count}</span>{' '}
-            {saved.count === 1 ? 'pain log' : 'pain logs'}. The pain log is cleared.
-          </span>
-          <Button asChild size="sm">
-            <Link to={`/reports/${saved.id}`}>View report</Link>
-          </Button>
-        </div>
-      ) : null}
       <div className="grid min-h-0 flex-1 lg:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] @3xl:grid-cols-[minmax(0,1fr)_19rem] @3xl:grid-rows-1">
         <section
           ref={stageRef}
@@ -563,6 +558,21 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
               </Button>
             </div>
           )}
+          {saved ? (
+            <div
+              role="status"
+              className="flex flex-wrap items-center gap-2 border-t px-4 py-3 text-sm"
+            >
+              <CircleCheck aria-hidden="true" className="size-4 shrink-0" />
+              <span className="flex-1">
+                Report saved with <span className="num">{saved.count}</span>{' '}
+                {saved.count === 1 ? 'pain log' : 'pain logs'}.
+              </span>
+              <Button asChild size="sm">
+                <Link to={`/reports/${saved.id}`}>View report</Link>
+              </Button>
+            </div>
+          ) : null}
         </aside>
       </div>
 
@@ -597,27 +607,6 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
                 className="text-sm"
               />
             ) : null}
-
-            <div className="grid gap-1.5">
-              <Label htmlFor="pain-when">Date and time of the pain</Label>
-              <Input
-                id="pain-when"
-                type="datetime-local"
-                value={draft?.when ?? ''}
-                onChange={(e) => {
-                  if (!draft) return
-                  setWhenError(null)
-                  setDraft({ ...draft, when: e.target.value })
-                }}
-                aria-invalid={whenError ? true : undefined}
-                aria-describedby={whenError ? 'pain-when-error' : undefined}
-              />
-              {whenError ? (
-                <p id="pain-when-error" className="text-sm font-medium text-destructive">
-                  {whenError}
-                </p>
-              ) : null}
-            </div>
 
             <fieldset className="space-y-2">
               <legend className="flex w-full justify-between text-sm font-medium">
@@ -672,6 +661,73 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
                   </button>
                 ))}
               </div>
+            </fieldset>
+
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium">Date and time of the pain</legend>
+              <div className="flex flex-wrap gap-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="pain-date" className="text-xs text-muted-foreground">
+                    Date
+                  </Label>
+                  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="pain-date"
+                        type="button"
+                        variant="outline"
+                        className="w-44 justify-between font-normal"
+                      >
+                        <span className="num">
+                          {draft ? formatDate(fromLocalInput(draft.when)) : ''}
+                        </span>
+                        <ChevronDown aria-hidden="true" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        captionLayout="dropdown"
+                        selected={draft ? fromLocalInput(draft.when) : undefined}
+                        defaultMonth={draft ? fromLocalInput(draft.when) : undefined}
+                        disabled={{ after: today }}
+                        onSelect={(date) => {
+                          if (!draft || !date) return
+                          setWhenError(null)
+                          setDraft({
+                            ...draft,
+                            when: `${toLocalInput(date).slice(0, 10)}T${draft.when.slice(11, 16)}`,
+                          })
+                          setDatePickerOpen(false)
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="pain-time" className="text-xs text-muted-foreground">
+                    Time
+                  </Label>
+                  <Input
+                    id="pain-time"
+                    type="time"
+                    value={draft?.when.slice(11, 16) ?? ''}
+                    onChange={(e) => {
+                      if (!draft || !e.target.value) return
+                      setWhenError(null)
+                      setDraft({ ...draft, when: `${draft.when.slice(0, 10)}T${e.target.value}` })
+                    }}
+                    aria-invalid={whenError ? true : undefined}
+                    aria-describedby={whenError ? 'pain-when-error' : undefined}
+                    className="num w-32 appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  />
+                </div>
+              </div>
+              {whenError ? (
+                <p id="pain-when-error" className="text-sm font-medium text-destructive">
+                  {whenError}
+                </p>
+              ) : null}
             </fieldset>
 
             <div className="grid gap-1.5">
