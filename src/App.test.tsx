@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import App from './App'
@@ -34,9 +34,11 @@ describe('App shell', () => {
       'Sleep',
       'Mood',
     ]) {
-      expect(screen.getByRole('button', { name: new RegExp(label) }).textContent).toContain(
-        'No reading yet',
-      )
+      expect(
+        within(screen.getByRole('region', { name: 'Indicators' })).getByRole('link', {
+          name: new RegExp(`^${label}`),
+        }).textContent,
+      ).toContain('No measurement')
     }
   })
 

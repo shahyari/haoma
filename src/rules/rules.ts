@@ -15,14 +15,23 @@ function rule(
   thresholdLabels: EvidenceLabel[],
   actionLabels: EvidenceLabel[],
   refs: string[],
+  condition: string,
   action?: string,
 ): RuleDefinition {
-  return { id, indicator, status, thresholdLabels, actionLabels, refs, action }
+  return { id, indicator, status, thresholdLabels, actionLabels, refs, condition, action }
 }
 
 export const RULES = {
   // Blood pressure
-  'RULE-01': rule('RULE-01', 'bloodPressure', 'normal', ['GCR'], [], ['REF-17']),
+  'RULE-01': rule(
+    'RULE-01',
+    'bloodPressure',
+    'normal',
+    ['GCR'],
+    [],
+    ['REF-17'],
+    'Below 120 and below 80 (AHA “Normal”).',
+  ),
   'RULE-02': rule(
     'RULE-02',
     'bloodPressure',
@@ -30,6 +39,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-17'],
+    '120–139 systolic or 80–89 diastolic (AHA “Elevated” / “Stage 1”).',
     'Re-measure after rest and watch the trend.',
   ),
   'RULE-03': rule(
@@ -39,6 +49,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-17'],
+    '140 or higher systolic, or 90 or higher diastolic (AHA “Stage 2”).',
     'Report at next flight-surgeon contact.',
   ),
   'RULE-04': rule(
@@ -48,6 +59,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-17'],
+    'Above 180 and/or above 120 (AHA “Severe hypertension”).',
     'Your blood pressure is above 180/120. Sit quietly for 1 minute, then measure again. If it is still this high, or you have chest pain, shortness of breath, back pain, numbness, weakness, a change in vision or difficulty speaking, contact the crew medical officer or flight surgeon now.',
   ),
   'RULE-05': rule(
@@ -57,6 +69,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-44', 'REF-45'],
+    'Below 90/60 with no symptoms.',
     'Re-measure and compare with the trend.',
   ),
   'RULE-25': rule(
@@ -66,6 +79,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-44', 'REF-45'],
+    'Below 90/60 with dizziness, faintness, blurred vision or fainting.',
     'Stop what you’re doing and secure yourself. Re-measure in 5 minutes. If symptoms continue or you fainted, contact the crew medical officer or flight surgeon.',
   ),
   'RULE-26': rule(
@@ -75,10 +89,19 @@ export const RULES = {
     ['TDD'],
     ['TDD'],
     ['REF-47', 'REF-19', 'REF-23', 'REF-45'],
+    'Mission phase is Post-landing and you report lightheadedness, dizziness, blurred vision or faintness, even when blood pressure is 90/60 or higher.',
     'You reported feeling lightheaded or dizzy after landing. Move slowly, and sit or hold on before standing up. Take a blood pressure reading now. If it is below 90/60, or your symptoms get worse, contact the crew medical officer or flight surgeon.',
   ),
   // Heart rate
-  'RULE-06': rule('RULE-06', 'heartRate', 'normal', ['GCR'], [], ['REF-22']),
+  'RULE-06': rule(
+    'RULE-06',
+    'heartRate',
+    'normal',
+    ['GCR'],
+    [],
+    ['REF-22'],
+    '60–100 bpm at rest (AHA). Lower rates can be normal in very fit people.',
+  ),
   'RULE-07': rule(
     'RULE-07',
     'heartRate',
@@ -86,6 +109,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-22'],
+    'Below 60 or above 100 at rest without symptoms.',
     'Re-check at rest the next morning and compare with personal baseline.',
   ),
   'RULE-08': rule(
@@ -95,11 +119,28 @@ export const RULES = {
     ['TDD'],
     ['TDD'],
     ['REF-22', 'REF-23'],
+    'Resting rate outside 60–100 with dizziness, fainting, breathlessness or chest pain, a rate regularly above 100 at rest, or a felt irregular rhythm.',
     'Contact flight surgeon.',
   ),
-  'RULE-29': rule('RULE-29', 'heartRate', 'attention', ['TDD'], ['TDD'], ['REF-18']),
+  'RULE-29': rule(
+    'RULE-29',
+    'heartRate',
+    'attention',
+    ['TDD'],
+    ['TDD'],
+    ['REF-18'],
+    'Resting heart rate differs from the personal baseline by 10 bpm or more, once 5 readings exist (team-set parameters P-2, P-3).',
+  ),
   // Blood glucose
-  'RULE-09': rule('RULE-09', 'bloodGlucose', 'normal', ['GCR'], [], ['REF-46', 'REF-24', 'REF-25']),
+  'RULE-09': rule(
+    'RULE-09',
+    'bloodGlucose',
+    'normal',
+    ['GCR'],
+    [],
+    ['REF-46', 'REF-24', 'REF-25'],
+    'Fasting 70–99 mg/dL (ADA normal is below 100).',
+  ),
   'RULE-10': rule(
     'RULE-10',
     'bloodGlucose',
@@ -107,6 +148,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-46', 'REF-24'],
+    'Fasting 100–125 mg/dL (ADA impaired-fasting-glucose range).',
     'Repeat a fasting test and review meals/activity.',
   ),
   'RULE-11': rule(
@@ -116,6 +158,7 @@ export const RULES = {
     ['GCR', 'TDD'],
     ['TDD'],
     ['REF-25', 'REF-53'],
+    '54–69 mg/dL with no hypoglycemia symptoms, any context (ADA Level 1, defined for people with diabetes).',
     'Re-test now. If you feel shaky, sweaty, confused or unwell, eat fast-acting carbohydrate.',
   ),
   'RULE-12': rule(
@@ -125,6 +168,7 @@ export const RULES = {
     ['GCR', 'TDD'],
     ['TDD'],
     ['REF-25', 'REF-53'],
+    'Below 54 mg/dL (ADA Level 2), or below 70 with hypoglycemia symptoms, any context (levels defined for people with diabetes).',
     'Treat now and notify crew medical officer / flight surgeon.',
   ),
   'RULE-13': rule(
@@ -134,6 +178,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-46', 'REF-24'],
+    'Fasting 126 mg/dL or higher (ADA threshold; needs a repeat test to confirm).',
     'Report to flight surgeon.',
   ),
   'RULE-27': rule(
@@ -143,10 +188,19 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-46', 'REF-49'],
+    'Non-fasting or unknown context: 200 mg/dL or higher with classic symptoms of hyperglycemia.',
     'This glucose reading is high, and you reported symptoms. Re-test to confirm, then contact the crew medical officer or flight surgeon today. If you feel very unwell, contact them now.',
   ),
   // Body temperature
-  'RULE-14': rule('RULE-14', 'bodyTemperature', 'normal', ['GCR', 'TDD'], [], ['REF-50', 'REF-31']),
+  'RULE-14': rule(
+    'RULE-14',
+    'bodyTemperature',
+    'normal',
+    ['GCR', 'TDD'],
+    [],
+    ['REF-50', 'REF-31'],
+    'Below 37.5 °C oral, and within 0.5 °C of the personal baseline (team-set parameter P-4).',
+  ),
   'RULE-15': rule(
     'RULE-15',
     'bodyTemperature',
@@ -154,6 +208,7 @@ export const RULES = {
     ['GCR'],
     ['GCR', 'TDD'],
     ['REF-50', 'REF-31', 'REF-32'],
+    '37.5–37.9 °C (often called low-grade fever).',
     'Rest, drink fluids, re-check in a few hours. Do not judge right after exercise.',
   ),
   'RULE-16': rule(
@@ -163,6 +218,7 @@ export const RULES = {
     ['GCR', 'TDD'],
     ['TDD'],
     ['REF-30', 'REF-32'],
+    '38.0 °C or higher and either symptoms or a reading more than 0.5 °C above the baseline. Until a baseline exists, 38.0 °C or higher alone.',
     'Report, especially with other symptoms.',
   ),
   'RULE-17': rule(
@@ -172,10 +228,19 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-50', 'REF-31'],
+    '39.4 °C (103 °F) or higher. Fixed safety ceiling; the baseline never overrides it.',
     'Contact flight surgeon promptly.',
   ),
   // Sleep
-  'RULE-18': rule('RULE-18', 'sleep', 'normal', ['GCR'], [], ['REF-35']),
+  'RULE-18': rule(
+    'RULE-18',
+    'sleep',
+    'normal',
+    ['GCR'],
+    [],
+    ['REF-35'],
+    '7 hours or more (AASM/SRS consensus for adults 18–60).',
+  ),
   'RULE-19': rule(
     'RULE-19',
     'sleep',
@@ -183,6 +248,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-35', 'REF-36'],
+    'More than 6 but under 7 hours.',
     'Adjust schedule and lighting; watch for a run of short nights.',
   ),
   'RULE-20': rule(
@@ -192,10 +258,19 @@ export const RULES = {
     ['GCR', 'TDD'],
     ['TDD'],
     ['REF-36'],
+    '6 hours or fewer on 3 or more of the last 7 nights (team-set parameter P-7).',
     'Raise at next private medical conference, and before EVAs or critical operations.',
   ),
   // Mood
-  'RULE-21': rule('RULE-21', 'mood', 'normal', ['TDD'], [], ['REF-51', 'REF-40']),
+  'RULE-21': rule(
+    'RULE-21',
+    'mood',
+    'normal',
+    ['TDD'],
+    [],
+    ['REF-51', 'REF-40'],
+    'PHQ-2 score 0–1, and stable daily ratings.',
+  ),
   'RULE-22': rule(
     'RULE-22',
     'mood',
@@ -203,6 +278,7 @@ export const RULES = {
     ['TDD'],
     ['TDD'],
     ['REF-51', 'REF-40', 'REF-42'],
+    'PHQ-2 score 2 (team choice: an earlier attention level below the validated cutoff of 3), or a declining daily trend (team-set parameter P-5).',
     'Check in, use self-care time, talk to crewmates.',
   ),
   'RULE-23': rule(
@@ -212,6 +288,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-51', 'REF-40'],
+    'PHQ-2 score 3 or more (validated cutpoint in primary care and obstetrics-gynecology patients).',
     'The flight surgeon or behavioral health team can do a fuller assessment. Arrange a private conference with the flight surgeon / behavioral health.',
   ),
 } as const satisfies Record<string, RuleDefinition>

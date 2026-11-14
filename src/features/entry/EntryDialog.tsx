@@ -22,6 +22,8 @@ import {
 } from '@/domain/format'
 import { INDICATORS, type IndicatorId } from '@/domain/indicators'
 import { SYMPTOMS, SYMPTOMS_BY_INDICATOR } from '@/domain/symptoms'
+import { formatDate } from '@/domain/dates'
+import { phq2Schedule } from '@/features/checkin/checkin'
 import { validateEntry, type ValidationIssue } from '@/domain/validation'
 import { MOOD_SAFETY_MESSAGE } from '@/rules/rules'
 
@@ -52,10 +54,10 @@ const NUMBER_FIELDS: Record<IndicatorId, NumberFieldSpec[]> = {
   mood: [],
 }
 
-/** PHQ-2 items and answer scale (Kroenke 2003, REF-51; reuse terms REF-41). */
+/** PHQ-2 stem, items and answer scale, worded as in REF-40 (checked 2026-11-14); validation REF-51; reuse terms REF-41. */
 const PHQ2_ITEMS = [
   { name: 'phq2a', label: 'Little interest or pleasure in doing things' },
-  { name: 'phq2b', label: 'Feeling down, depressed, or hopeless' },
+  { name: 'phq2b', label: 'Feeling down, depressed or hopeless' },
 ]
 const PHQ2_ANSWERS = {
   '0': 'Not at all',
@@ -159,7 +161,13 @@ interface Props {
 }
 
 export function EntryDialog({ indicator, open, onOpenChange }: Props) {
-  const { addEntry } = useHealthData()
+  const { addEntry, data } = useHealthData()
+  const [now] = useState(() => new Date())
+  // The dialog has no Radix trigger, so remember what opened it and return focus there on close.
+  const [opener] = useState(() =>
+    typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null),
+  )
+  const phq2 = phq2Schedule(data.entries, now)
   const [values, setValues] = useState<Values>({ kind: 'dailyRating' })
   const [symptoms, setSymptoms] = useState<string[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -241,14 +249,24 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
   } else if (indicator === 'mood') {
     extra = (
       <>
-        <Choice
-          name="kind"
-          legend="Assessment"
-          options={{ dailyRating: 'Daily rating', phq2: 'PHQ-2 (every 14 days)' }}
-          values={values}
-          onChange={set}
-        />
-        {values.kind === 'phq2' ? (
+        {phq2.due ? (
+          <Choice
+            name="kind"
+            legend="Assessment"
+            options={{
+              dailyRating: 'Daily mood rating',
+              phq2: 'PHQ-2 depression screening (every 14 days)',
+            }}
+            values={values}
+            onChange={set}
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            The PHQ-2 screening asks about the past 2 weeks, so it is taken every 14 days. Next due{' '}
+            <span className="num">{formatDate(phq2.nextDue!)}</span>.
+          </p>
+        )}
+        {values.kind === 'phq2' && phq2.due ? (
           <>
             <p className="text-sm">
               Over the last 2 weeks, how often have you been bothered by the following problems?
@@ -265,13 +283,13 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
               />
             ))}
             <p className="text-sm text-muted-foreground">
-              The PHQ-2 is a screener, not a diagnosis.
+              The PHQ-2 is a screener, not a diagnosis, and it is not a daily mood score.
             </p>
           </>
         ) : (
           <Choice
             name="rating"
-            legend="Mood today (1 = lowest, 5 = highest)"
+            legend="Mood today, your own rating (1 = lowest, 5 = highest)"
             options={RATING_ANSWERS}
             values={values}
             onChange={set}
@@ -285,7 +303,15 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90svh] overflow-y-auto">
+      <DialogContent
+        className="max-h-[90svh] overflow-y-auto"
+        onCloseAutoFocus={(event) => {
+          if (opener?.isConnected) {
+            event.preventDefault()
+            opener.focus()
+          }
+        }}
+      >
         <form onSubmit={submit} noValidate className="space-y-4">
           <DialogHeader>
             <DialogTitle>{INDICATORS[indicator].label}</DialogTitle>

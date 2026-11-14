@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 
+import { INDICATOR_IDS, INDICATORS } from '@/domain/indicators'
 import { cn } from '@/lib/utils'
 
 import { DISCLAIMER } from './disclaimer'
@@ -12,7 +13,13 @@ function useDocumentTitle() {
   const { pathname } = useLocation()
   useEffect(() => {
     const route = APP_ROUTES.find((r) => r.path === pathname)
-    document.title = route && route.path !== '/' ? `${route.label} · ${APP_NAME}` : APP_NAME
+    const indicator = INDICATOR_IDS.find((id) => pathname === `/indicators/${id}`)
+    const title = indicator
+      ? INDICATORS[indicator].label
+      : route && route.path !== '/'
+        ? route.label
+        : undefined
+    document.title = title ? `${title} · ${APP_NAME}` : APP_NAME
   }, [pathname])
 }
 
@@ -34,7 +41,7 @@ export function AppShell() {
           <span className="text-lg font-semibold">{APP_NAME}</span>
           <nav aria-label="Main">
             <ul className="flex flex-wrap gap-1">
-              {APP_ROUTES.map((route) => (
+              {APP_ROUTES.filter((route) => !route.hidden).map((route) => (
                 <li key={route.path}>
                   <NavLink
                     to={route.path}

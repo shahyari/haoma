@@ -66,14 +66,15 @@ Source: the owner's brainstorm file. This table tracks what is built; details th
 | Home: three areas (indicators; body figure with status banners; profile card and tasks card) | F-02 | Built, with placeholders for the figure, profile, and tasks |
 | Six indicators with latest value and status; open an indicator to enter a value | F-01, F-02 | Built |
 | Yellow/red banner with icon and wording, expandable to instructions and actions | F-05 | Built (RULE-01–RULE-30, evidence labels, REF IDs). Pointing at a body part waits for the figure |
-| Average status, trend, and charts per indicator (Earth values, mission average, crew average, standard range, zone-based values) | F-03 | Not built |
-| Comparison with other crew members (same time window and total average) | F-03, F-06 | Not built; needs fictional crew data |
-| Clickable human figure, colour-coded per body part | F-04 | Not built; needs artwork and a body-part mapping |
-| Profile card (avatar, XP and level, name, role, mission, health score) | F-06, F-08 | Not built; needs definitions |
-| Tasks card (assessments due from the schedule) | F-07 | Not built; needs the schedule |
-| Reading external sensors and wearables | — | Not built; simulation only is possible in this prototype |
+| Per-indicator history: latest value, chart, data table, personal baseline, approved rules with references | F-03 | Built (owner approval 2026-11-14). No averaged statuses; no reference ranges drawn on charts. Earth values, mission and crew averages, zone values not built |
+| Comparison with other crew members (same time window and total average) | F-03, F-06 | Deferred (owner 2026-11-14) |
+| Clickable human figure, colour-coded per body part | F-04 | Not built. Approved approach: lightweight accessible 2D SVG, a navigation and educational tool, not a diagnostic map; waits for the owner's spec |
+| Profile card (avatar, XP and level, name, role, mission, health score) | F-06, F-08 | One fictional profile with check-ins completed today and indicators to review, shown separately. No overall health score (owner 2026-11-14). XP and levels deferred |
+| Tasks card (assessments due from the schedule) | F-07 | Built as a simple daily check-in (one entry per indicator per day) plus the PHQ-2 14-day cadence. No notifications |
+| Reading external sensors and wearables | — | Deferred. Entries record provenance (manual or simulated); an "imported" value is added when an import exists |
 | Display settings (Section 14) | — | Built (`design.md` → "Display settings") |
-| Roles: Director, Admin, User (Section 15) | — | Not built; conflicts with approved documents (`progress.md`) |
+| Roles: Director, Admin, User (Section 15) | — | Deferred until a backend is approved. Clinical rules stay read-only (owner 2026-11-14) |
+| Zone-based medical reference values | — | Not built: no supported source. Zone themes stay (owner 2026-11-14) |
 
 ## Explicitly out of scope
 

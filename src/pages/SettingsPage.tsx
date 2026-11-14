@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { StatusBadge } from '@/components/StatusBadge'
 import { useHealthData } from '@/data/HealthDataProvider'
+import { createDemoEntries } from '@/demo/demo'
 import { MISSION_PHASE_LABELS, MISSION_PHASES, type MissionPhase } from '@/domain/mission'
 import { STATUSES } from '@/rules/types'
 import { useSettings } from '@/settings/SettingsProvider'
@@ -59,7 +60,7 @@ function Choice<K extends keyof DisplaySettings>({
 
 export function SettingsPage() {
   const { settings, update, deviceWantsMoreContrast } = useSettings()
-  const { data, setMissionPhase, clearAll } = useHealthData()
+  const { data, setMissionPhase, clearAll, replaceEntries } = useHealthData()
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -156,6 +157,20 @@ export function SettingsPage() {
         <p className="text-sm">
           <span className="num">{data.entries.length}</span> entries stored in this browser only.
         </p>
+        <Button
+          variant="outline"
+          className="mr-2"
+          onClick={() => {
+            if (
+              data.entries.length === 0 ||
+              window.confirm('Replace all stored entries with the simulated demo history?')
+            ) {
+              replaceEntries(createDemoEntries(new Date()))
+            }
+          }}
+        >
+          Load simulated demo history
+        </Button>
         <Button
           variant="outline"
           disabled={data.entries.length === 0}

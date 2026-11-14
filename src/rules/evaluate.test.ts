@@ -249,3 +249,107 @@ describe('evaluateIndicator', () => {
     expect(evaluateIndicator('sleep', [], { missionPhase: 'inFlight' }).status).toBe('missing')
   })
 })
+
+/**
+ * Rule audit (2026-11-14): boundaries with decimal input, overlaps, and
+ * precedence. Thresholds are half-open intervals matching the source wording
+ * ("below N" = < N; "N–M" = N ≤ x < M+1 for integers). When several rules
+ * apply, the most severe tier wins and every non-Normal finding is shown.
+ */
+describe('audit: decimal boundaries', () => {
+  it.each([
+    [119.9, 79.9, 'normal RULE-01'],
+    [139.9, 89.9, 'attention RULE-02'],
+    [180.1, 80, 'escalate RULE-04'],
+    [89.9, 70, 'attention RULE-05'],
+  ])('BP %f/%f → %s', (sys, dia, expected) => {
+    expect(run([bp(sys, dia)])).toBe(expected)
+  })
+  it.each([
+    [69.9, 'fasting', 'attention RULE-11'],
+    [99.9, 'fasting', 'normal RULE-09'],
+    [125.9, 'fasting', 'attention RULE-10'],
+    [53.9, 'fasting', 'escalate RULE-12'],
+  ] as const)('glucose %f %s → %s', (mgDl, context, expected) => {
+    expect(run([glucose(mgDl, context)])).toBe(expected)
+  })
+  it.each([
+    [37.49, 'normal RULE-14'],
+    [37.99, 'attention RULE-15'],
+    [39.39, 'escalate RULE-16'],
+  ])('temperature %f °C → %s', (celsius, expected) => {
+    expect(run([temp(celsius)])).toBe(expected)
+  })
+  it.each([
+    [6.01, 'attention RULE-19'],
+    [6.99, 'attention RULE-19'],
+  ])('sleep %f h → %s', (hours, expected) => {
+    expect(run([sleep(hours)])).toBe(expected)
+  })
+})
+
+describe('audit: overlaps and precedence', () => {
+  it('BP: high systolic with low diastolic shows both findings ("below 90/60" read as either number)', () => {
+    expect(run([bp(125, 58)])).toBe('attention RULE-02 RULE-05')
+    expect(run([bp(150, 55)])).toBe('escalate RULE-03 RULE-05')
+    expect(run([bp(150, 55, ['dizziness'])])).toBe('escalate RULE-03 RULE-25')
+  })
+  it('BP: post-landing symptoms add RULE-26 to an elevated reading', () => {
+    expect(run([bp(130, 85, ['dizziness'])], 'postLanding')).toBe('attention RULE-02 RULE-26')
+  })
+  it('HR: an out-of-range reading and a baseline shift both show', () => {
+    const five = [62, 64, 63, 65, 64].map((v, i) => hr(v, undefined, i + 1))
+    expect(run([...five, hr(105, undefined, 6)])).toBe('attention RULE-07 RULE-29')
+    expect(run([...five, hr(105, ['chestPain'], 6)])).toBe('escalate RULE-08 RULE-29')
+  })
+  it('glucose: a low fasting reading uses the any-context low rules, not RULE-09', () => {
+    expect(run([glucose(60, 'fasting')])).toBe('attention RULE-11')
+  })
+  it('temperature: the 39.4 ceiling wins over every other condition', () => {
+    expect(run([temp(39.4, { symptoms: ['otherSymptoms'] })])).toBe('escalate RULE-17')
+  })
+  it('sleep: the 3-of-7 pattern wins over a single good night', () => {
+    expect(run([sleep(5, 1), sleep(5, 2), sleep(5, 3), sleep(8, 4)])).toBe('escalate RULE-20')
+  })
+  it('sleep: two entries for the same night count as one night', () => {
+    const night = (hours: number, hour: number): HealthEntry => ({
+      id: `n${n++}`,
+      recordedAt: new Date(2026, 0, 2, hour).toISOString(),
+      origin: 'simulated',
+      indicator: 'sleep',
+      hours,
+      source: 'selfReport',
+    })
+    expect(run([sleep(5, 1), night(5, 6), night(5, 7), sleep(8, 3)])).toBe('normal RULE-18')
+  })
+  it('mood: a declining daily trend overrides a PHQ-2 of 0–1, and Normal is then not shown', () => {
+    const stable = Array.from({ length: 11 }, (_, i) => rating(4, i + 1))
+    expect(run([phq2(1, 1), ...stable, rating(2, 12), rating(2, 13), rating(2, 14)])).toBe(
+      'attention RULE-22',
+    )
+  })
+})
+
+describe('audit: reported gaps stay "Not evaluated", never "Within reference"', () => {
+  const steady = (value: number) => [1, 2, 3, 4, 5].map((day) => temp(value, { day }))
+  it.each([
+    ['sleep: one night of 6 h or less', () => [sleep(5)]],
+    [
+      'temperature: 38.0–39.3 °C close to the baseline, no symptoms',
+      () => [...steady(37.9), temp(38.3, { day: 6 })],
+    ],
+    [
+      'temperature: below 37.5 °C but more than 0.5 °C above the baseline',
+      () => [...steady(36.3), temp(36.9, { day: 6 })],
+    ],
+    ['glucose: non-fasting reading without symptoms', () => [glucose(180, 'nonFasting')]],
+    ['glucose: non-fasting 200+ without symptoms', () => [glucose(240, 'unknown')]],
+  ])('%s', (_label, make) => {
+    expect(run(make())).toBe('none')
+  })
+  it('heart rate: repeated readings above 100 without symptoms stay Attention ("regularly" is undefined)', () => {
+    expect(run([101, 104, 108, 103].map((v, i) => hr(v, undefined, i + 1)))).toBe(
+      'attention RULE-07',
+    )
+  })
+})

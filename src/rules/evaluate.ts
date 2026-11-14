@@ -46,8 +46,12 @@ function hasAny(entry: HealthEntry, symptoms: SymptomId[]): boolean {
   return (entry.symptoms ?? []).some((s) => (symptoms as string[]).includes(s))
 }
 
-function finding(rule: RuleDefinition, message: string | undefined = rule.action): Finding {
-  return { rule, message }
+function finding(
+  rule: RuleDefinition,
+  message: string | undefined = rule.action,
+  reason?: string,
+): Finding {
+  return { rule, message, reason }
 }
 
 function median(values: number[]): number {
@@ -197,8 +201,15 @@ function sleep(entries: SleepEntry[], ctx: EvaluationContext): IndicatorAssessme
   const { maxHours, minNights, windowNights } = p.regularShortSleep
   const findings: Finding[] = []
 
-  const recent = entries.filter((x) => time(x) > time(e) - windowNights * DAY_MS)
-  if (recent.filter((x) => x.hours <= maxHours).length >= minNights) {
+  // Count nights, not entries: the latest entry per local calendar day stands for that night.
+  const nights = new Map<string, SleepEntry>()
+  for (const x of entries) {
+    if (time(x) <= time(e) - windowNights * DAY_MS) continue
+    const d = new Date(x.recordedAt)
+    nights.set(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`, x)
+  }
+  const shortNights = [...nights.values()].filter((x) => x.hours <= maxHours).length
+  if (shortNights >= minNights) {
     findings.push(finding(RULES['RULE-20']))
   } else if (e.hours >= 7) findings.push(finding(RULES['RULE-18']))
   else if (e.hours > 6) findings.push(finding(RULES['RULE-19']))
@@ -222,7 +233,7 @@ function mood(entries: MoodEntry[], ctx: EvaluationContext): IndicatorAssessment
   const phq2 = entries.filter((x) => x.kind === 'phq2').at(-1)
   if (phq2) {
     if (phq2.score >= 3) findings.push(finding(RULES['RULE-23']))
-    else if (phq2.score === 2) findings.push(finding(RULES['RULE-22']))
+    else if (phq2.score === 2) findings.push(finding(RULES['RULE-22'], undefined, 'PHQ-2 score 2.'))
     else findings.push(finding(RULES['RULE-21']))
   }
 
@@ -236,11 +247,54 @@ function mood(entries: MoodEntry[], ctx: EvaluationContext): IndicatorAssessment
     const short = within(shortWindowDays)
     const long = within(longWindowDays)
     if (long.length > short.length && average(long) - average(short) >= minDropPoints) {
-      findings.push(finding(RULES['RULE-22']))
+      findings.push(
+        finding(
+          RULES['RULE-22'],
+          undefined,
+          `Daily ratings: the ${shortWindowDays}-day average is at least ${minDropPoints} point below the ${longWindowDays}-day average.`,
+        ),
+      )
     }
   }
 
-  return assess('mood', findings, 'Daily ratings are used for the trend only.')
+  return assess(
+    'mood',
+    findings,
+    'Daily mood ratings are used for the trend only. No PHQ-2 screening is recorded yet.',
+  )
+}
+
+export interface PersonalBaseline {
+  /** Median of the last readings (P-1); undefined until the minimum (P-2) is met. */
+  value: number | undefined
+  /** Earlier valid readings available for the baseline. */
+  readings: number
+  required: number
+}
+
+/**
+ * The personal baseline that the rules compare the latest reading with.
+ * Defined only for heart rate (RULE-29) and body temperature (RULE-14, RULE-16).
+ */
+export function personalBaseline(
+  indicator: IndicatorId,
+  allEntries: HealthEntry[],
+  p: TeamParameters = TEAM_PARAMETERS,
+): PersonalBaseline | undefined {
+  let earlier: number[]
+  if (indicator === 'heartRate') {
+    earlier = entriesOf(allEntries, 'heartRate')
+      .slice(0, -1)
+      .map((x) => x.bpm)
+  } else if (indicator === 'bodyTemperature') {
+    const entries = entriesOf(allEntries, 'bodyTemperature')
+    const latest = entries.at(-1)
+    earlier = entries
+      .slice(0, -1)
+      .filter((x) => x.method === latest?.method && !x.exercisedLast30Min)
+      .map((x) => x.celsius)
+  } else return undefined
+  return { value: baseline(earlier, p), readings: earlier.length, required: p.baselineMinReadings }
 }
 
 function byTime<T extends HealthEntry>(entries: T[]): T[] {

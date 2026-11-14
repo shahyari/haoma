@@ -1,90 +1,92 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { HealthDataProvider } from '@/data/HealthDataProvider'
-import { createAppStore } from '@/storage/storage'
-
-import { HomePage } from './HomePage'
+import { daysAgo, renderApp } from '@/test/render'
 
 afterEach(cleanup)
 
-function renderHome() {
-  const store = createAppStore(null)
-  render(
-    <HealthDataProvider store={store}>
-      <HomePage />
-    </HealthDataProvider>,
-  )
-  return store
-}
-
-function enter(indicator: string, fields: Record<string, string>, options: string[] = []) {
-  fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${indicator}`) }))
-  const dialog = within(screen.getByRole('dialog'))
-  for (const [label, value] of Object.entries(fields)) {
-    fireEvent.change(dialog.getByLabelText(label), { target: { value } })
-  }
-  for (const option of options) fireEvent.click(dialog.getByLabelText(option))
-  fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
-}
+const row = (label: string) =>
+  within(screen.getByRole('region', { name: 'Indicators' })).getByRole('link', {
+    name: new RegExp(`^${label}`),
+  })
 
 describe('HomePage', () => {
-  it('stores a reading as user-entered and shows its status and the approved action', () => {
-    const store = renderHome()
-    enter('Blood pressure', { 'Systolic (mmHg)': '150', 'Diastolic (mmHg)': '95' })
+  it('shows "No measurement" for every indicator at first, never a status tier', () => {
+    renderApp()
+    for (const label of [
+      'Blood pressure',
+      'Heart rate',
+      'Blood glucose',
+      'Body temperature',
+      'Sleep',
+      'Mood',
+    ]) {
+      expect(row(label).textContent).toContain('No measurement')
+      expect(row(label).textContent).not.toMatch(
+        /Within reference|Attention|Escalate|Not evaluated/,
+      )
+    }
+    expect(screen.getByText('0 of 6')).toBeTruthy()
+  })
 
-    expect(screen.queryByRole('dialog')).toBeNull()
-    const row = screen.getByRole('button', { name: /^Blood pressure/ })
-    expect(row.textContent).toContain('150/95 mmHg')
-    expect(row.textContent).toContain('Escalate')
+  it('keeps "Within reference", "Not evaluated" and "No measurement" distinct', () => {
+    renderApp('/', [
+      { ...daysAgo(0), indicator: 'heartRate', bpm: 70 },
+      { ...daysAgo(0), indicator: 'bloodGlucose', mgDl: 140, context: 'nonFasting', device: 'cgm' },
+      { ...daysAgo(0), indicator: 'sleep', hours: 5, source: 'selfReport' },
+    ])
+    expect(row('Heart rate').textContent).toContain('Within reference')
+    expect(row('Blood glucose').textContent).toContain('Not evaluated')
+    expect(row('Blood glucose').textContent).toContain('trend only')
+    expect(row('Sleep').textContent).toContain('Not evaluated')
+    expect(row('Blood pressure').textContent).toContain('No measurement')
+  })
+
+  it('shows an expandable banner with the approved action and evidence for Attention and Escalate', () => {
+    renderApp('/', [
+      { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
+    ])
+    expect(row('Blood pressure').textContent).toContain('Escalate')
     expect(screen.getByText('Report at next flight-surgeon contact.')).toBeTruthy()
     expect(
       screen.getByText(/Threshold: General clinical reference\. Action: Team design decision\./),
     ).toBeTruthy()
-    expect(screen.getByText(/RULE-03 · REF-17/)).toBeTruthy()
-    expect(store.load().data.entries).toMatchObject([
-      { indicator: 'bloodPressure', origin: 'userEntered' },
+    expect(screen.getByText('REF-17').closest('a')?.getAttribute('href')).toContain(
+      'docs/references.md',
+    )
+  })
+
+  it('counts completed check-ins and indicators to review separately, with no overall score', () => {
+    renderApp('/', [
+      { ...daysAgo(0), indicator: 'heartRate', bpm: 70 },
+      { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
+      { ...daysAgo(1), indicator: 'sleep', hours: 6.5, source: 'selfReport' },
     ])
-  })
-
-  it('shows field errors and stores nothing when the input is invalid', () => {
-    const store = renderHome()
-    enter('Heart rate', { 'Heart rate (bpm)': 'abc' })
-    expect(within(screen.getByRole('dialog')).getByText('Enter a number.')).toBeTruthy()
-    expect(store.load().data.entries).toEqual([])
-  })
-
-  it('uses reported symptoms in the rules', () => {
-    renderHome()
-    enter('Blood glucose', { 'Glucose (mg/dL)': '65' }, ['Non-fasting', 'Fingerstick', 'Sweating'])
-    expect(screen.getByRole('button', { name: /^Blood glucose/ }).textContent).toContain('Escalate')
+    const profile = within(screen.getByRole('region', { name: 'Profile' }))
+    expect(profile.getByText('2 of 6')).toBeTruthy()
     expect(
-      screen.getByText('Treat now and notify crew medical officer / flight surgeon.'),
-    ).toBeTruthy()
+      profile.getByText('Indicators to review (Attention or Escalate)').nextElementSibling
+        ?.textContent,
+    ).toBe('2')
+    expect(profile.getByText('Fictional profile')).toBeTruthy()
+    expect(document.body.textContent).not.toMatch(/health score/i)
   })
 
-  it('shows no status badge when no approved rule applies', () => {
-    renderHome()
-    enter('Blood glucose', { 'Glucose (mg/dL)': '140' }, ['Non-fasting', 'CGM'])
-    const row = screen.getByRole('button', { name: /^Blood glucose/ }).textContent
-    expect(row).toContain('trend only')
-    expect(row).not.toMatch(/Normal|Attention|Escalate/)
+  it('loads the simulated demo history and labels it', () => {
+    const store = renderApp()
+    fireEvent.click(screen.getByRole('button', { name: 'Load simulated demo history' }))
+    expect(screen.getByText(/entries marked “Simulated”\s+are invented/)).toBeTruthy()
+    expect(row('Heart rate').textContent).toContain('Simulated')
+    const { entries } = store.load().data
+    expect(entries.length).toBe(14 * 6 + 1)
+    expect(entries.every((e) => e.origin === 'simulated')).toBe(true)
   })
 
-  it('scores the PHQ-2 from its two answers and always shows the safety message', () => {
-    renderHome()
-    fireEvent.click(screen.getByRole('button', { name: /^Mood/ }))
-    const dialog = within(screen.getByRole('dialog'))
-    expect(
-      dialog.getByText(/thoughts of harming yourself, contact the flight surgeon now/),
-    ).toBeTruthy()
-    fireEvent.click(dialog.getByLabelText('PHQ-2 (every 14 days)'))
-    fireEvent.click(dialog.getAllByLabelText('Several days')[0])
-    fireEvent.click(dialog.getAllByLabelText('More than half the days')[1])
-    fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
-    const row = screen.getByRole('button', { name: /^Mood/ }).textContent
-    expect(row).toContain('PHQ-2 3/6')
-    expect(row).toContain('Escalate')
+  it('reaches every indicator and check-in item with native links', () => {
+    renderApp()
+    const links = screen.getAllByRole('link')
+    expect(links.filter((a) => a.getAttribute('href')?.startsWith('/indicators/')).length).toBe(13)
+    for (const link of links) expect(link.tabIndex).toBe(0)
   })
 })

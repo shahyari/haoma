@@ -19,7 +19,7 @@ This replaces the earlier placeholder token table. Implemented in `src/index.css
 |---|---|---|---|
 | Theme | Earth = Tailwind mist; Space = Tailwind slate; Moon = Tailwind zinc; Mars = neutral with a small orange hue. Auto-selected from the zone, also selectable manually | Auto | `data-theme` on `<html>`; each theme supplies the gray scale `--g-50`…`--g-950`. Mars uses Tailwind neutral lightness steps with chroma 0.004–0.022 at hue 50 |
 | Mode | Dark, Light, Auto | Auto | `.dark` class. TODO: Auto should follow the habitat LED lighting system, not the clock; the link in the brainstorm is incomplete and no data source is defined. Until then Auto follows the device light/dark preference |
-| Contrast | Normal (WCAG AA), High (WCAG AAA) | Normal | `data-contrast`; picks different steps of the gray scale and darker/lighter status colours. High contrast is suggested when the device reports `prefers-contrast: more`. TODO: measure contrast ratios for every theme × mode × contrast combination (`design-decisions.md`) |
+| Contrast | Normal (WCAG AA), High (WCAG AAA) | Normal | `data-contrast`; picks different steps of the gray scale and darker/lighter status colours. High contrast is suggested when the device reports `prefers-contrast: more`. Token contrast is measured for all 16 combinations by `src/test/contrast.test.ts` (results in `design-decisions.md`) |
 | Base font size | Small, Medium, Big | Medium | `data-font-size`: 87.5% / 100% / 125% root size |
 | Numbers | Monospaced font for all numbers | — | `.num` class and numeric inputs; system monospace stack |
 | Colour-blind mode | Off / On; patterns alongside the three status colours | Off | `data-colorblind`; solid, diagonal-stripe, and cross-hatch strips for Normal, Attention, Escalate |

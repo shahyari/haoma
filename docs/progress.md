@@ -3,17 +3,19 @@
 **Responsibility:** Current status only. Read this first in every session. Keep it short: replace stale entries instead of appending history.
 
 **Last updated:** 2026-11-14
-**Current phase:** B — Features, working from the owner's brainstorm (Sections 13–15).
+**Current phase:** B — Features. Owner review of 2026-11-14 approved the history view and set product decisions (below).
 **Build status:** Passing. Repository https://github.com/shahyari/haoma (public). Production https://haomaho.vercel.app.
 
 ## Completed
 
 - Phase A foundation (Checkpoint A).
-- Display settings, Section 14 (`design.md` → "Display settings"): four zone themes, three modes, two contrast levels, three font sizes, monospaced numbers, colour-blind patterns.
-- Rule evaluation for RULE-01–RULE-30 (`src/rules/`), with approved wording, evidence labels, and REF IDs.
-- Home, Section 13 structure: indicator list with latest value and status, entry dialog for all six indicators (with symptoms, PHQ-2, and RULE-24), expandable Attention/Escalate banners, RULE-30 reminder; placeholders for the figure, profile, and tasks.
-- Settings page: display settings, mission phase, "Clear my data".
-- Feature state per brainstorm item: `product.md` → "Owner brainstorm".
+- Display settings (`design.md` → "Display settings").
+- Rule evaluation RULE-01–RULE-30 (`src/rules/`), with three distinct neutral states: **No measurement**, **Not evaluated**, **Within reference** (the label for Normal).
+- Home: indicator list linking to history pages, Attention/Escalate banners, RULE-30 reminder, fictional profile with "check-ins completed today" and "indicators to review" (no health score), daily check-in card with the PHQ-2 14-day cadence, "Load simulated demo history".
+- Per-indicator history view (`/indicators/:id`): latest value with unit, time, and provenance; status with the applying rule, its condition, action, evidence labels, and REF IDs; personal baseline (heart rate, temperature); Recharts line chart (blood pressure as separate systolic and diastolic series; mood as separate daily-rating and PHQ-2 charts) followed by an accessible data table; empty states; approved rules listed separately as reference information.
+- Rule audit (`scientific-foundations.md` → "Implementation audit", AU-1–AU-8); no approved rule was changed. RULE-20 night counting fixed.
+- Mood/PHQ-2 review: wording matched to REF-40; PHQ-2 offered every 14 days only and never counted as the daily rating.
+- Docs: data provenance and privacy statement (`data-and-limitations.md`), tested accessibility results (`design-decisions.md`).
 
 ## Decisions made
 
@@ -39,48 +41,40 @@
 | 2026-11-14 | Evidence policy: source hierarchy (1 / 2a / 2b / 3), Mayo Clinic approved as a 2b source, population and limitations required per source; OD-10 (Mayo 20 mmHg as RULE-26 explanation only) | `science.md`, `references.md` |
 | 2026-11-14 | OD-11: MedlinePlus approved as a 2b source (REF-50, temperature); REF-46 primary for fasting glucose; Kroenke 2003 (REF-51) for PHQ-2, with score 2 as a team decision | `scientific-foundations.md`, `references.md`, `science.md` |
 | 2026-11-14 | OD-12: low glucose is symptom-gated (Endocrine Society guideline, REF-53); the OSDR search found no human glucose thresholds (OSD-370 recorded as REF-52, context only) | `scientific-foundations.md`, `references.md` |
+| 2026-11-14 | Owner review: history view approved; no overall health score; XP deferred; 2D SVG body figure (spec pending); one fictional profile; simple daily check-in; no averaged statuses; crew comparison, sensors, roles, real-time reporting deferred; clinical rules read-only; no zone-specific reference ranges | `product.md` |
 | 2026-11-14 | Owner brainstorm Sections 13–15 received; Section 14 and the decided parts of Section 13 implemented | `product.md`, `design.md` |
 | 2026-11-14 | Kickoff received 09:00 CET; repo created and Phase A executed | `implementation.md` |
 | 2026-11-14 | OD-13: OSDR cross-check applied (C-5 to C-8); REF-54 Polaris Dawn, REF-55 OSD-575 added as `Unverified`; no rule changed | `scientific-foundations.md`, `references.md` |
 
 ## Outstanding decisions (owner)
 
-**Conflicts with approved documents (not built)**
+**Rule audit (`scientific-foundations.md` → "Implementation audit")**
 
-1. Section 15, Admin edits Normal/Attention/Escalate ranges and wording: `science.md` allows only `Approved` rules with cited evidence to drive behavior. Decide whether admin edits are out of scope, shown as a non-functional demo, or allowed as labeled "Team design decision" overrides.
-2. Section 15, roles, reports, and real-time escalation to admins: `architecture.md` is browser-only with no accounts or backend. Only a simulated role switch inside one browser is possible.
-3. Crew comparison on Home vs. Section 15 (only admins see other crew members' detail): decide what a User may see (for example, anonymous crew averages only).
-4. Zone-based values (space, moon, mars): no `Approved` source gives indicator ranges per zone; `scientific-foundations.md` calls lunar/Mars use unvalidated.
+1. AU-1 Sleep: extend RULE-19 to "under 7 h when RULE-20 does not apply".
+2. AU-2a–e Temperature: 38.0–39.3 °C near baseline without symptoms; sub-fever rise above baseline; RULE-16 symptom list; oral threshold applied to forehead readings; "keeps rising" in RULE-17.
+3. AU-3 Heart rate: define "regularly above 100" (proposed P-9: ≥ 3 of the last 7 days).
+4. AU-4 Blood pressure: confirm "below 90/60" = either number low (current).
+5. AU-5 PHQ-2 status validity of 14 days; AU-6 optional age limit for the latest reading; AU-7 P-1 "similar time of day".
+6. Mood: status label for PHQ-2 0–1 ("Within reference" vs. e.g. "Below screening cutoff").
 
-**Definitions needed before building**
+**Product and content**
 
-5. Health score: formula and evidence label. None exists in `scientific-foundations.md`.
-6. XP and levels: what earns XP and the level steps.
-7. Body figure: artwork (an AI-drawn figure would need a visible watermark, E-R18; a 3D model needs a new major dependency), whether two figures by biological sex are required, the indicator → body part mapping, and the "function" text per part with sources.
-8. Fictional crew: names, roles, mission, Earth baseline values, and simulated history (F-06).
-9. Assessment schedule for the tasks card (only the PHQ-2 14-day cadence is defined).
-10. "Average status per indicator" and "trend" on Home: what exactly to show.
-11. Sensors and wearables: simulated import only, or leave out.
-12. Auto mode source (LED lighting; the link is incomplete), the zone source, and how the app knows the astronaut's condition for suggestions.
-
-**Gaps in the approved rules (the app shows a neutral "no status" for these)**
-
-13. Sleep: a single night of 6 h or less without the 3-of-7 pattern has no tier (RULE-19 covers only more than 6 and under 7).
-14. Temperature: 38.0–39.3 °C within 0.5 °C of the baseline and without symptoms has no tier; so does a reading below 37.5 °C that is more than 0.5 °C above the baseline. RULE-16 does not list its symptoms (one generic "Other symptoms" flag is used). The 37.5 °C limit is stated for oral readings and is applied to forehead readings too.
-15. Heart rate: "regularly above 100" (RULE-08) is undefined and not evaluated. P-1 "similar time of day" is undefined and not applied.
-16. Blood pressure: "below 90/60" is implemented as systolic below 90 **or** diastolic below 60. Confirm.
-17. RULE-28 (short night before an EVA) needs the schedule; not evaluated.
+7. Body figure feature spec (2D SVG).
+8. Demo profile details: name, role, mission (currently "Demo astronaut", labeled fictional).
+9. D-01: no reference bands on charts (rules listed separately). Confirm or change.
+10. Settings and About placement in the navigation.
+11. Auto mode source (LED lighting), zone source, how condition-based suggestions are triggered.
 
 **Other**
 
-18. Feature-freeze time (proposal: Sun 18:00 CET freeze, Sun 22:00 CET submission target).
-19. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
-20. Berlin Local Event name and local judging times.
-21. Settings and About are provisional pages; their place in the navigation is undecided.
+12. Feature-freeze time (proposal: Sun 18:00 CET freeze, Sun 22:00 CET submission target).
+13. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
+14. Berlin Local Event name and local judging times.
 
 ## Environment status (2026-11-14)
 
-- Node v26.13.1 + npm 11.20.0 via user-local `fnm`. GitHub CLI logged in as `shahyari`. Vercel CLI via `npx vercel`, logged in as `shahyari`; project `haoma` linked (`.vercel/` is git-ignored) and connected to the GitHub repo.
+- Node v26.13.1 + npm 11.20.0 via user-local `fnm`. GitHub CLI and Vercel CLI (`npx vercel`) logged in as `shahyari`.
+- Vercel project `haoma` (`prj_IBHh…`), connected to `shahyari/haoma`; pushes to `main` deploy to production. Aliases of the production deployment: haomaho.vercel.app (documented URL), haoma-mu.vercel.app (redirects to haomaho, set by the owner), haoma-ho-shah.vercel.app, haoma-git-main-ho-shah.vercel.app. Checked 2026-11-14: the production deployment's source is git, `shahyari/haoma`, branch `main`, at the latest pushed commit.
 
 ## Unresolved scientific questions
 
@@ -88,10 +82,11 @@ SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (
 
 ## Verification
 
-- 2026-11-14: `npm run lint` → 0 problems; `npm run typecheck` → exit 0; `npm test` → 7 files, 106 tests passed; `npm run build` → exit 0.
-- Checked in headless Chrome: Home at 320, 500, and 1280 px; Earth, Moon, and Mars themes; dark mode; high contrast; big text; colour-blind patterns.
-- Not checked: measured contrast ratios per combination; manual keyboard pass; screen reader.
+- 2026-11-14: `npm run lint` → 0 problems; `npm run typecheck` → exit 0; `npm test` → 12 files, 179 tests passed; `npm run build` → exit 0.
+- Includes: rule boundaries, overlaps, and precedence; missing-data states; keyboard (jsdom); token contrast for 16 combinations; localStorage persistence across reloads. Results: `design-decisions.md` → Accessibility.
+- Browser check (headless Chrome): history pages at 500 px and desktop width, light and dark.
+- Not done: manual keyboard pass in a real browser, screen reader, true 320 px render of seeded pages. No WCAG conformance is claimed.
 
 ## Next action
 
-Owner answers to the outstanding decisions above. Buildable next without further decisions: per-indicator history view with a chart and data table (personal values and the approved ranges only).
+Owner decisions on the audit items (1–6) and the body-figure spec. Buildable meanwhile without new decisions: a manual keyboard and screen-reader pass in a real browser; a 320 px layout check of the history pages.

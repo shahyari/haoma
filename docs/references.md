@@ -148,7 +148,7 @@ E-R7, E-R8, and E-R15 in `challenge.md` require these to be freely available or 
 | TP-09 | recharts 3.8.0 | Recharts Group | https://recharts.org | Charts (via the shadcn chart component) | MIT | 2026-11-14 |
 | TP-10 | vite 8.3.8, @vitejs/plugin-react 6.3.0 | VoidZero and contributors | https://vite.dev | Build tool (dev-only) | MIT | 2026-11-14 |
 | TP-11 | typescript 7.0.2 | Microsoft | https://www.typescriptlang.org | Language (dev-only) | Apache-2.0 | 2026-11-14 |
-| TP-12 | vitest 5.1.0, jsdom 31.0.1, @testing-library/react 16.3.3 | VoidZero; jsdom contributors; Testing Library contributors | https://vitest.dev | Tests (dev-only) | MIT | 2026-11-14 |
+| TP-12 | vitest 5.1.0, jsdom 31.0.1, @testing-library/react 16.3.3, @testing-library/user-event 14.6.10 | VoidZero; jsdom contributors; Testing Library contributors | https://vitest.dev | Tests (dev-only) | MIT | 2026-11-14 |
 | TP-13 | oxlint 1.93.0, prettier 3.10.1 | VoidZero; Prettier contributors | https://oxc.rs, https://prettier.io | Linting and formatting (dev-only) | MIT | 2026-11-14 |
 | TP-14 | @types/react, @types/react-dom, @types/node | DefinitelyTyped contributors | https://github.com/DefinitelyTyped/DefinitelyTyped | Type definitions (dev-only) | MIT | 2026-11-14 |
 | TP-15 | Apache License 2.0 text (`LICENSE`) | Apache Software Foundation | https://www.apache.org/licenses/LICENSE-2.0.txt | Project license | Apache-2.0 | 2026-11-14 |

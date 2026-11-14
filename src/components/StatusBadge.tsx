@@ -1,28 +1,42 @@
-import { CircleCheck, OctagonAlert, TriangleAlert, type LucideIcon } from 'lucide-react'
+import {
+  CircleCheck,
+  CircleDashed,
+  Minus,
+  OctagonAlert,
+  TriangleAlert,
+  type LucideIcon,
+} from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { STATUS_LABELS, type Status } from '@/rules/types'
+import { DISPLAY_STATUS_LABELS, type DisplayStatus } from '@/rules/types'
 
 // oxlint-disable-next-line react/only-export-components
-export const STATUS_ICONS: Record<Status, LucideIcon> = {
+export const STATUS_ICONS: Record<DisplayStatus, LucideIcon> = {
   normal: CircleCheck,
   attention: TriangleAlert,
   escalate: OctagonAlert,
+  none: CircleDashed,
+  missing: Minus,
 }
 
-/** Status is always conveyed by icon shape and text, never by colour alone. */
-export function StatusBadge({ status, className }: { status: Status; className?: string }) {
+/**
+ * Status is always conveyed by icon shape and text, never by colour alone.
+ * "Not evaluated" and "No measurement" are neutral: they get no status colour.
+ */
+export function StatusBadge({ status, className }: { status: DisplayStatus; className?: string }) {
   const Icon = STATUS_ICONS[status]
+  const tiered = status === 'normal' || status === 'attention' || status === 'escalate'
   return (
     <span
-      data-status={status}
+      data-status={tiered ? status : undefined}
       className={cn(
-        'status-surface inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-sm font-medium',
+        'inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-sm font-medium whitespace-nowrap',
+        tiered ? 'status-surface' : 'border-dashed text-muted-foreground',
         className,
       )}
     >
-      <Icon aria-hidden="true" className="size-4 text-(--status-color)" />
-      {STATUS_LABELS[status]}
+      <Icon aria-hidden="true" className={cn('size-4', tiered && 'text-(--status-color)')} />
+      {DISPLAY_STATUS_LABELS[status]}
     </span>
   )
 }

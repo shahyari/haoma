@@ -1,0 +1,200 @@
+// @vitest-environment jsdom
+import { cleanup, fireEvent, screen, within } from '@testing-library/react'
+import { afterEach, describe, expect, it } from 'vitest'
+
+import type { HealthEntry } from '@/domain/indicators'
+import { daysAgo, renderApp } from '@/test/render'
+
+afterEach(cleanup)
+
+function enter(fields: Record<string, string>, options: string[] = []) {
+  fireEvent.click(screen.getByRole('button', { name: 'Add entry' }))
+  const dialog = within(screen.getByRole('dialog'))
+  for (const [label, value] of Object.entries(fields)) {
+    fireEvent.change(dialog.getByLabelText(label), { target: { value } })
+  }
+  for (const option of options) fireEvent.click(dialog.getByLabelText(option))
+  fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
+}
+
+const latest = () => within(screen.getByRole('region', { name: 'Latest measurement' }))
+const table = (name: RegExp) => within(screen.getByRole('region', { name })).getByRole('table')
+
+describe('IndicatorPage', () => {
+  it('shows the empty states when nothing is recorded', () => {
+    renderApp('/indicators/heartRate')
+    expect(screen.getByRole('heading', { level: 1, name: 'Heart rate' })).toBeTruthy()
+    expect(latest().getByText('No measurement')).toBeTruthy()
+    expect(latest().queryByText('Within reference')).toBeNull()
+    expect(screen.getByText(/a baseline needs/).textContent).toContain(
+      '5 earlier readings, and 0 exist',
+    )
+    expect(
+      within(screen.getByRole('region', { name: 'History' })).getByText(
+        'Nothing has been recorded here yet.',
+      ),
+    ).toBeTruthy()
+  })
+
+  it('stores a manual entry and shows it with unit, timestamp, provenance and status', () => {
+    const store = renderApp('/indicators/bloodPressure')
+    enter({ 'Systolic (mmHg)': '150', 'Diastolic (mmHg)': '95' })
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(latest().getByText('150/95 mmHg')).toBeTruthy()
+    expect(latest().getByText(/Manual entry/)).toBeTruthy()
+    expect(latest().getByText('Escalate')).toBeTruthy()
+    expect(latest().getByText('Report at next flight-surgeon contact.')).toBeTruthy()
+    expect(store.load().data.entries).toMatchObject([
+      { indicator: 'bloodPressure', origin: 'userEntered' },
+    ])
+  })
+
+  it('rejects invalid input with a field error and stores nothing', () => {
+    const store = renderApp('/indicators/heartRate')
+    enter({ 'Heart rate (bpm)': 'abc' })
+    expect(within(screen.getByRole('dialog')).getByText('Enter a number.')).toBeTruthy()
+    expect(store.load().data.entries).toEqual([])
+  })
+
+  it('uses reported symptoms in the rules', () => {
+    renderApp('/indicators/bloodGlucose')
+    enter({ 'Glucose (mg/dL)': '65' }, ['Non-fasting', 'Fingerstick', 'Sweating'])
+    expect(latest().getByText('Escalate')).toBeTruthy()
+    expect(
+      latest().getByText('Treat now and notify crew medical officer / flight surgeon.'),
+    ).toBeTruthy()
+  })
+
+  it('lists systolic and diastolic separately in an accessible table, newest first, with provenance', () => {
+    renderApp('/indicators/bloodPressure', [
+      { ...daysAgo(2), indicator: 'bloodPressure', systolicMmHg: 112, diastolicMmHg: 70 },
+      {
+        ...daysAgo(1),
+        indicator: 'bloodPressure',
+        systolicMmHg: 118,
+        diastolicMmHg: 74,
+        origin: 'userEntered',
+      } as HealthEntry,
+    ])
+    const t = within(table(/table of readings/))
+    expect(t.getAllByRole('columnheader').map((h) => h.textContent)).toEqual([
+      'Date and time',
+      'Systolic (mmHg)',
+      'Diastolic (mmHg)',
+      'Symptoms reported',
+      'Provenance',
+    ])
+    const rows = t.getAllByRole('row').slice(1)
+    expect(
+      rows.map((r) =>
+        within(r)
+          .getAllByRole('cell')
+          .map((c) => c.textContent),
+      ),
+    ).toEqual([
+      ['118', '74', 'None', 'Manual entry'],
+      ['112', '70', 'None', 'Simulated'],
+    ])
+    expect(t.getAllByRole('rowheader').length).toBe(2)
+    expect(screen.getByRole('region', { name: /table of readings/ }).tabIndex).toBe(0)
+  })
+
+  it('shows the personal baseline once five earlier readings exist', () => {
+    const readings = [62, 64, 63, 65, 64, 80].map((bpm, i): HealthEntry => ({
+      ...daysAgo(6 - i),
+      indicator: 'heartRate',
+      bpm,
+    }))
+    renderApp('/indicators/heartRate', readings)
+    expect(screen.getByRole('region', { name: 'Personal baseline' }).textContent).toContain(
+      '64 bpm',
+    )
+    expect(latest().getByText(/80 bpm, which is 16 bpm above your usual/)).toBeTruthy()
+    expect(latest().getByText('Attention')).toBeTruthy()
+  })
+
+  it('has no baseline section for indicators whose rules do not use one', () => {
+    renderApp('/indicators/sleep')
+    expect(screen.queryByRole('region', { name: 'Personal baseline' })).toBeNull()
+  })
+
+  it('marks a temperature taken after exercise as not evaluated', () => {
+    renderApp('/indicators/bodyTemperature', [
+      {
+        ...daysAgo(0),
+        indicator: 'bodyTemperature',
+        celsius: 38.6,
+        method: 'oral',
+        exercisedLast30Min: true,
+      },
+    ])
+    expect(latest().getByText('Not evaluated')).toBeTruthy()
+    expect(latest().getByText(/after exercise, so it is not evaluated/)).toBeTruthy()
+    expect(within(table(/table of readings/)).getByText('Yes (not evaluated)')).toBeTruthy()
+  })
+
+  it('separates the approved rules from the measurements and cites their references', () => {
+    renderApp('/indicators/sleep')
+    const rules = within(
+      screen.getByRole('region', { name: 'Reference information and approved rules' }),
+    )
+    expect(rules.getByText(/not your measurements/)).toBeTruthy()
+    expect(rules.getAllByRole('listitem').length).toBe(3)
+    expect(rules.getByText('RULE-20')).toBeTruthy()
+    expect(rules.getAllByRole('link', { name: /REF-/ }).length).toBe(3)
+  })
+
+  it('shows a not-found page for an unknown indicator', () => {
+    renderApp('/indicators/weight')
+    expect(screen.getByRole('heading', { name: 'Page not found' })).toBeTruthy()
+  })
+})
+
+describe('Mood: daily rating and PHQ-2 are separate', () => {
+  it('keeps two histories, and a daily rating alone is never a status', () => {
+    renderApp('/indicators/mood', [
+      { ...daysAgo(0), indicator: 'mood', kind: 'dailyRating', rating: 2 },
+    ])
+    expect(screen.getByRole('heading', { name: 'Daily mood rating' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'PHQ-2 depression screening' })).toBeTruthy()
+    expect(latest().getByText('Not evaluated')).toBeTruthy()
+    expect(
+      screen.getByText(/screener, not a diagnosis, and it is not a daily mood score/),
+    ).toBeTruthy()
+    expect(
+      screen.getAllByText(/thoughts of harming yourself, contact the flight surgeon now/).length,
+    ).toBe(1)
+  })
+
+  it('scores the PHQ-2 from its two answers about the past 2 weeks', () => {
+    renderApp('/indicators/mood')
+    fireEvent.click(screen.getByRole('button', { name: 'Add entry' }))
+    const dialog = within(screen.getByRole('dialog'))
+    fireEvent.click(dialog.getByLabelText('PHQ-2 depression screening (every 14 days)'))
+    expect(
+      dialog.getByText(
+        /Over the last 2 weeks, how often have you been bothered by the following problems\?/,
+      ),
+    ).toBeTruthy()
+    fireEvent.click(dialog.getAllByLabelText('Several days')[0])
+    fireEvent.click(dialog.getAllByLabelText('More than half the days')[1])
+    fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
+    expect(within(table(/PHQ-2 depression screening: table/)).getByText('3')).toBeTruthy()
+    expect(latest().getByText('Escalate')).toBeTruthy()
+    expect(latest().getByText(/can do a fuller assessment/)).toBeTruthy()
+  })
+
+  it('offers the PHQ-2 only every 14 days', () => {
+    renderApp('/indicators/mood', [{ ...daysAgo(13), indicator: 'mood', kind: 'phq2', score: 1 }])
+    fireEvent.click(screen.getByRole('button', { name: 'Add entry' }))
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.queryByLabelText(/PHQ-2 depression screening/)).toBeNull()
+    expect(dialog.getByText(/taken every 14 days\. Next due/)).toBeTruthy()
+    cleanup()
+    renderApp('/indicators/mood', [{ ...daysAgo(14), indicator: 'mood', kind: 'phq2', score: 1 }])
+    fireEvent.click(screen.getByRole('button', { name: 'Add entry' }))
+    expect(
+      within(screen.getByRole('dialog')).getByLabelText(/PHQ-2 depression screening/),
+    ).toBeTruthy()
+  })
+})

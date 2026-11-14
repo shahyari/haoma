@@ -6,15 +6,23 @@
 
 | Data element | Origin | Real or simulated? | Collection / generation method | Source (REF ID or N/A) | Restrictions |
 |---|---|---|---|---|---|
-| TODO: element | TODO: source | TODO: real / simulated / user-entered | TODO: method | TODO | TODO: notes |
+| Indicator entries typed by the user | The person using the app | User-entered (labeled "Manual entry") | Entry form; structural validation only | N/A | Stored only in this browser |
+| Demo history | `src/demo/demo.ts` | Simulated (labeled "Simulated") | Deterministic generator (see below) | N/A (Simulated demo logic) | Not real astronaut data |
+| Demo profile "Demo astronaut" | `src/demo/demo.ts` | Fictional (labeled "Fictional profile") | Placeholder name; further fields wait for the owner | N/A | — |
+| Rule thresholds and wording | `scientific-foundations.md` | Reference information | Copied from the approved rules | REF IDs per rule | General-population references, not astronaut-specific |
 
 ## Demo profiles
 
-TODO: Describe the fictional profiles and mission scenarios (stories are in `product.md`). No real private health records.
+One fictional profile, "Demo astronaut", labeled "Fictional profile" on Home (owner decision 2026-11-14). TODO: name, role, and mission from the owner. Additional crew profiles are deferred. No real private health records.
 
 ## Simulated history generation
 
-TODO: Document the assumptions, time range, seeded values, randomness, and how to reproduce the data.
+Generated in the browser by `createDemoEntries` (`src/demo/demo.ts`, written with AI assistance) when the user chooses "Load simulated demo history":
+
+- **Time range:** the 14 days before today, one entry per indicator per day at 07:00 local time, so today's check-in stays open.
+- **Values:** drawn uniformly from fixed bands chosen by the team for a calm demo (blood pressure 108–118 / 68–76 mmHg, heart rate 62–70 bpm, fasting glucose 82–94 mg/dL by fingerstick, oral temperature 36.5–36.9 °C, self-reported sleep 6.5–7.9 h, daily mood rating 3–5) and one PHQ-2 of 0 on the first day. These bands are **Simulated demo logic**, not reference ranges.
+- **Randomness:** a seeded generator (mulberry32, seed 2026), so the same day always produces the same history.
+- **Reproduce:** call `createDemoEntries(date)`; a unit test checks that the output is deterministic, structurally valid, and labeled simulated.
 
 ## Reference information versus thresholds
 
@@ -22,7 +30,7 @@ TODO: Distinguish research citations, general clinical guidance, personal baseli
 
 ## Privacy statement
 
-TODO: State whether any information is transmitted, stored in the browser, or saved remotely. Verify this against the code before submission.
+haoma has no backend and makes no network requests with health data. Entries are stored only in this browser's localStorage (key `haoma:v1`) and display settings under `haoma:display:v1`. Nothing is saved remotely. "Clear my data" in Settings deletes the stored entries. Checked against the code on 2026-11-14; re-check before submission.
 
 ## Known limitations
 
