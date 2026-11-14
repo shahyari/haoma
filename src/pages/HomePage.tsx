@@ -10,10 +10,9 @@ import {
   Thermometer,
   type LucideIcon,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 
-import { EmptyState } from '@/components/states/StatePanel'
 import { StatusBadge } from '@/components/StatusBadge'
 import { useHealthData } from '@/data/HealthDataProvider'
 import { formatDateTime } from '@/domain/dates'
@@ -43,6 +42,11 @@ const ICONS: Record<IndicatorId, LucideIcon> = {
   sleep: Moon,
   mood: Smile,
 }
+
+// The body map (WebGL and SVG engine) loads on demand, like the history charts.
+const BodyMap = lazy(() =>
+  import('@/features/bodymap/BodyMap').then((m) => ({ default: m.BodyMap })),
+)
 
 const focusRing = 'outline-none focus-visible:ring-2 focus-visible:ring-ring'
 
@@ -141,15 +145,20 @@ export function HomePage() {
           </ul>
         </section>
 
-        <section aria-labelledby="figure-heading" className="flex flex-col">
-          <h2 id="figure-heading" className="sr-only">
-            Body figure
-          </h2>
-          <EmptyState
-            title="Body figure"
-            description="Placeholder. The interactive 2D figure is added once its specification is ready."
-            className="min-h-96 flex-1 justify-center"
-          />
+        <section
+          aria-labelledby="bodymap-heading"
+          className="flex min-w-0 flex-col lg:sticky lg:top-4 lg:self-start"
+        >
+          <Suspense
+            fallback={
+              <div
+                className="min-h-[540px] flex-1 animate-pulse rounded-lg border bg-muted"
+                aria-hidden="true"
+              />
+            }
+          >
+            <BodyMap />
+          </Suspense>
         </section>
 
         <section aria-labelledby="status-heading" className="space-y-3 lg:col-span-2 xl:col-span-1">

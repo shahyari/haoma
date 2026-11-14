@@ -86,16 +86,15 @@ describe('HomePage (owner brainstorm Section 16)', () => {
     )
   })
 
-  it('keeps the body-figure placeholder, with the banners in their own column on the right', () => {
+  it('shows the body map, with the banners in their own column on the right', async () => {
     renderApp('/', [
       { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
     ])
-    const figure = screen.getByRole('region', { name: 'Body figure' })
+    const map = await screen.findByRole('region', { name: 'Body map' })
     const status = screen.getByRole('region', { name: 'Health status' })
-    expect(within(figure).getByText(/Placeholder/)).toBeTruthy()
     expect(within(status).getByText('Report at next flight-surgeon contact.')).toBeTruthy()
-    // Document order: cards, figure, banners (left to right on wide screens).
-    expect(figure.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // Document order: cards, body map, banners (left to right on wide screens).
+    expect(map.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('uses the standard status badge, left-aligned at its normal size', () => {

@@ -170,7 +170,7 @@ This section is required (`challenge.md` E-R6, E-R17, E-R18).
 - Code and data: AI generation must be acknowledged "in descriptive text and metadata". Planned approach: a statement in README and the submission, plus `Co-Authored-By` trailers on AI-assisted commits.
 - Images and video: AI-generated visuals must carry a visible watermark.
 - Development (from 2026-11-14 09:00 CET): the Phase A technical foundation (project setup, shell, data models, validation, storage, tests) was written by Claude Code under the owner's direction. AI-assisted commits carry a `Co-Authored-By` trailer, and `package.json` and `index.html` carry a note in their metadata.
-- TODO: Describe how Claude Code and any other AI tools were used for the Phase B features.
+- Phase B features (2026-11-14): implemented by Claude Code under the owner's direction (history view, rule evaluation, Home layout, display settings, editing). The body map prototype (`body-map.html`, a dependency-free WebGL/SVG body model) was created by the owner with the Claude app; Claude Code ported it to TypeScript (`src/features/bodymap/`) and integrated it. Research checks and rule audits were done by Claude Code and decided by the owner (OD-14 to OD-16).
 
 ## Originality and pre-existing work
 

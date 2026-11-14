@@ -289,3 +289,323 @@ html[data-font-size='large'] {
     @apply font-mono tabular-nums;
   }
 }
+
+/*
+ * Body map (owner prototype "body-map.html", 2026-11-14). The prototype's white-on-black
+ * HUD is mapped to theme tokens: white -> --foreground, black -> --background,
+ * translucent white -> foreground mixed with transparent. Works in every theme and mode.
+ */
+.bodymap {
+  --bm-fg: var(--foreground);
+  --bm-bg: var(--background);
+  --bm-dim: color-mix(in oklab, var(--foreground) 62%, transparent);
+  --bm-mute: color-mix(in oklab, var(--foreground) 40%, transparent);
+  --bm-line: color-mix(in oklab, var(--foreground) 26%, transparent);
+  --bm-faint: color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+.bodymap .seg {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--bm-line);
+  border-radius: 999px;
+}
+.bodymap .seg button {
+  min-height: 2.25rem;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  font-size: 0.875rem;
+  color: var(--bm-dim);
+  outline: none;
+}
+.bodymap .seg button[aria-pressed='true'] {
+  background: var(--bm-fg);
+  color: var(--bm-bg);
+}
+.bodymap .seg button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.bodymap .seg button:focus-visible,
+.bodymap .tool:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.bodymap .stage {
+  background: var(--bm-bg);
+}
+.bodymap .stage canvas,
+.bodymap .stage .ov,
+.bodymap .stage .v2d {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.bodymap .stage [hidden] {
+  display: none !important;
+}
+.bodymap .gl {
+  touch-action: none;
+  cursor: crosshair;
+}
+.bodymap .gl.grab {
+  cursor: grabbing;
+}
+.bodymap .ov {
+  pointer-events: none;
+}
+.bodymap .v2d {
+  touch-action: none;
+  cursor: crosshair;
+}
+.bodymap .ov *,
+.bodymap .v2d * {
+  vector-effect: non-scaling-stroke;
+}
+.bodymap .corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--bm-line);
+  pointer-events: none;
+}
+.bodymap .corner.a {
+  left: 14px;
+  top: 14px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.bodymap .corner.b {
+  right: 14px;
+  top: 14px;
+  border-left: 0;
+  border-bottom: 0;
+}
+.bodymap .corner.c {
+  left: 14px;
+  bottom: 14px;
+  border-right: 0;
+  border-top: 0;
+}
+.bodymap .corner.d {
+  right: 14px;
+  bottom: 14px;
+  border-left: 0;
+  border-top: 0;
+}
+.bodymap .readout {
+  position: absolute;
+  font: 400 10.5px/1.7 var(--font-numeric);
+  letter-spacing: 0.08em;
+  color: var(--bm-dim);
+  pointer-events: none;
+  white-space: pre;
+}
+.bodymap .readout.tl {
+  left: 26px;
+  top: 22px;
+}
+.bodymap .readout.tr {
+  right: 26px;
+  top: 22px;
+  text-align: right;
+}
+.bodymap .tools {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bodymap .tools .row {
+  display: flex;
+  gap: 6px;
+}
+.bodymap .tool {
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 10px;
+  border: 1px solid var(--bm-line);
+  background: color-mix(in oklab, var(--bm-bg) 70%, transparent);
+  font: 500 11px var(--font-numeric);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bm-dim);
+}
+.bodymap .tool:hover,
+.bodymap .tool[aria-pressed='true'] {
+  border-color: var(--bm-fg);
+  color: var(--bm-fg);
+}
+.bodymap .tool.big {
+  font-size: 16px;
+  padding: 0;
+}
+.bodymap .tip {
+  position: absolute;
+  pointer-events: none;
+  padding: 4px 8px;
+  background: var(--bm-bg);
+  color: var(--bm-fg);
+  border: 1px solid var(--bm-fg);
+  font: 500 11px var(--font-numeric);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  transform: translate(14px, -130%);
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.bodymap .tip.on {
+  opacity: 1;
+}
+/* 3D markers */
+.bodymap .m3 .ring {
+  fill: color-mix(in oklab, var(--bm-fg) 10%, transparent);
+  stroke: var(--bm-fg);
+  stroke-width: 1.6;
+}
+.bodymap .m3 .pulse {
+  fill: none;
+  stroke: var(--bm-fg);
+  stroke-width: 1;
+}
+.bodymap .m3 .dot {
+  fill: var(--bm-fg);
+}
+.bodymap .m3 .lbl rect {
+  fill: var(--bm-bg);
+  stroke: var(--bm-fg);
+  stroke-width: 1;
+}
+.bodymap .m3 .lbl text {
+  fill: var(--bm-fg);
+  font: 500 10px var(--font-numeric);
+}
+.bodymap .m3 .lbl line {
+  stroke: var(--bm-fg);
+  stroke-width: 1;
+}
+.bodymap .m3.occ {
+  opacity: 0.22;
+}
+.bodymap .m3.pending .ring,
+.bodymap .m2.pending .ring {
+  stroke-dasharray: 3 3;
+}
+.bodymap .m3.hl .ring,
+.bodymap .m2.hl .ring {
+  stroke-width: 3;
+}
+/* 2D */
+.bodymap .v2d .floor {
+  fill: none;
+  stroke: var(--bm-fg);
+  stroke-opacity: 0.22;
+}
+.bodymap .v2d .floor.dashed {
+  stroke-opacity: 0.14;
+  stroke-dasharray: 4 4;
+}
+.bodymap .v2d .sil-stroke {
+  fill: none;
+  stroke: var(--bm-fg);
+  stroke-width: 2.6;
+  stroke-linejoin: round;
+}
+.bodymap .v2d .sil-fill {
+  fill: var(--bm-bg);
+  stroke: none;
+}
+.bodymap .v2d .scanline {
+  stroke: var(--bm-fg);
+  stroke-width: 1;
+  opacity: 0.09;
+}
+.bodymap .v2d .scan2 {
+  pointer-events: none;
+}
+.bodymap .v2d .zone {
+  fill: var(--bm-bg);
+  stroke: color-mix(in oklab, var(--bm-fg) 78%, transparent);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  cursor: pointer;
+  transition: fill 0.15s;
+}
+.bodymap .v2d .zone.has {
+  fill: color-mix(in oklab, var(--bm-fg) 12%, var(--bm-bg));
+}
+.bodymap .v2d .zone:hover,
+.bodymap .v2d .zone.hot,
+.bodymap .v2d .zone:focus-visible {
+  fill: color-mix(in oklab, var(--bm-fg) 23%, var(--bm-bg));
+}
+.bodymap .v2d .organ {
+  fill: var(--bm-bg);
+  stroke: var(--bm-fg);
+  stroke-width: 1.3;
+  cursor: pointer;
+  transition: fill 0.15s;
+}
+.bodymap .v2d .organ.has {
+  fill: color-mix(in oklab, var(--bm-fg) 15%, var(--bm-bg));
+}
+.bodymap .v2d .organ:hover,
+.bodymap .v2d .organ.hot,
+.bodymap .v2d .organ:focus-visible {
+  fill: color-mix(in oklab, var(--bm-fg) 28%, var(--bm-bg));
+}
+.bodymap .v2d *:focus {
+  outline: none;
+}
+.bodymap .v2d .zone:focus-visible,
+.bodymap .v2d .organ:focus-visible {
+  stroke: var(--ring);
+  stroke-width: 3;
+}
+.bodymap .v2d .pupil {
+  fill: var(--bm-fg);
+  pointer-events: none;
+}
+.bodymap .v2d .m2 .ring {
+  fill: color-mix(in oklab, var(--bm-fg) 12%, transparent);
+  stroke: var(--bm-fg);
+  stroke-width: 1.6;
+}
+.bodymap .v2d .m2 .pulse {
+  fill: none;
+  stroke: var(--bm-fg);
+  stroke-width: 1;
+}
+.bodymap .v2d .m2 .dot {
+  fill: var(--bm-fg);
+}
+.bodymap .v2d .m2.back .ring {
+  fill: none;
+  stroke-dasharray: 3 2;
+}
+.bodymap .v2d .m2.back .dot {
+  fill: var(--bm-bg);
+  stroke: var(--bm-fg);
+  stroke-width: 1;
+}
+.bodymap .v2d .mnum {
+  fill: var(--bm-fg);
+  font-family: var(--font-numeric);
+  font-weight: 500;
+}
+.bodymap .v2d .mnum-bg {
+  fill: var(--bm-bg);
+  stroke: var(--bm-fg);
+  stroke-width: 1;
+}
+@media (max-width: 860px) {
+  .bodymap .readout.tr {
+    display: none;
+  }
+}

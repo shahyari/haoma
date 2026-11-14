@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 
 import type { HealthEntry } from '@/domain/indicators'
 import type { MissionPhase } from '@/domain/mission'
+import type { PainReport } from '@/domain/pain'
 import {
   createAppStore,
   createDefaultData,
@@ -21,6 +22,10 @@ interface HealthDataValue {
   /** Replaces all entries, e.g. when loading the simulated demo history. */
   replaceEntries: (entries: HealthEntry[]) => void
   setMissionPhase: (phase: MissionPhase) => void
+  /** Adds the report, or replaces the stored one with the same id. */
+  savePainReport: (report: PainReport) => void
+  deletePainReport: (id: string) => void
+  clearPainReports: () => void
   clearAll: () => void
 }
 
@@ -55,6 +60,16 @@ export function HealthDataProvider({ children, store }: { children: ReactNode; s
         })),
       replaceEntries: (entries) => change((d) => ({ ...d, entries })),
       setMissionPhase: (missionPhase) => change((d) => ({ ...d, missionPhase })),
+      savePainReport: (report) =>
+        change((d) => ({
+          ...d,
+          painReports: d.painReports.some((r) => r.id === report.id)
+            ? d.painReports.map((r) => (r.id === report.id ? report : r))
+            : [...d.painReports, report],
+        })),
+      deletePainReport: (id) =>
+        change((d) => ({ ...d, painReports: d.painReports.filter((r) => r.id !== id) })),
+      clearPainReports: () => change((d) => ({ ...d, painReports: [] })),
       clearAll: () => {
         appStore.clear()
         setData(createDefaultData())

@@ -100,7 +100,7 @@ These are routine tooling choices within the approved stack, delegated to Claude
 | `src/data/` | `HealthDataProvider`: React context over the store (entries, mission phase, clear) |
 | `src/rules/` | Approved rules as data (`rules.ts`, copied from `scientific-foundations.md`) and their evaluation (`evaluate.ts`). The only place with health thresholds |
 | `src/settings/` | Display settings (theme, mode, contrast, font size, colour-blind mode, zone), stored under `haoma:display:v1` |
-| `src/features/` | Feature components: entry dialog, Home status banner, history chart and table definitions (`history/`), daily check-in and PHQ-2 cadence (`checkin/`) |
+| `src/features/` | Feature components: entry dialog, Home status banner, history chart and table definitions (`history/`), daily check-in and PHQ-2 cadence (`checkin/`), body map and pain log (`bodymap/`: `engine.ts`, the dependency-free WebGL/SVG engine ported from the owner's prototype; `BodyMap.tsx`, the React panel and dialog) |
 | `src/demo/` | Fictional profile and seeded simulated history |
 | `src/test/` | Test setup and helpers, contrast measurement, keyboard and persistence tests |
 | `src/index.css` | Tailwind entry and design tokens (neutral placeholders, `design.md`) |
@@ -108,7 +108,7 @@ These are routine tooling choices within the approved stack, delegated to Claude
 
 Tests sit next to the code as `*.test.ts(x)`. Import alias: `@/` → `src/`.
 
-**Code splitting:** the history chart (Recharts) is loaded with `React.lazy` only when a history page shows a chart. Main bundle 2026-11-14: 423 kB (136 kB gzip), down from 780 kB; chart chunk 364 kB (106 kB gzip).
+**Code splitting:** the history chart (Recharts) is loaded with `React.lazy` only when a history page shows a chart, and the body map (43 kB, 16 kB gzip) loads on demand on Home. Main bundle 2026-11-14: 423 kB (136 kB gzip), down from 780 kB; chart chunk 364 kB (106 kB gzip).
 
 Installed versions (2026-11-14): React 19.3, React Router 8.5, Vite 8.3, TypeScript 7.0, Tailwind CSS 4.3, shadcn CLI 4.23 (style `radix-nova`, base color neutral), Recharts 3.8, Vitest 5.1. The full list is in `references.md`.
 
@@ -118,6 +118,7 @@ Indicator models are implemented in `src/domain/indicators.ts` (Phase A step A6)
 
 - CrewProfile: TODO: fields
 - HealthEntry: a union discriminated by `indicator`. Common fields: `id`, `recordedAt` (ISO 8601), `origin` (`userEntered` / `simulated`), optional `editedAt` (ISO 8601; set when an entry is edited, which also sets `origin` to `userEntered` and keeps `id` and `recordedAt`), optional `symptoms` (IDs from `src/domain/symptoms.ts`, taken from the symptom lists in the approved rules). Per indicator: blood pressure `systolicMmHg`, `diastolicMmHg`; heart rate `bpm`, optional `activity` (`rest` / `afterActivity`; required for new entries); glucose `mgDl`, `context`, `device`; temperature `celsius`, optional `method` (`oral` / `forehead`; required for new entries, absent on legacy entries), `exercisedLast30Min`; sleep `hours`, `source`; mood `kind` = `phq2` (`score` 0–6) or `dailyRating` (`rating` 1–5).
+- PainReport (`src/domain/pain.ts`): `id`, `recordedAt`, optional `editedAt`, `region` (name shown), `organ` / `zone` (ids from the 2D map, or null), `position` and `normal` (model coordinates, metres), `view` (`3D` / `2D`), `intensity` (integer 1–10), optional `character` (one of 7 options), optional `note` (≤ 240 characters). Stored in `AppData.painReports`; data saved before 2026-11-14 without this field loads as an empty list (no schema version change).
 - AppData (stored under `haoma:v1`): `schemaVersion`, `missionPhase` (app-level setting, default In flight), `entries`. Stored data that fails validation is reported as `corrupt` and left untouched; the app starts from defaults.
 - EvidenceReference: TODO: claim, REF ID, applicability, status
 - DemoScenario: TODO: profile, seeded entries, explanation

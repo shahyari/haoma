@@ -7,6 +7,7 @@
 | Data element | Origin | Real or simulated? | Collection / generation method | Source (REF ID or N/A) | Restrictions |
 |---|---|---|---|---|---|
 | Indicator entries typed by the user | The person using the app | User-entered (labeled "Manual entry") | Entry form; structural validation only | N/A | Stored only in this browser |
+| Pain reports (body map) | The person using the app | Self-reported (the app adds no data) | Body map: location on the model (region or organ name, position, surface normal, 3D or 2D view), intensity 1–10, optional character, optional note (max 240 characters) | N/A | Stored only in this browser; never interpreted, classified, or used by any rule |
 | Demo history | `src/demo/demo.ts` | Simulated (labeled "Simulated") | Deterministic generator (see below) | N/A (Simulated demo logic) | Not real astronaut data |
 | Demo profile "Alex Morgan" | `src/demo/demo.ts` | Fictional (labeled "Fictional profile") | Provisional profile set by the owner 2026-11-14 | N/A | — |
 | Rule thresholds and wording | `scientific-foundations.md` | Reference information | Copied from the approved rules | REF IDs per rule | General-population references, not astronaut-specific |
@@ -33,7 +34,7 @@ TODO: Distinguish research citations, general clinical guidance, personal baseli
 
 ## Privacy statement
 
-haoma has no backend and makes no network requests with health data. Entries are stored only in this browser's localStorage (key `haoma:v1`) and display settings under `haoma:display:v1`. Nothing is saved remotely. "Clear my data" in Settings deletes the stored entries. Checked against the code on 2026-11-14; re-check before submission.
+haoma has no backend and makes no network requests with health data. Entries and pain reports (including their free-text notes) are stored only in this browser's localStorage (key `haoma:v1`) and display settings under `haoma:display:v1`. Nothing is saved remotely. "Clear my data" in Settings deletes the stored entries and pain reports; "Clear all" in the pain log deletes the pain reports. "Copy JSON" copies the pain reports to the clipboard only when the person asks. Checked against the code on 2026-11-14; re-check before submission.
 
 ## Known limitations
 

@@ -11,6 +11,7 @@
 - Phase A foundation (Checkpoint A). Display settings (`design.md` → "Display settings").
 - Rule evaluation RULE-01–RULE-30 (`src/rules/`) with three distinct neutral states: **No measurement**, **Not evaluated**, **Normal**.
 - Home (Section 16): logo links Home; avatar card with the fictional profile Alex Morgan, indicators to review, demo-data notice, Settings and About; "Demo data" chip; six separate indicator cards (check-in state merged in; PHQ-2 state on Mood; standard left-aligned badge); green tier labeled "Normal"; banners in a right column; full-width layout except Settings (fixed width); body-figure placeholder unchanged.
+- Body map (owner prototype, 2026-11-14) in the Home figure area: 3D (WebGL) and 2D (SVG, keyboard-accessible) body model; pain log with add, edit, delete, show on body, copy JSON, clear all; reports stored in `AppData.painReports`; theme-aware; lazy-loaded; never interpreted.
 - History entries are editable (Edit per row; time kept; marked "Manual entry (edited)"; re-evaluated).
 - Per-indicator history view (`/indicators/:id`): latest value, unit, time, provenance; status with rule, action, evidence labels, REF IDs; personal baseline; chart plus accessible table; approved rules listed separately. Chart library lazy-loaded (main bundle 780 → 423 kB).
 - OD-14 applied (owner decisions on the audit, `scientific-foundations.md`): AU-1 sleep label; AU-3 heart-rate rest state, rest-only rules and baseline, descriptive count of readings above 100; AU-4 systolic < 90 OR diastolic < 60; AU-5 PHQ-2 current for 14 days, with the owner's four labels; AU-6 timestamps and separate check-in completeness; AU-7 time-of-day clause removed. Tests added for each.
@@ -47,6 +48,7 @@
 | 2026-11-14 | Owner brainstorm Sections 13–15 received; Section 14 and the decided parts of Section 13 implemented | `product.md`, `design.md` |
 | 2026-11-14 | Kickoff received 09:00 CET; repo created and Phase A executed | `implementation.md` |
 | 2026-11-14 | OD-14: audit decisions (AU-1, AU-3–AU-7 applied; AU-2 to revise), PHQ-2 labels, D-01 charts approved, provisional demo profile, body-figure direction, lazy-load charts | `scientific-foundations.md`, `design.md`, `data-and-limitations.md` |
+| 2026-11-14 | Body map: owner prototype `body-map.html` integrated in the Home figure area for self-reported pain; replaces the navigation proposal | `design.md` |
 | 2026-11-14 | Brainstorm Section 16: Home layout (cards, avatar card, Demo data chip, "Normal" label, full width, logo links Home) | `design.md` |
 | 2026-11-14 | OD-16: RULE-17 split (≥ 40.6 °C urgent; RULE-31 review 39.4–40.5 °C), forehead explanation, REF-56 approved | `scientific-foundations.md`, `references.md` |
 | 2026-11-14 | OD-15: temperature method-specific rules, PHQ-2 single cutoff 3, RULE-08 symptom-based for any reading; owner logo | `scientific-foundations.md`, `references.md` |
@@ -58,7 +60,7 @@
 1. RULE-16 precedence: a single oral 39.4–40.5 °C reading still escalates through RULE-16 when there is no baseline yet, the reading is more than 0.5 °C above the baseline, or symptoms are reported. Keep, or cap RULE-16 below 39.4 °C (`scientific-foundations.md` → "OD-16 implementation and verification").
 2. Proposals P16-1 to P16-4 (`scientific-foundations.md` → "OD-16 proposals"): symptom-only heart-rate rule (RULE-32), RULE-08 split and wording, RULE-17/RULE-31 wording, temperature symptom list.
 3. REF-57, REF-58 (NHLBI): approve. AHA warning-signs page: PDF export needed (automated access blocked).
-4. Body figure spec and remaining UX decisions (owner preparing).
+4. Body map: whether pain reports should appear anywhere else (for example a banner or the avatar card), and whether the Home banners should mention them. Currently they appear only in the pain log.
 5. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
 6. Auto-mode source (LED lighting), zone source, condition-based suggestions.
 7. Berlin Local Event name and local judging times.
@@ -74,7 +76,7 @@ SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (
 
 ## Verification
 
-- 2026-11-14 (after OD-16): `npm run format:check` clean; `npm run lint` 0 problems; `npm run typecheck` exit 0; `npm test` 12 files, 239 tests passed; `npm run build` exit 0, no chunk-size warning.
+- 2026-11-14 (after the body map): `npm run format:check` clean; `npm run lint` 0 problems; `npm run typecheck` exit 0; `npm test` 13 files, 252 tests passed; `npm run build` exit 0, no chunk-size warning. Body map checked in headless Chrome with WebGL (light and dark, 1600 px and 500 px).
 - Covers: rule boundaries, overlaps, precedence; temperature methods and legacy records; heart-rate rest state and symptom-based escalation; PHQ-2 single cutoff and 14-day validity; a sweep that no reading without an applicable rule is shown as Normal; temperature tier never drops as the value rises (36.0–42.0 °C); symptom-only scenarios; demo scenario snapshot (all six Normal); keyboard (jsdom); token contrast; persistence.
 - Not done: manual keyboard pass in a real browser, screen reader, true 320 px render of seeded pages. No WCAG conformance is claimed.
 

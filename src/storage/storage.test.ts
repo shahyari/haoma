@@ -13,7 +13,12 @@ const entry: HealthEntry = {
   source: 'selfReport',
 }
 
-const data: AppData = { schemaVersion: 1, missionPhase: 'postLanding', entries: [entry] }
+const data: AppData = {
+  schemaVersion: 1,
+  missionPhase: 'postLanding',
+  entries: [entry],
+  painReports: [],
+}
 
 /** Minimal in-memory Storage, so tests don't depend on the environment's localStorage. */
 function fakeStorage(): Storage {
@@ -98,5 +103,52 @@ describe('createAppStore', () => {
       throw new DOMException('full', 'QuotaExceededError')
     }
     expect(store.save(data)).toBe(false)
+  })
+})
+
+describe('pain reports', () => {
+  const report = {
+    id: 'p1',
+    recordedAt: '2026-11-14T08:00:00.000Z',
+    region: 'Left chest',
+    organ: null,
+    zone: 'left-chest',
+    position: [0.08, 1.3, 0.11],
+    normal: [0, 0, 1],
+    view: '2D',
+    intensity: 6,
+    character: 'Sharp',
+    note: 'Started this morning',
+  }
+
+  it('loads data saved before pain reports existed, with an empty list', () => {
+    const storage = fakeStorage()
+    const { painReports: _omit, ...legacy } = data
+    storage.setItem(STORAGE_KEY, JSON.stringify(legacy))
+    const result = createAppStore(storage).load()
+    expect(result.status).toBe('ok')
+    expect(result.data.painReports).toEqual([])
+  })
+
+  it('round-trips a valid report', () => {
+    const store = createAppStore(fakeStorage())
+    store.save({ ...data, painReports: [report as AppData['painReports'][number]] })
+    expect(store.load().data.painReports).toEqual([report])
+  })
+
+  it.each([
+    ['intensity 0', { intensity: 0 }],
+    ['intensity 11', { intensity: 11 }],
+    ['decimal intensity', { intensity: 5.5 }],
+    ['unknown character', { character: 'Stabbing' }],
+    ['note too long', { note: 'x'.repeat(241) }],
+    ['bad position', { position: [0, 1] }],
+  ])('treats a report with %s as corrupt', (_label, change) => {
+    const storage = fakeStorage()
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ ...data, painReports: [{ ...report, ...change }] }),
+    )
+    expect(createAppStore(storage).load().status).toBe('corrupt')
   })
 })

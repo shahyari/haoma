@@ -41,24 +41,16 @@ TODO (owner): how the app learns the astronaut's condition for the "suggested" o
 |---|---|---|---|
 | TODO: component | TODO: default/focus/error/... | TODO: behavior | TODO: label/keyboard |
 
-## Body figure (F-04): interaction proposal (Claude, 2026-11-14) — awaiting owner approval
+## Body map (F-04), owner prototype (2026-11-14)
 
-Owner direction (2026-11-14): an original, lightweight 2D SVG silhouette as accessible navigation; regions chest (blood pressure, heart rate), abdomen (glucose), head (sleep, mood), and whole body (temperature); several indicators may share a region; no colour may suggest organ damage or a diagnosis; keyboard access and a text equivalent.
+The owner created the body map in the Claude app (`body-map.html`) and asked for it in the Home body-figure area to save reports of pain and issues. It replaces the earlier navigation proposal (chest, abdomen, head, whole body → indicators), which is not built.
 
-Proposal:
-
-1. **Place:** replaces the placeholder in the middle column of Home, above the status banners. One front view, about 240 px tall on phones.
-2. **Regions:** four focusable regions with a hit area of at least 44 × 44 px: Head, Chest, Abdomen, and **Whole body** as a labeled button directly under the figure. An outline around the whole silhouette would be hard to see and to tap.
-3. **Activation:** click, tap, Enter, or Space opens a small popover that lists the region's indicators. Each entry shows the latest value, its status badge, and a link to its history page. Escape closes the popover and returns focus to the region. Using the same popover for every region, including the single-indicator ones, keeps the interaction predictable.
-4. **Status on the figure:** regions stay neutral, with no organ shapes and no fills. A region with items to review gets a small badge with the status icon and a count, for example "1 to review". The figure caption says: "The figure is for navigation. Badges show the status of the linked measurements, not the condition of a body part."
-5. **Text equivalent:** the SVG is a `role="group"` named "Body figure: navigation to indicators". Each region is a button whose name lists its indicators and its count to review, for example "Chest: blood pressure, heart rate, 1 to review". The Indicators card on Home remains the full text navigation to all six indicators.
-6. **Keyboard order:** Head, Chest, Abdomen, Whole body.
-
-Questions for the owner:
-
-- (a) Is the popover for every region acceptable, or should single-indicator regions open the history page directly?
-- (b) Badge only (recommended), or a status-tinted outline on the region?
-- (c) Whole body as a separate button (recommended), or an outline around the silhouette?
+- **3D view** (default when WebGL is available): drag to rotate, Shift-drag or right-drag to pan, scroll or pinch to zoom, click to add a pain point; Front, Back, L, R presets; Zoom and Reset buttons. Numbered markers sit on the surface with leader labels; markers hidden behind the body are dimmed.
+- **2D view:** front and back outlines split into named regions, plus 12 organs on the front. Every region and organ is a button reachable with Tab; Enter or Space adds a point. This is the keyboard path, and it is used automatically when WebGL is missing.
+- **Pain log** (beside the stage on wide containers, below it on narrow ones): points, max and average intensity; each point with number, region, character, surface (front, back, or organ), time, intensity bar, and note; actions Show on body, Edit, Delete; Copy JSON; Clear all with a confirmation step.
+- **Dialog** (app dialog component): region as the title, intensity 1–10 (number keys work; 0 = 10), character chips (Aching, Sharp, Throbbing, Burning, Cramping, Tingling, Pressure), note. Editing also offers Delete.
+- **Integration changes from the prototype (Claude):** the white-on-black HUD is mapped to theme tokens, so it follows the theme, light or dark mode, and contrast settings. The panel and dialog use the app's components. The prototype's Google Fonts are not loaded; the app fonts are used. Pulse animations are off with reduced motion. Reports are stored with the app's data, not under a separate key.
+- **Wording:** "Pain log · self-reported, not a diagnostic tool". Organ names describe where the person points; nothing is interpreted, and no status or rule uses the reports.
 
 ## Health communication
 

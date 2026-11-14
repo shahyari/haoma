@@ -7,6 +7,7 @@
  */
 import type { HealthEntry } from '@/domain/indicators'
 import { DEFAULT_MISSION_PHASE, MISSION_PHASES, type MissionPhase } from '@/domain/mission'
+import { validatePainReport, type PainReport } from '@/domain/pain'
 import { isRecord, validateEntry } from '@/domain/validation'
 
 export const SCHEMA_VERSION = 1
@@ -16,6 +17,8 @@ export interface AppData {
   schemaVersion: typeof SCHEMA_VERSION
   missionPhase: MissionPhase
   entries: HealthEntry[]
+  /** Self-reported pain points from the body map. Absent in data saved before 2026-11-14 (read as empty). */
+  painReports: PainReport[]
 }
 
 export type LoadStatus =
@@ -41,7 +44,12 @@ export interface AppStore {
 }
 
 export function createDefaultData(): AppData {
-  return { schemaVersion: SCHEMA_VERSION, missionPhase: DEFAULT_MISSION_PHASE, entries: [] }
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    missionPhase: DEFAULT_MISSION_PHASE,
+    entries: [],
+    painReports: [],
+  }
 }
 
 function parseAppData(raw: string): AppData | undefined {
@@ -63,7 +71,21 @@ function parseAppData(raw: string): AppData | undefined {
     if (!result.ok) return undefined
     entries.push(result.value)
   }
-  return { schemaVersion: SCHEMA_VERSION, missionPhase: phase as MissionPhase, entries }
+  const painReports: PainReport[] = []
+  if (parsed.painReports !== undefined) {
+    if (!Array.isArray(parsed.painReports)) return undefined
+    for (const item of parsed.painReports) {
+      const report = validatePainReport(item)
+      if (!report) return undefined
+      painReports.push(report)
+    }
+  }
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    missionPhase: phase as MissionPhase,
+    entries,
+    painReports,
+  }
 }
 
 function createMemoryStorage(): Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> {
