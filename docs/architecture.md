@@ -136,11 +136,14 @@ The `verify` skill reads these.
 - Tests: `npm test`
 - Lint/typecheck: `npm run lint` and `npm run typecheck`
 - Format: `npm run format` (check only: `npm run format:check`)
-- Deploy: TODO: command (recorded at step A10)
+- Deploy: `git push origin main` (the Vercel project `haoma` is connected to `shahyari/haoma` and builds `main` as production). Manual fallback: `npx vercel --prod`
+- Production URL: https://haoma-mu.vercel.app
 
 ## Deployment smoke test
 
-- [ ] Home page loads from the public URL.
-- [ ] No login required.
-- [ ] Core scenario works.
-- [ ] No secrets or personal data exposed.
+Last run: 2026-11-14 (Checkpoint A), anonymous `curl` against the production URL.
+
+- [x] Home page loads from the public URL.
+- [x] No login required.
+- [ ] Core scenario works. (Not applicable yet: no product screens.)
+- [x] No secrets or personal data exposed.

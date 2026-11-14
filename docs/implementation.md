@@ -6,7 +6,7 @@
 **Start:** Saturday 2026-11-14, 09:00 CET (`challenge.md` T-1)
 **Submission deadline:** Sunday 2026-11-15, 23:59 CET
 **Team:** Hossein Shahyari (solo), working with Claude Code
-**Status:** PREPARATION ONLY. Phase A begins only when the owner sends the kickoff instruction at or after 09:00 CET Saturday (`challenge.md` E-R2).
+**Status:** see `progress.md`. Phase A was authorized by the owner's kickoff on Sat 2026-11-14 at 09:00 CET (`challenge.md` E-R2).
 
 ## Roles
 
