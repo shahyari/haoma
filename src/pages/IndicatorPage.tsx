@@ -1,7 +1,8 @@
-import { ArrowLeft, Pencil, Plus } from 'lucide-react'
+import { Pencil, Plus } from 'lucide-react'
 import { lazy, Suspense, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { useParams } from 'react-router'
 
+import { BackLink } from '@/components/BackLink'
 import { EmptyState } from '@/components/states/StatePanel'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
@@ -229,13 +230,7 @@ export function IndicatorPage() {
     // Fixed width like Settings; only Home is full width (owner, 2026-11-14).
     <div className="mx-auto w-full max-w-5xl space-y-8">
       <div className="space-y-3">
-        <Link
-          to="/"
-          className="inline-flex min-h-9 items-center gap-1 rounded-md text-sm underline underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <ArrowLeft aria-hidden="true" className="size-4" />
-          Home
-        </Link>
+        <BackLink />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-semibold">{label}</h1>
           <Button
@@ -268,7 +263,10 @@ export function IndicatorPage() {
             <p className="text-muted-foreground">Nothing has been recorded yet.</p>
           )}
           <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={assessment.status} label={assessment.label} />
+            <StatusBadge status={assessment.status} />
+            {assessment.label && indicator !== 'mood' ? (
+              <span className="text-sm font-medium">{assessment.label}</span>
+            ) : null}
             {assessment.status === 'none' ? (
               <span className="text-sm">{assessment.note}</span>
             ) : null}
@@ -461,7 +459,12 @@ export function IndicatorPage() {
         <ul className="divide-y rounded-lg border bg-card text-sm">
           {rules.map((rule) => (
             <li key={rule.id} className="space-y-1 p-3">
-              <StatusBadge status={rule.status} label={rule.statusLabel} />
+              <p className="flex flex-wrap items-center gap-2">
+                <StatusBadge status={rule.status} />
+                {rule.statusLabel ? (
+                  <span className="text-muted-foreground">Shown as “{rule.statusLabel}”</span>
+                ) : null}
+              </p>
               <p>{rule.condition}</p>
               {rule.action ? <p>Action: {rule.action}</p> : null}
               <RuleEvidence rule={rule} />

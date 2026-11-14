@@ -7,6 +7,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { DISPLAY_STATUS_LABELS, type DisplayStatus } from '@/rules/types'
 
@@ -20,32 +21,30 @@ export const STATUS_ICONS: Record<DisplayStatus, LucideIcon> = {
 }
 
 /**
- * Status is always conveyed by icon shape and text, never by colour alone.
- * "Not evaluated" and "No measurement" are neutral: they get no status colour.
+ * The shadcn badge (default size and type), fully rounded. It only ever says "Normal",
+ * "Attention", "Escalate", "Not evaluated", or "No measurement" (owner, 2026-11-14);
+ * any other wording is shown next to it. Status is conveyed by icon and text, never by
+ * colour alone; the two neutral states get no status colour.
  */
-export function StatusBadge({
-  status,
-  label,
-  className,
-}: {
-  status: DisplayStatus
-  /** Replaces the default status name (owner-set wording such as "Below screening cutoff"). */
-  label?: string
-  className?: string
-}) {
+export function StatusBadge({ status, className }: { status: DisplayStatus; className?: string }) {
   const Icon = STATUS_ICONS[status]
   const tiered = status === 'normal' || status === 'attention' || status === 'escalate'
   return (
-    <span
+    <Badge
+      variant="outline"
       data-status={tiered ? status : undefined}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-sm font-medium whitespace-nowrap',
-        tiered ? 'status-surface' : 'border-dashed text-muted-foreground',
+        'rounded-full',
+        tiered ? 'status-surface text-foreground' : 'border-dashed text-muted-foreground',
         className,
       )}
     >
-      <Icon aria-hidden="true" className={cn('size-4', tiered && 'text-(--status-color)')} />
-      {label ?? DISPLAY_STATUS_LABELS[status]}
-    </span>
+      <Icon
+        aria-hidden="true"
+        data-icon="inline-start"
+        className={cn(tiered && 'text-(--status-color)')}
+      />
+      {DISPLAY_STATUS_LABELS[status]}
+    </Badge>
   )
 }

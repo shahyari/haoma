@@ -49,3 +49,12 @@ export function formatShortDate(value: string | number | Date): string {
   if (f === 'iso') return `${p2(d.getMonth() + 1)}-${p2(d.getDate())}`
   return (f === 'monthDayYear' ? us : gb).short.format(d)
 }
+
+/** "just now", "5 mins ago", "1 hour ago", "3 hours ago" (for readings taken today). */
+export function formatTimeAgo(value: string | number | Date, now: Date): string {
+  const minutes = Math.floor((now.getTime() - new Date(value).getTime()) / 60_000)
+  if (minutes < 1) return 'just now'
+  if (minutes < 60) return `${minutes} ${minutes === 1 ? 'min' : 'mins'} ago`
+  const hours = Math.floor(minutes / 60)
+  return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`
+}

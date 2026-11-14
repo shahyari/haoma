@@ -20,9 +20,9 @@ function reload(path = '/') {
 }
 
 describe('browser persistence (localStorage)', () => {
-  it('keeps entries across a reload', () => {
+  it('keeps entries across a reload', async () => {
     reload('/indicators/sleep')
-    fireEvent.click(screen.getByRole('button', { name: 'Add entry' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Add entry' }))
     const dialog = within(screen.getByRole('dialog'))
     fireEvent.change(dialog.getByLabelText('Sleep (hours)'), { target: { value: '7.5' } })
     fireEvent.click(dialog.getByLabelText('Self-report'))
@@ -31,17 +31,19 @@ describe('browser persistence (localStorage)', () => {
 
     reload('/indicators/sleep')
     expect(
-      within(screen.getByRole('region', { name: 'Latest measurement' })).getByText('7.5 h'),
+      within(await screen.findByRole('region', { name: 'Latest measurement' })).getByText('7.5 h'),
     ).toBeTruthy()
   })
 
-  it('keeps display settings across a reload and applies them before rendering', () => {
+  it('keeps display settings across a reload and applies them before rendering', async () => {
     reload('/settings')
-    fireEvent.click(screen.getByLabelText('High (WCAG AAA)'))
+    fireEvent.click(await screen.findByLabelText('High (WCAG AAA)'))
     expect(JSON.parse(localStorage.getItem(SETTINGS_KEY)!).contrast).toBe('high')
     reload('/settings')
     expect(
-      (screen.getByLabelText('High (WCAG AAA)') as HTMLButtonElement).getAttribute('aria-checked'),
+      ((await screen.findByLabelText('High (WCAG AAA)')) as HTMLButtonElement).getAttribute(
+        'aria-checked',
+      ),
     ).toBe('true')
     expect(document.documentElement.dataset.contrast).toBe('high')
   })

@@ -1,11 +1,8 @@
 import type { ReactNode } from 'react'
 
-import { AboutPage } from '@/pages/AboutPage'
 import { HomePage } from '@/pages/HomePage'
-import { IndicatorPage } from '@/pages/IndicatorPage'
-import { ReportPage } from '@/pages/ReportPage'
-import { ReportsPage } from '@/pages/ReportsPage'
-import { SettingsPage } from '@/pages/SettingsPage'
+
+import { AboutPage, IndicatorPage, ReportPage, ReportsPage, SettingsPage } from './lazyPages'
 
 export interface AppRoute {
   path: string

@@ -259,6 +259,11 @@ html[data-font-size='large'] {
   background-size: 0.875rem 100%;
   background-image: linear-gradient(var(--status-color), var(--status-color));
 }
+/* Badges are small: a narrower strip. */
+[data-colorblind='true'] [data-slot='badge'].status-surface[data-status] {
+  padding-left: 0.875rem;
+  background-size: 0.5rem 100%;
+}
 [data-colorblind='true'] .status-surface[data-status='attention'] {
   background-image: repeating-linear-gradient(
     45deg,

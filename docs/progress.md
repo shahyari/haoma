@@ -50,6 +50,7 @@
 | 2026-11-14 | Owner brainstorm Sections 13–15 received; Section 14 and the decided parts of Section 13 implemented | `product.md`, `design.md` |
 | 2026-11-14 | Kickoff received 09:00 CET; repo created and Phase A executed | `implementation.md` |
 | 2026-11-14 | OD-14: audit decisions (AU-1, AU-3–AU-7 applied; AU-2 to revise), PHQ-2 labels, D-01 charts approved, provisional demo profile, body-figure direction, lazy-load charts | `scientific-foundations.md`, `design.md`, `data-and-limitations.md` |
+| 2026-11-14 | Mission phase stays in the avatar card; glucose unit choice kept (a common pattern); mission name, mission day, indicators-to-review not shown; cards show "Measured … ago" / "Not measured today" with the badge top right; badges are shadcn default size, fully rounded, tier wording only; outline "Back" button everywhere | `design.md` |
 | 2026-11-14 | Section 17 (Settings, avatar card); fixed width for every page except Home; save banner back in the pain log; pain date and time below Character with the shadcn date picker; unticked logs stay in the pain log (confirmed) | `design.md` |
 | 2026-11-14 | Reports: saving moves logs into the report; success banner with View report; report view on the body map; open, download, and import JSON; file includes astronaut name and save date | `design.md` |
 | 2026-11-14 | Body map follow-ups: region → indicator links, Save report and Reports page, date and time per log, Max card removed, average kept, full-height and full-width body map, fixed width and Back for About and Settings | `design.md` |
@@ -66,7 +67,6 @@
 2. Proposals P16-1 to P16-4 (`scientific-foundations.md` → "OD-16 proposals"): symptom-only heart-rate rule (RULE-32), RULE-08 split and wording, RULE-17/RULE-31 wording, temperature symptom list.
 3. REF-57, REF-58 (NHLBI): approve. AHA warning-signs page: PDF export needed (automated access blocked).
 4. Body map: confirm the region → indicator links (`design.md` → "Body map").
-5. Section 17: mission phase placed in the avatar card (not in the wireframe); "Measurement system" applied to blood glucose (mg/dL or mmol/L); mission name, mission day, and the indicators-to-review count no longer shown. Confirm or change.
 5. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
 6. Auto-mode source (LED lighting), zone source, condition-based suggestions.
 7. Berlin Local Event name and local judging times.

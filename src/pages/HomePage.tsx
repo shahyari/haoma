@@ -1,6 +1,4 @@
 import {
-  Check,
-  Circle,
   Droplet,
   HeartPulse,
   Info,
@@ -10,15 +8,14 @@ import {
   Thermometer,
   type LucideIcon,
 } from 'lucide-react'
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 
 import { StatusBadge } from '@/components/StatusBadge'
 import { useHealthData } from '@/data/HealthDataProvider'
-import { formatDateTime } from '@/domain/dates'
+import { calendarDaysBetween, formatDateTime, formatTimeAgo } from '@/domain/dates'
 import { formatContext, formatValue } from '@/domain/format'
 import { INDICATORS, type IndicatorId } from '@/domain/indicators'
-import { dailyCheckIn } from '@/features/checkin/checkin'
 import { StatusBanner } from '@/features/home/StatusBanner'
 import { entriesOf, evaluateAll, PHQ2_STATE_LABELS, phq2Screening } from '@/rules/evaluate'
 import { cn } from '@/lib/utils'
@@ -53,7 +50,12 @@ const focusRing = 'outline-none focus-visible:ring-2 focus-visible:ring-ring'
 
 export function HomePage() {
   const { data, persistent } = useHealthData()
-  const [now] = useState(() => new Date())
+  const [now, setNow] = useState(() => new Date())
+  // Keeps "Measured … ago" current.
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 60_000)
+    return () => window.clearInterval(id)
+  }, [])
 
   const assessments = useMemo(
     () => evaluateAll(data.entries, { missionPhase: data.missionPhase, now }),
@@ -63,8 +65,6 @@ export function HomePage() {
   const alerts = assessments
     .filter((a) => a.status === 'escalate' || a.status === 'attention')
     .sort((a, b) => Number(b.status === 'escalate') - Number(a.status === 'escalate'))
-  // The daily check-in is shown on each card (Section 16).
-  const doneToday = new Map(dailyCheckIn(data.entries, now).map((i) => [i.indicator, i.done]))
   const screening = phq2Screening(data.entries, now)
   const hasBanners = alerts.length > 0 || data.missionPhase === 'approachingLanding'
 
@@ -94,44 +94,45 @@ export function HomePage() {
               const latest = entriesOf(data.entries, indicator).at(-1)
               const context = latest ? formatContext(latest) : undefined
               const Icon = ICONS[indicator]
-              const done = doneToday.get(indicator)
+              // Today's entry (for mood, today's daily rating), for "Measured … ago".
+              const today = entriesOf(data.entries, indicator)
+                .filter(
+                  (e) =>
+                    calendarDaysBetween(new Date(e.recordedAt), now) === 0 &&
+                    (e.indicator !== 'mood' || e.kind === 'dailyRating'),
+                )
+                .at(-1)
               return (
                 <li key={indicator}>
                   <Link
                     to={`/indicators/${indicator}`}
                     className={`flex h-full flex-col gap-2 rounded-lg border bg-card p-4 text-card-foreground hover:bg-muted ${focusRing}`}
                   >
-                    <span className="flex items-center gap-2 font-medium">
+                    <span className="flex items-center gap-2">
                       <Icon aria-hidden="true" className="size-5 shrink-0" />
-                      {INDICATORS[indicator].label}
+                      <span className="flex-1 font-medium">{INDICATORS[indicator].label}</span>
+                      <StatusBadge status={assessment.status} />
                     </span>
                     {latest ? (
-                      <>
-                        <span className="num block text-3xl font-semibold">
-                          {formatValue(latest)}
-                        </span>
-                        <span className="block text-sm text-muted-foreground">
-                          <span className="sr-only">Latest reading </span>
-                          <span className="num">{formatDateTime(latest.recordedAt)}</span>
-                          {context ? ` · ${context}` : ''}
-                          {latest.origin === 'simulated' ? ' · Simulated' : ''}
-                        </span>
-                      </>
+                      <span className="num block text-3xl font-semibold">
+                        {formatValue(latest)}
+                      </span>
                     ) : null}
-                    <span className="flex items-center gap-1.5 text-sm">
-                      {done ? (
-                        <Check aria-hidden="true" className="size-4 shrink-0" />
-                      ) : (
-                        <Circle
-                          aria-hidden="true"
-                          className="size-4 shrink-0 text-muted-foreground"
-                        />
-                      )}
-                      {done
-                        ? 'Checked in today'
-                        : indicator === 'mood'
-                          ? 'Daily rating not yet today'
-                          : 'Not yet measured today'}
+                    {assessment.label && indicator !== 'mood' ? (
+                      <span className="block text-sm font-medium">{assessment.label}</span>
+                    ) : null}
+                    <span className="block text-sm text-muted-foreground">
+                      {today
+                        ? `Measured ${formatTimeAgo(today.recordedAt, now)}`
+                        : 'Not measured today'}
+                      {latest ? (
+                        <span className="sr-only">
+                          {' '}
+                          (latest reading {formatDateTime(latest.recordedAt)})
+                        </span>
+                      ) : null}
+                      {latest && context ? ` · ${context}` : ''}
+                      {latest?.origin === 'simulated' ? ' · Simulated' : ''}
                     </span>
                     {indicator === 'mood' ? (
                       <span className="block text-sm text-muted-foreground">
@@ -141,11 +142,6 @@ export function HomePage() {
                     {assessment.status === 'none' ? (
                       <span className="block text-sm text-muted-foreground">{assessment.note}</span>
                     ) : null}
-                    <StatusBadge
-                      status={assessment.status}
-                      label={assessment.label}
-                      className="self-start"
-                    />
                   </Link>
                 </li>
               )

@@ -290,7 +290,8 @@ describe('Mood: daily rating and PHQ-2 are separate', () => {
     ])
     expect(screen.getByRole('heading', { name: 'Daily mood rating' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'PHQ-2 depression screening' })).toBeTruthy()
-    expect(latest().getByText('Not assessed')).toBeTruthy()
+    expect(latest().getByText('Not evaluated')).toBeTruthy()
+    expect(screen.getByText(/PHQ-2 screening:/).closest('p')?.textContent).toContain('Not assessed')
     expect(latest().queryByText(/Within reference|Below screening cutoff/)).toBeNull()
     expect(screen.getByText(/It is not a diagnosis and not a daily mood rating/)).toBeTruthy()
     expect(
@@ -312,7 +313,10 @@ describe('Mood: daily rating and PHQ-2 are separate', () => {
     fireEvent.click(dialog.getAllByLabelText('More than half the days')[1])
     fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
     expect(within(table(/PHQ-2 depression screening: table/)).getByText('3')).toBeTruthy()
-    expect(latest().getAllByText('Further assessment recommended').length).toBeGreaterThan(0)
+    expect(latest().getByText('Escalate')).toBeTruthy()
+    expect(screen.getByText(/PHQ-2 screening:/).closest('p')?.textContent).toContain(
+      'Further assessment recommended',
+    )
     expect(latest().getByText(/can do a fuller assessment/)).toBeTruthy()
   })
 
@@ -332,12 +336,16 @@ describe('Mood: daily rating and PHQ-2 are separate', () => {
 
   it('labels a current PHQ-2 below the cutoff, and a PHQ-2 older than 14 days as history', () => {
     renderApp('/indicators/mood', [{ ...daysAgo(3), indicator: 'mood', kind: 'phq2', score: 1 }])
-    expect(latest().getAllByText('Below screening cutoff').length).toBeGreaterThan(0)
+    expect(latest().getByText('Normal')).toBeTruthy()
+    expect(screen.getByText(/PHQ-2 screening:/).closest('p')?.textContent).toContain(
+      'Below screening cutoff',
+    )
     cleanup()
     renderApp('/indicators/mood', [{ ...daysAgo(15), indicator: 'mood', kind: 'phq2', score: 4 }])
-    expect(latest().getAllByText('Screening due').length).toBeGreaterThan(0)
-    expect(latest().getByText(/now history only/)).toBeTruthy()
-    expect(latest().queryByText('Further assessment recommended')).toBeNull()
+    const line = screen.getByText(/PHQ-2 screening:/).closest('p')?.textContent
+    expect(line).toContain('Screening due')
+    expect(line).toContain('now history only')
+    expect(latest().getByText('Not evaluated')).toBeTruthy()
   })
 })
 

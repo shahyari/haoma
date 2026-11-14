@@ -109,7 +109,7 @@ These are routine tooling choices within the approved stack, delegated to Claude
 
 Tests sit next to the code as `*.test.ts(x)`. Import alias: `@/` → `src/`.
 
-**Code splitting:** the history chart (Recharts) is loaded with `React.lazy` only when a history page shows a chart, and the body map (43 kB, 16 kB gzip) loads on demand on Home. Main bundle 2026-11-14: 423 kB (136 kB gzip), down from 780 kB; chart chunk 364 kB (106 kB gzip).
+**Code splitting:** every page except Home is loaded on demand (`src/app/lazyPages.tsx`), and so are the history chart (Recharts) and the body map. Main bundle 2026-11-14: 364 kB (117 kB gzip); body map chunk 121 kB (39 kB gzip, includes the date picker); chart chunk 364 kB (106 kB gzip).
 
 Installed versions (2026-11-14): React 19.3, React Router 8.5, Vite 8.3, TypeScript 7.0, Tailwind CSS 4.3, shadcn CLI 4.23 (style `radix-nova`, base color neutral), Recharts 3.8, Vitest 5.1. The full list is in `references.md`.
 

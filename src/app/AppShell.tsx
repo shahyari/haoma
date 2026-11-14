@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 
 import { Logo } from '@/components/Logo'
+import { LoadingState } from '@/components/states/StatePanel'
 import { ProfileMenu } from '@/features/profile/ProfileMenu'
 import { INDICATOR_IDS, INDICATORS } from '@/domain/indicators'
 
@@ -55,7 +56,9 @@ export function AppShell() {
       </header>
 
       <main id="main" tabIndex={-1} className="w-full flex-1 px-4 py-6 outline-none lg:px-6">
-        <Outlet />
+        <Suspense fallback={<LoadingState />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <footer className="border-t">

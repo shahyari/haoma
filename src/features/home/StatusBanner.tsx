@@ -67,11 +67,12 @@ export function StatusBanner({
         <Icon aria-hidden="true" className="size-5 shrink-0 text-(--status-color)" />
         <span className="flex-1">
           <span className="font-medium">
-            {assessment.label ?? STATUS_LABELS[status]}: {INDICATORS[assessment.indicator].label}
+            {STATUS_LABELS[status]}: {INDICATORS[assessment.indicator].label}
           </span>{' '}
           {assessment.indicator === 'mood' ? null : (
             <span className="num">{formatValue(latest)}</span>
           )}
+          {assessment.label ? <span className="block text-sm">{assessment.label}</span> : null}
         </span>
         <ChevronDown
           aria-hidden="true"

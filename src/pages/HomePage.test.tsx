@@ -56,14 +56,36 @@ describe('HomePage (owner brainstorm Section 16)', () => {
     expect(card('Blood pressure').textContent).toContain('No measurement')
   })
 
-  it('merges the daily check-in into the cards', () => {
+  it('shows "Measured … ago" for today’s readings and "Not measured today" otherwise', () => {
+    const minutesAgo = (m: number) => ({
+      id: `m${m}`,
+      recordedAt: new Date(Date.now() - m * 60_000).toISOString(),
+      origin: 'simulated' as const,
+    })
+    const now = new Date()
     renderApp('/', [
-      { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
+      { ...minutesAgo(5), indicator: 'heartRate', bpm: 70, activity: 'rest' },
+      ...(now.getHours() >= 2
+        ? [
+            {
+              ...minutesAgo(90),
+              indicator: 'bloodPressure' as const,
+              systolicMmHg: 115,
+              diastolicMmHg: 75,
+            },
+          ]
+        : []),
       { ...daysAgo(1), indicator: 'sleep', hours: 7.5, source: 'selfReport' },
     ])
-    expect(card('Heart rate').textContent).toContain('Checked in today')
-    expect(card('Sleep').textContent).toContain('Not yet measured today')
-    expect(card('Mood').textContent).toContain('Daily rating not yet today')
+    expect(card('Heart rate').textContent).toContain('Measured 5 mins ago')
+    if (now.getHours() >= 2)
+      expect(card('Blood pressure').textContent).toContain('Measured 1 hour ago')
+    expect(card('Sleep').textContent).toContain('Not measured today')
+    // The full timestamp is kept for screen readers only.
+    const visible = card('Sleep').cloneNode(true) as HTMLElement
+    visible.querySelectorAll('.sr-only').forEach((n) => n.remove())
+    expect(visible.textContent).not.toMatch(/\d{1,2} \w{3} \d{4}/)
+    expect(card('Mood').textContent).toContain('Not measured today')
     expect(card('Mood').textContent).toContain('PHQ-2 screening: Not assessed')
     expect(screen.queryByText('Today’s check-in')).toBeNull()
     // One link per indicator: the check-in no longer duplicates the destination.
@@ -98,11 +120,16 @@ describe('HomePage (owner brainstorm Section 16)', () => {
     expect(map.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
-  it('uses the standard status badge, left-aligned at its normal size', () => {
-    renderApp('/', [{ ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' }])
-    const badge = within(card('Heart rate')).getByText('Normal')
-    expect(badge.className).toContain('self-start')
-    expect(badge.className).not.toMatch(/w-full|justify-center/)
+  it('uses the shadcn badge (fully rounded) in the card header, with only the tier wording', () => {
+    renderApp('/', [{ ...daysAgo(0), indicator: 'sleep', hours: 5, source: 'selfReport' }])
+    const badge = within(card('Sleep')).getByText('Attention').closest('[data-slot="badge"]')!
+    expect(badge.className).toContain('rounded-full')
+    expect(badge.className).toContain('text-xs')
+    // Same row as the icon and name.
+    expect(badge.parentElement?.textContent).toMatch(/^Sleep/)
+    // Other wording sits outside the badge.
+    expect(badge.textContent).toBe('Attention')
+    expect(card('Sleep').textContent).toContain('Below general sleep recommendation')
   })
 
   it('replaces the demo disclaimer on the main screen with a "Demo data" chip', () => {
