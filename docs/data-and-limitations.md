@@ -21,7 +21,7 @@ One provisional fictional profile (owner decision 2026-11-14): **Alex Morgan**, 
 
 ## Simulated history generation
 
-Generated in the browser by `createDemoEntries` (`src/demo/demo.ts`, written with AI assistance) when the user chooses "Load simulated demo history":
+Generated in the browser by `createDemoEntries` (`src/demo/demo.ts`, written with AI assistance) on the first visit (nothing stored in this browser yet; owner request 2026-11-14), and again when the user chooses "Load demo data" in the avatar card. "Clear data" stores an empty dataset, so a cleared app is not refilled on the next visit:
 
 - **Time range:** the 14 days before today, one entry per indicator per day at 07:00 local time, so today's check-in stays open.
 - **Heart rate** entries are recorded "at rest".

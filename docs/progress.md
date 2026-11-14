@@ -10,9 +10,11 @@
 
 - Phase A foundation (Checkpoint A). Display settings (`design.md` → "Display settings").
 - Rule evaluation RULE-01–RULE-30 (`src/rules/`) with three distinct neutral states: **No measurement**, **Not evaluated**, **Normal**.
-- Home (Section 16): logo links Home; avatar card with the fictional profile Alex Morgan, indicators to review, demo-data notice, Settings and About; "Demo data" chip; six separate indicator cards (check-in state merged in; PHQ-2 state on Mood; standard left-aligned badge); green tier labeled "Normal"; banners in a right column; full-width layout except Settings (fixed width); body-figure placeholder unchanged.
+- Home (Section 16): logo links Home; avatar card with the fictional profile Alex Morgan, indicators to review, demo-data notice, Settings and About; "Demo data" chip; six separate indicator cards (check-in state merged in; PHQ-2 state on Mood; standard left-aligned badge); green tier labeled "Normal"; banners in a right column; full-width layout; the body map fills the figure area (next item).
 - Body map (owner prototype, 2026-11-14) in the Home figure area: 3D (WebGL) and 2D (SVG, keyboard-accessible) body model; pain logs with date and time, add, edit, delete, show on body, clear all; links to related indicators; Save report moves the chosen logs into a report (temporary banner with View report); Reports page (avatar menu and button next to 3D/2D) with View, Open JSON, Download JSON, Delete, and Import JSON; report view shows the logs read-only on the body map; report file includes astronaut name and save date; fills the viewport height and the free width; theme-aware; lazy-loaded; never interpreted.
-- Every page except Home: fixed width; Settings, About, Reports: Back button.
+- Every page except Home: fixed width and an outline Back button.
+- Demo data loads automatically on the first visit (nothing stored yet); Clear data stores an empty dataset so it is not reloaded. Body map 3D/2D toggle moved to the bottom right of the figure, styled like the Zoom/Reset/view buttons.
+- Public README describes the built app.
 - Section 17: Settings in two cards (Appearances; Units and Formats: °C/°F, mg/dL or mmol/L, three date formats, display and entry only); avatar card per the wireframe with Mission zone, Mission phase, Load demo data, Clear data. Pain-log date and time below Character with the shadcn date picker.
 - History entries are editable (Edit per row; time kept; marked "Manual entry (edited)"; re-evaluated).
 - Per-indicator history view (`/indicators/:id`): latest value, unit, time, provenance; status with rule, action, evidence labels, REF IDs; personal baseline; chart plus accessible table; approved rules listed separately. Chart library lazy-loaded (main bundle 780 → 423 kB).
@@ -20,7 +22,6 @@
 - OD-15 applied: temperature method required for new entries; RULE-14–RULE-17 for oral readings only; forehead and legacy readings ("Method not recorded") shown with trend and same-method baseline difference, unclassified; one chart line per method; "keeps rising" trigger removed. PHQ-2 single cutoff 3 (score 2 alone no longer Attention; REF-56 documents the ≥ 2 alternative). Heart rate: rate rules resting-only, RULE-08 symptom-based escalation for any reading.
 - Owner logo applied as favicon and header mark (TP-16).
 - OD-16 applied: RULE-17 = single oral reading ≥ 40.6 °C (urgent review); new RULE-31 = measurement review for 39.4 ≤ x < 40.6 °C; RULE-16 precedence kept (no tier drops as temperature rises); unclassified forehead readings explained; reported symptoms shown with the latest reading; REF-56 approved; REF-57/58 (NHLBI) added `Unverified`; proposals P16-1–P16-4 documented, not implemented.
-- Body figure: interaction proposal written (`design.md` → "Body figure"); not built.
 
 ## Decisions made
 
@@ -46,7 +47,7 @@
 | 2026-11-14 | Evidence policy: source hierarchy (1 / 2a / 2b / 3), Mayo Clinic approved as a 2b source, population and limitations required per source; OD-10 (Mayo 20 mmHg as RULE-26 explanation only) | `science.md`, `references.md` |
 | 2026-11-14 | OD-11: MedlinePlus approved as a 2b source (REF-50, temperature); REF-46 primary for fasting glucose; Kroenke 2003 (REF-51) for PHQ-2, with score 2 as a team decision | `scientific-foundations.md`, `references.md`, `science.md` |
 | 2026-11-14 | OD-12: low glucose is symptom-gated (Endocrine Society guideline, REF-53); the OSDR search found no human glucose thresholds (OSD-370 recorded as REF-52, context only) | `scientific-foundations.md`, `references.md` |
-| 2026-11-14 | Owner review: history view approved; no overall health score; XP deferred; 2D SVG body figure (spec pending); one fictional profile; simple daily check-in; no averaged statuses; crew comparison, sensors, roles, real-time reporting deferred; clinical rules read-only; no zone-specific reference ranges | `product.md` |
+| 2026-11-14 | Owner review: history view approved; no overall health score; XP deferred; body figure (since built as the owner's body map); one fictional profile; simple daily check-in; no averaged statuses; crew comparison, sensors, roles, real-time reporting deferred; clinical rules read-only; no zone-specific reference ranges | `product.md` |
 | 2026-11-14 | Owner brainstorm Sections 13–15 received; Section 14 and the decided parts of Section 13 implemented | `product.md`, `design.md` |
 | 2026-11-14 | Kickoff received 09:00 CET; repo created and Phase A executed | `implementation.md` |
 | 2026-11-14 | OD-14: audit decisions (AU-1, AU-3–AU-7 applied; AU-2 to revise), PHQ-2 labels, D-01 charts approved, provisional demo profile, body-figure direction, lazy-load charts | `scientific-foundations.md`, `design.md`, `data-and-limitations.md` |
@@ -54,6 +55,7 @@
 | 2026-11-14 | Section 17 (Settings, avatar card); fixed width for every page except Home; save banner back in the pain log; pain date and time below Character with the shadcn date picker; unticked logs stay in the pain log (confirmed) | `design.md` |
 | 2026-11-14 | Reports: saving moves logs into the report; success banner with View report; report view on the body map; open, download, and import JSON; file includes astronaut name and save date | `design.md` |
 | 2026-11-14 | Body map follow-ups: region → indicator links, Save report and Reports page, date and time per log, Max card removed, average kept, full-height and full-width body map, fixed width and Back for About and Settings | `design.md` |
+| 2026-11-14 | Demo data loads on the first visit; 3D/2D toggle at the bottom right of the figure in the figure-button style | `design.md`, `data-and-limitations.md` |
 | 2026-11-14 | Body map: owner prototype `body-map.html` integrated in the Home figure area for self-reported pain; replaces the navigation proposal | `design.md` |
 | 2026-11-14 | Brainstorm Section 16: Home layout (cards, avatar card, Demo data chip, "Normal" label, full width, logo links Home) | `design.md` |
 | 2026-11-14 | OD-16: RULE-17 split (≥ 40.6 °C urgent; RULE-31 review 39.4–40.5 °C), forehead explanation, REF-56 approved | `scientific-foundations.md`, `references.md` |
@@ -82,7 +84,7 @@ SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (
 
 ## Verification
 
-- 2026-11-14 (after the body map): `npm run format:check` clean; `npm run lint` 0 problems; `npm run typecheck` exit 0; `npm test` 15 files, 282 tests passed; `npm run build` exit 0, no chunk-size warning. Body map checked in headless Chrome with WebGL (light and dark, 1600 px and 500 px).
+- 2026-11-14 (first-visit demo data, 3D/2D toggle move): `npm run format:check` clean; `npm run lint` exit 0; `npm run typecheck` exit 0; `npm test` 15 files, 282 tests passed; `npm run build` exit 0. Home checked in headless Chrome with WebGL at 1600 px: demo history loaded on a fresh profile, toggle at the bottom right of the figure.
 - Covers: rule boundaries, overlaps, precedence; temperature methods and legacy records; heart-rate rest state and symptom-based escalation; PHQ-2 single cutoff and 14-day validity; a sweep that no reading without an applicable rule is shown as Normal; temperature tier never drops as the value rises (36.0–42.0 °C); symptom-only scenarios; demo scenario snapshot (all six Normal); keyboard (jsdom); token contrast; persistence.
 - Not done: manual keyboard pass in a real browser, screen reader, true 320 px render of seeded pages. No WCAG conformance is claimed.
 

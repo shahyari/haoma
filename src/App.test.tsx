@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import { DISCLAIMER } from './app/disclaimer'
 import { ErrorBoundary } from './app/ErrorBoundary'
+import { STORAGE_KEY } from './storage/storage'
 
 afterEach(() => {
   cleanup()
@@ -27,8 +28,10 @@ describe('App shell', () => {
     expect(screen.getByRole('contentinfo').textContent).toContain(DISCLAIMER)
   })
 
-  it('lists the six indicators on Home, without readings or a status at first', () => {
+  it('loads the simulated demo history on a first visit and lists the six indicators', () => {
+    localStorage.clear()
     render(<App />)
+    const indicators = within(screen.getByRole('region', { name: 'Indicators' }))
     for (const label of [
       'Blood pressure',
       'Heart rate',
@@ -38,11 +41,11 @@ describe('App shell', () => {
       'Mood',
     ]) {
       expect(
-        within(screen.getByRole('region', { name: 'Indicators' })).getByRole('link', {
-          name: new RegExp(`^${label}`),
-        }).textContent,
-      ).toContain('No measurement')
+        indicators.getByRole('link', { name: new RegExp(`^${label}`) }).textContent,
+      ).not.toContain('No measurement')
     }
+    expect(screen.getByText('Demo data')).toBeTruthy()
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries.length).toBeGreaterThan(0)
   })
 
   it('shows a not-found page for unknown routes', () => {

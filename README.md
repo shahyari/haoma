@@ -1,6 +1,6 @@
 # haoma — Astronaut Health Self-Assessment
 
-> **Status: in development** during the NASA Space Apps Challenge 2026 hackathon (November 14–15, 2026). The technical foundation is in place; product screens are not built yet. Development started at the event start, in line with the rule that teams may not begin working on challenges before the hackathon.
+> **Status: working prototype**, built during the NASA Space Apps Challenge 2026 hackathon (November 14–15, 2026). Development started at the event start, in line with the rule that teams may not begin working on challenges before the hackathon.
 
 **Challenge:** [Create Health Monitoring Software for Astronauts on Space Missions](https://www.spaceappschallenge.org/2026/challenges/health-monitoring-software/)
 **Team:** haoma
@@ -9,9 +9,9 @@
 
 ## About
 
-The official challenge asks teams to build health monitoring software that gathers health indicators and enables astronauts to evaluate and act on the status of their health during long-duration space missions. haoma will be a web-based self-assessment prototype for that challenge.
+The official challenge asks teams to build health monitoring software that gathers health indicators and enables astronauts to evaluate and act on the status of their health during long-duration space missions. haoma is a web-based self-assessment prototype for that challenge.
 
-haoma is TODO: one-sentence description of what the built product actually does (fill after implementation).
+haoma lets an astronaut record six health indicators, see each one evaluated against owner-approved, evidence-labeled rules with preventive actions and escalation to the crew medical officer or flight surgeons, follow the history of each indicator, and log self-reported pain on a 3D/2D body map. Everything runs in the browser; no data leaves the device.
 
 **Safety statement:** haoma is a hackathon prototype for education and demonstration. It is not a medical device, is not clinically validated, and does not replace a flight surgeon or other medical professional. Demonstration data are fictional unless specifically identified otherwise.
 
@@ -45,39 +45,49 @@ Unfinished items are marked `TODO:`.
 
 ---
 
-The sections below are completed during the hackathon.
-
 ## Explore
 
-- **Live app:** https://haomaho.vercel.app (in development)
+- **Live app:** https://haomaho.vercel.app. The fictional demo history loads automatically on the first visit.
 - **Presentation (official demo):** TODO: slides URL
 - **NASA project page:** TODO: project page URL
 
 ## Problem
 
-TODO: 2–4 sentences describing the astronaut self-assessment problem and why it matters. Cite sources from `docs/references.md`.
+On long-duration missions, astronauts face the hazards of human spaceflight (radiation, isolation and confinement, distance from Earth, altered gravity, closed environments; NASA Human Research Program, REF-01) far from in-person medical care. The challenge (REF-02) asks for software that gathers health indicators and helps astronauts evaluate and act on their health status.
 
 ## Solution
 
-TODO: Describe implemented functionality, not planned features.
+- **Home:** six indicator cards (heart rate, blood pressure, blood glucose, body temperature, sleep, mood) with the latest value, status badge (Normal, Attention, Escalate, or the neutral Not evaluated / No measurement), and when it was measured; status banners with the triggered rule, recommended action, evidence labels, and reference IDs; the body map in the centre.
+- **Indicator pages:** latest value with provenance, status and the rule behind it, personal baseline, a chart with an accessible data table, editable history, and the approved rules for that indicator with their references.
+- **Body map and pain log:** a 3D (WebGL) and 2D (SVG, keyboard-accessible) body model. Pain logs record region, intensity, character, date and time, and a note, with links to related indicators. Logs can be saved as reports, viewed read-only on the body map, and opened, downloaded, or imported as JSON. Pain logs are self-reported and never interpreted.
+- **Avatar card and Settings:** the fictional profile, mission zone and mission phase, load demo data, clear data; theme, mode, contrast, text size, assistive patterns, units, and date format.
 
 ## Demo scenario
 
-TODO: Describe the fictional astronaut, mission context, input, app response, and outcome. State that scenario data are simulated.
+The fictional profile **Alex Morgan**, Flight Engineer on the invented **Aster-1 Lunar Transit Mission**, with a simulated 14-day history of all six indicators and one PHQ-2 screening. The history loads automatically on a first visit and can be reloaded from the avatar card. All values are simulated and fall in calm bands, so every indicator starts as Normal; entering a new value (for example a high oral temperature) shows how the app evaluates it, explains why, and recommends an action. The person, mission, and data are fictional ([`docs/data-and-limitations.md`](docs/data-and-limitations.md)).
 
 ## Features actually implemented
 
-- TODO: feature 1
-- TODO: feature 2
-- TODO: feature 3
+- Entry forms for all six indicators, with validation and unit choices (°C/°F, mg/dL or mmol/L)
+- Rule evaluation RULE-01–RULE-31 with three distinct neutral states (No measurement, Not evaluated, Normal); no overall health score and no averaged statuses
+- Per-indicator history with chart, data table, personal baseline, and editable entries
+- 3D/2D body map with pain logs, saved reports, and JSON export and import
+- Fictional demo profile and simulated history, labeled as such, loaded on the first visit
+- Display settings: four themes linked to the mission zone, light/dark mode, high contrast, text size, assistive patterns
+- Browser-only persistence (localStorage, with an in-memory fallback)
 
 ## Scientific grounding
 
-TODO: Summarize the NASA Human Research Program and other authoritative sources actually used. See [`docs/scientific-foundations.md`](docs/scientific-foundations.md).
+Indicators and rules are defined in [`docs/scientific-foundations.md`](docs/scientific-foundations.md); only rules the owner has set to `Approved` affect the app. Sources include NASA Human Research Program hazard and risk pages, NASA technical reports, the American Heart Association, the American Diabetes Association, the Endocrine Society, MedlinePlus (U.S. National Library of Medicine), Mayo Clinic, and peer-reviewed studies such as Kroenke et al. 2003 for the PHQ-2 ([`docs/references.md`](docs/references.md)). Most thresholds are general adult clinical references, not validated astronaut-specific thresholds, and the app says so.
 
 ## Data and limitations
 
-TODO: Describe user-entered inputs, simulated historical records, thresholds, and known limitations. See [`docs/data-and-limitations.md`](docs/data-and-limitations.md).
+- Health values are entered by the user or come from the simulated demo history. There are no sensors, no accounts, and no server; data stay in this browser.
+- Thresholds are general-population references, not validated for astronauts or for spaceflight conditions.
+- The pain log is self-reported and is not evaluated.
+- Not tested with a screen reader; no WCAG conformance is claimed.
+
+See [`docs/data-and-limitations.md`](docs/data-and-limitations.md).
 
 ## Run locally
 
@@ -92,11 +102,11 @@ Other commands (tests, lint, build) are listed in [`docs/architecture.md`](docs/
 
 ## Technology
 
-TODO: actual stack and dependencies.
+React 19, TypeScript, Vite, Tailwind CSS 4, shadcn/ui (Radix UI), Lucide icons, Recharts, React Router, date-fns, react-day-picker; Vitest and Testing Library; oxlint and Prettier; deployed on Vercel. The body map uses a dependency-free WebGL/SVG engine ported from the owner's prototype. Details: [`docs/architecture.md`](docs/architecture.md).
 
 ## Credits, sources, and licenses
 
-TODO: Link to [`docs/references.md`](docs/references.md). List third-party code, assets, and data, and their licenses.
+Sources are listed in [`docs/references.md`](docs/references.md) (`REF-NN`), together with third-party code and their licenses, and the AI-assistance disclosure: code, the simulated demo data, and parts of the research were produced with AI assistance (Claude).
 
 ## License
 

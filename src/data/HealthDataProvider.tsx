@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 
+import { createDemoEntries } from '@/demo/demo'
 import type { HealthEntry } from '@/domain/indicators'
 import type { MissionPhase } from '@/domain/mission'
 import type { PainLog, PainReport } from '@/domain/pain'
@@ -8,6 +9,7 @@ import {
   createDefaultData,
   type AppData,
   type AppStore,
+  type LoadResult,
   type LoadStatus,
 } from '@/storage/storage'
 
@@ -36,10 +38,33 @@ interface HealthDataValue {
 
 const HealthDataContext = createContext<HealthDataValue | null>(null)
 
-export function HealthDataProvider({ children, store }: { children: ReactNode; store?: AppStore }) {
+/**
+ * Loads the simulated demo history when nothing is stored yet (first visit), so first-time
+ * visitors see a populated Home. Corrupt data is left untouched, and "Clear data" stores an
+ * empty dataset, so clearing is not undone on the next visit.
+ */
+function firstVisitData(appStore: AppStore, loaded: LoadResult): AppData {
+  if (loaded.status !== 'empty') return loaded.data
+  const seeded = { ...loaded.data, entries: createDemoEntries(new Date()) }
+  appStore.save(seeded)
+  return seeded
+}
+
+export function HealthDataProvider({
+  children,
+  store,
+  seedDemoOnFirstVisit = false,
+}: {
+  children: ReactNode
+  store?: AppStore
+  /** Load the simulated demo history when the store is empty (the app sets this). */
+  seedDemoOnFirstVisit?: boolean
+}) {
   const [appStore] = useState(() => store ?? createAppStore())
   const [loaded] = useState(() => appStore.load())
-  const [data, setData] = useState(loaded.data)
+  const [data, setData] = useState(() =>
+    seedDemoOnFirstVisit ? firstVisitData(appStore, loaded) : loaded.data,
+  )
 
   const change = useCallback(
     (update: (current: AppData) => AppData) => {
@@ -89,7 +114,10 @@ export function HealthDataProvider({ children, store }: { children: ReactNode; s
         change((d) => ({ ...d, reports: d.reports.filter((r) => r.id !== id) })),
       clearAll: () => {
         appStore.clear()
-        setData(createDefaultData())
+        // Store the empty dataset so a cleared app is not re-seeded with demo data.
+        const empty = createDefaultData()
+        appStore.save(empty)
+        setData(empty)
       },
     }),
     [data, appStore, loaded.status, change],

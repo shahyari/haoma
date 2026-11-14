@@ -308,32 +308,6 @@ html[data-font-size='large'] {
   --bm-line: color-mix(in oklab, var(--foreground) 26%, transparent);
   --bm-faint: color-mix(in oklab, var(--foreground) 12%, transparent);
 }
-.bodymap .seg {
-  display: flex;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--bm-line);
-  border-radius: 999px;
-}
-.bodymap .seg button {
-  min-height: 2.25rem;
-  padding: 0 1.1rem;
-  border-radius: 999px;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  font-size: 0.875rem;
-  color: var(--bm-dim);
-  outline: none;
-}
-.bodymap .seg button[aria-pressed='true'] {
-  background: var(--bm-fg);
-  color: var(--bm-bg);
-}
-.bodymap .seg button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-.bodymap .seg button:focus-visible,
 .bodymap .tool:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
@@ -427,6 +401,10 @@ html[data-font-size='large'] {
   flex-direction: column;
   gap: 6px;
 }
+.bodymap .tools.right {
+  left: auto;
+  right: 20px;
+}
 .bodymap .tools .row {
   display: flex;
   gap: 6px;
@@ -442,10 +420,14 @@ html[data-font-size='large'] {
   text-transform: uppercase;
   color: var(--bm-dim);
 }
-.bodymap .tool:hover,
+.bodymap .tool:hover:not(:disabled),
 .bodymap .tool[aria-pressed='true'] {
   border-color: var(--bm-fg);
   color: var(--bm-fg);
+}
+.bodymap .tool:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 .bodymap .tool.big {
   font-size: 16px;

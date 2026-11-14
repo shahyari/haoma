@@ -305,19 +305,6 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
             </Link>
           </Button>
         )}
-        <div role="group" aria-label="View mode" className={cn('seg', readOnly && 'ml-auto')}>
-          <button
-            type="button"
-            aria-pressed={mode === '3d'}
-            disabled={!glAvailable}
-            onClick={() => changeMode('3d')}
-          >
-            3D
-          </button>
-          <button type="button" aria-pressed={mode === '2d'} onClick={() => changeMode('2d')}>
-            2D
-          </button>
-        </div>
       </div>
 
       <div className="grid min-h-0 flex-1 lg:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] @3xl:grid-cols-[minmax(0,1fr)_19rem] @3xl:grid-rows-1">
@@ -407,6 +394,27 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
                   </button>
                 </>
               ) : null}
+            </div>
+          </div>
+          <div className="tools right">
+            <div className="row" role="group" aria-label="View mode">
+              <button
+                type="button"
+                className="tool"
+                aria-pressed={mode === '3d'}
+                disabled={!glAvailable}
+                onClick={() => changeMode('3d')}
+              >
+                3D
+              </button>
+              <button
+                type="button"
+                className="tool"
+                aria-pressed={mode === '2d'}
+                onClick={() => changeMode('2d')}
+              >
+                2D
+              </button>
             </div>
           </div>
           <div ref={tipRef} className="tip" aria-hidden="true" />

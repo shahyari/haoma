@@ -27,7 +27,10 @@ describe('browser persistence (localStorage)', () => {
     fireEvent.change(dialog.getByLabelText('Sleep (hours)'), { target: { value: '7.5' } })
     fireEvent.click(dialog.getByLabelText('Self-report'))
     fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
-    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries).toHaveLength(1)
+    const sleep = (
+      JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries as { origin: string }[]
+    ).filter((e) => e.origin !== 'simulated')
+    expect(sleep).toHaveLength(1)
 
     reload('/indicators/sleep')
     expect(
@@ -79,7 +82,8 @@ describe('browser persistence (localStorage)', () => {
     fireEvent.click(card.getByRole('button', { name: 'Clear data' }))
     expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull()
     fireEvent.click(card.getByRole('button', { name: 'Confirm: delete all data' }))
-    expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+    // An empty dataset is stored, so the demo history is not loaded again on the next visit.
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries).toEqual([])
     reload()
     expect(
       within(screen.getByRole('region', { name: 'Indicators' })).getAllByText('No measurement'),

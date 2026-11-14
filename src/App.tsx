@@ -11,7 +11,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <SettingsProvider>
-        <HealthDataProvider>
+        <HealthDataProvider seedDemoOnFirstVisit>
           <BrowserRouter>
             <Routes>
               <Route element={<AppShell />}>
