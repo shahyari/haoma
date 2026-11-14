@@ -1,7 +1,10 @@
-import { Crosshair, Pencil, Trash2 } from 'lucide-react'
+import { Crosshair, FileText, Pencil, Save, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { Link } from 'react-router'
 
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
 import {
   Dialog,
   DialogContent,
@@ -16,11 +19,12 @@ import { formatDateTime } from '@/domain/dates'
 import {
   PAIN_CHARACTERS,
   PAIN_NOTE_MAX_LENGTH,
-  validatePainReport,
+  validatePainLog,
   type PainCharacter,
-  type PainReport,
+  type PainLog,
   type Vec3,
 } from '@/domain/pain'
+import { INDICATORS } from '@/domain/indicators'
 import { cn } from '@/lib/utils'
 
 import {
@@ -32,6 +36,7 @@ import {
   type PickInfo,
   type ViewName,
 } from './engine'
+import { relatedIndicators } from './links'
 
 interface Draft {
   /** Set when adding: where on the body the point was picked. */
@@ -41,18 +46,54 @@ interface Draft {
   intensity: number
   character?: PainCharacter
   note: string
+  /** Date and time of the pain, as a datetime-local value. */
+  when: string
+}
+
+/** A Date as the value of an <input type="datetime-local"> in local time. */
+function toLocalInput(date: Date): string {
+  const p2 = (n: number) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${p2(date.getMonth() + 1)}-${p2(date.getDate())}T${p2(date.getHours())}:${p2(date.getMinutes())}`
 }
 
 const pad = (n: number) => String(n).padStart(2, '0')
-const surfaceOf = (r: PainReport) => (r.organ ? 'Organ' : r.position[2] >= 0 ? 'Front' : 'Back')
+/** Links from a body region to its related indicators (navigation aid only). */
+function RelatedLinks({
+  log,
+  className,
+}: {
+  log: { region: string; organ: string | null }
+  className?: string
+}) {
+  const related = relatedIndicators(log)
+  return (
+    <p className={cn('text-muted-foreground', className)}>
+      Related indicators:{' '}
+      {related.map((id, i) => (
+        <span key={id}>
+          {i > 0 ? ' · ' : ''}
+          <Link
+            to={`/indicators/${id}`}
+            className="rounded-sm text-foreground underline underline-offset-2 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {INDICATORS[id].label}
+          </Link>
+          {id === 'bodyTemperature' ? ' (whole body)' : ''}
+        </span>
+      ))}
+    </p>
+  )
+}
+
+const surfaceOf = (r: PainLog) => (r.organ ? 'Organ' : r.position[2] >= 0 ? 'Front' : 'Back')
 
 /**
  * Body map and pain log (owner prototype "body-map.html", 2026-11-14).
  * Self-reported data only: nothing here is interpreted or classified.
  */
 export function BodyMap() {
-  const { data, savePainReport, deletePainReport, clearPainReports } = useHealthData()
-  const reports = data.painReports
+  const { data, savePainLog, deletePainLog, clearPainLogs, savePainReport } = useHealthData()
+  const logs = data.painLogs
 
   const stageRef = useRef<HTMLElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -69,7 +110,9 @@ export function BodyMap() {
   const [draft, setDraft] = useState<Draft | null>(null)
   const [highlight, setHighlight] = useState<string | null>(null)
   const [confirmClear, setConfirmClear] = useState(false)
-  const [copyLabel, setCopyLabel] = useState('Copy JSON')
+  const [whenError, setWhenError] = useState<string | null>(null)
+  const [saving, setSaving] = useState<Set<string> | null>(null)
+  const [savedNotice, setSavedNotice] = useState(false)
 
   useEffect(() => {
     const c = createBodyMap(
@@ -82,7 +125,10 @@ export function BodyMap() {
         readoutLeft: roLeftRef.current!,
         readoutRight: roRightRef.current!,
       },
-      (pick) => setDraft((current) => current ?? { pick, intensity: 5, note: '' }),
+      (pick) =>
+        setDraft(
+          (current) => current ?? { pick, intensity: 5, note: '', when: toLocalInput(new Date()) },
+        ),
     )
     controller.current = c
     // oxlint-disable-next-line react-hooks-js/set-state-in-effect -- WebGL support is known only after mounting.
@@ -102,7 +148,7 @@ export function BodyMap() {
   }, [])
 
   useEffect(() => {
-    const marks: Mark[] = reports.map((r, i) => ({
+    const marks: Mark[] = logs.map((r, i) => ({
       id: r.id,
       num: i + 1,
       p: r.position,
@@ -115,7 +161,7 @@ export function BodyMap() {
     if (draft?.pick) {
       marks.push({
         id: 'pending',
-        num: reports.length + 1,
+        num: logs.length + 1,
         p: draft.pick.p,
         n: draft.pick.n,
         intensity: draft.intensity,
@@ -126,7 +172,7 @@ export function BodyMap() {
       })
     }
     controller.current?.setMarks(marks, highlight)
-  }, [reports, draft, highlight])
+  }, [logs, draft, highlight])
 
   const changeMode = (m: BodyMapMode) => {
     setMode(m)
@@ -136,7 +182,7 @@ export function BodyMap() {
     if (mode === '2d' && (name === 'front' || name === 'back')) setFace(name)
     controller.current?.view(name)
   }
-  const locate = (r: PainReport, i: number) => {
+  const locate = (r: PainLog, i: number) => {
     controller.current?.locate({
       id: r.id,
       num: i + 1,
@@ -151,18 +197,33 @@ export function BodyMap() {
     window.setTimeout(() => setHighlight((h) => (h === r.id ? null : h)), 1600)
   }
 
-  const editing = draft?.editingId ? reports.find((r) => r.id === draft.editingId) : undefined
+  const editing = draft?.editingId ? logs.find((r) => r.id === draft.editingId) : undefined
   const dialogRegion = editing?.region ?? draft?.pick?.region ?? ''
-  const dialogNumber = editing ? reports.indexOf(editing) + 1 : reports.length + 1
+  const dialogNumber = editing ? logs.indexOf(editing) + 1 : logs.length + 1
+
+  function closeDraft() {
+    setDraft(null)
+    setWhenError(null)
+  }
 
   function save() {
     if (!draft) return
     const now = new Date().toISOString()
+    const when = new Date(draft.when)
+    if (!draft.when || Number.isNaN(when.getTime())) {
+      setWhenError('Enter a date and time.')
+      return
+    }
+    // One minute of tolerance for the clock moving on while the dialog is open.
+    if (when.getTime() > Date.now() + 60_000) {
+      setWhenError('The date and time cannot be in the future.')
+      return
+    }
     const base = editing
-      ? { ...editing, editedAt: now }
+      ? { ...editing, editedAt: now, recordedAt: when.toISOString() }
       : {
           id: crypto.randomUUID(),
-          recordedAt: now,
+          recordedAt: when.toISOString(),
           region: draft.pick!.region,
           organ: draft.pick!.organ,
           zone: draft.pick!.zone,
@@ -170,16 +231,28 @@ export function BodyMap() {
           normal: draft.pick!.n.map((v) => +v.toFixed(4)) as Vec3,
           view: draft.pick!.view,
         }
-    const { character: _c, note: _n, ...rest } = base as PainReport
+    const { character: _c, note: _n, ...rest } = base as PainLog
     const note = draft.note.trim()
-    const report = validatePainReport({
+    const report = validatePainLog({
       ...rest,
       intensity: draft.intensity,
       ...(draft.character ? { character: draft.character } : {}),
       ...(note ? { note } : {}),
     })
-    if (report) savePainReport(report)
-    setDraft(null)
+    if (report) savePainLog(report)
+    closeDraft()
+  }
+
+  function saveReport() {
+    if (!saving || saving.size === 0) return
+    savePainReport({
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      logs: logs.filter((l) => saving.has(l.id)),
+    })
+    setSaving(null)
+    setSavedNotice(true)
+    window.setTimeout(() => setSavedNotice(false), 4000)
   }
 
   function onDialogKey(e: KeyboardEvent) {
@@ -189,33 +262,12 @@ export function BodyMap() {
     }
   }
 
-  async function copyJson() {
-    const json = JSON.stringify(
-      {
-        schema: 'haoma.painReports.v1',
-        exported: new Date().toISOString(),
-        note: 'Self-reported pain points. Not a diagnosis.',
-        points: reports,
-      },
-      null,
-      2,
-    )
-    try {
-      await navigator.clipboard.writeText(json)
-      setCopyLabel('Copied')
-    } catch {
-      setCopyLabel('Copy failed')
-    }
-    window.setTimeout(() => setCopyLabel('Copy JSON'), 1400)
-  }
-
-  const max = reports.length ? Math.max(...reports.map((r) => r.intensity)) : undefined
-  const avg = reports.length
-    ? (reports.reduce((s, r) => s + r.intensity, 0) / reports.length).toFixed(1)
+  const avg = logs.length
+    ? (logs.reduce((s, r) => s + r.intensity, 0) / logs.length).toFixed(1)
     : undefined
 
   return (
-    <div className="bodymap @container flex flex-col rounded-lg border bg-card">
+    <div className="bodymap @container flex h-full min-h-0 flex-col rounded-lg border bg-card">
       <div className="flex flex-wrap items-center gap-3 border-b px-4 py-3">
         <div>
           <h2 id="bodymap-heading" className="font-medium">
@@ -225,7 +277,13 @@ export function BodyMap() {
             Pain log · self-reported, not a diagnostic tool
           </p>
         </div>
-        <div role="group" aria-label="View mode" className="seg ml-auto">
+        <Button asChild variant="outline" size="sm" className="ml-auto">
+          <Link to="/reports">
+            <FileText aria-hidden="true" />
+            Reports
+          </Link>
+        </Button>
+        <div role="group" aria-label="View mode" className="seg">
           <button
             type="button"
             aria-pressed={mode === '3d'}
@@ -240,11 +298,11 @@ export function BodyMap() {
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 @3xl:grid-cols-[minmax(0,1fr)_19rem]">
+      <div className="grid min-h-0 flex-1 lg:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] @3xl:grid-cols-[minmax(0,1fr)_19rem] @3xl:grid-rows-1">
         <section
           ref={stageRef}
           aria-label="Body model"
-          className="stage relative h-[min(72vh,640px)] min-h-[440px] overflow-hidden select-none"
+          className="stage relative h-[min(72vh,640px)] min-h-[360px] overflow-hidden select-none lg:h-auto"
         >
           <canvas
             ref={canvasRef}
@@ -336,10 +394,9 @@ export function BodyMap() {
             <h3 id="painlog-heading" className="text-sm font-medium tracking-wide uppercase">
               Pain log
             </h3>
-            <dl className="mt-2 grid grid-cols-3 gap-2 text-center">
+            <dl className="mt-2 grid grid-cols-2 gap-2 text-center">
               {[
-                ['Points', String(reports.length)],
-                ['Max /10', max !== undefined ? String(max) : '–'],
+                ['Points', String(logs.length)],
                 ['Avg /10', avg ?? '–'],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-md border px-2 py-1.5">
@@ -349,7 +406,7 @@ export function BodyMap() {
               ))}
             </dl>
           </div>
-          {reports.length === 0 ? (
+          {logs.length === 0 ? (
             <p className="px-4 py-6 text-sm text-muted-foreground">
               <strong className="font-medium text-foreground">No pain points logged.</strong> Click
               anywhere on the body, or in the 2D view choose a region or organ (also with Tab and
@@ -357,7 +414,7 @@ export function BodyMap() {
             </p>
           ) : (
             <ol className="min-h-0 flex-1 overflow-auto" onPointerLeave={() => setHighlight(null)}>
-              {reports.map((r, i) => (
+              {logs.map((r, i) => (
                 <li
                   key={r.id}
                   className={cn(
@@ -400,6 +457,7 @@ export function BodyMap() {
                       </span>
                     </p>
                     {r.note ? <p className="mt-1 text-sm break-words">{r.note}</p> : null}
+                    <RelatedLinks log={r} className="mt-1 text-xs" />
                   </div>
                   <div className="flex flex-col gap-1">
                     <Button
@@ -420,6 +478,7 @@ export function BodyMap() {
                           intensity: r.intensity,
                           character: r.character,
                           note: r.note ?? '',
+                          when: toLocalInput(new Date(r.recordedAt)),
                         })
                       }
                     >
@@ -429,7 +488,7 @@ export function BodyMap() {
                       variant="ghost"
                       size="icon-sm"
                       aria-label={`Delete point ${i + 1}`}
-                      onClick={() => deletePainReport(r.id)}
+                      onClick={() => deletePainLog(r.id)}
                     >
                       <Trash2 aria-hidden="true" />
                     </Button>
@@ -443,16 +502,17 @@ export function BodyMap() {
               variant="outline"
               size="sm"
               className="flex-1"
-              disabled={!reports.length}
-              onClick={copyJson}
+              disabled={!logs.length}
+              onClick={() => setSaving(new Set(logs.map((l) => l.id)))}
             >
-              {copyLabel}
+              <Save aria-hidden="true" />
+              Save report
             </Button>
             <Button
               variant={confirmClear ? 'destructive' : 'outline'}
               size="sm"
               className="flex-1"
-              disabled={!reports.length}
+              disabled={!logs.length}
               onClick={() => {
                 if (!confirmClear) {
                   setConfirmClear(true)
@@ -460,12 +520,20 @@ export function BodyMap() {
                   return
                 }
                 setConfirmClear(false)
-                clearPainReports()
+                clearPainLogs()
               }}
             >
               {confirmClear ? 'Confirm clear' : 'Clear all'}
             </Button>
           </div>
+          {savedNotice ? (
+            <p role="status" className="border-t px-4 py-2 text-sm">
+              Report saved.{' '}
+              <Link to="/reports" className="underline underline-offset-2">
+                Open reports
+              </Link>
+            </p>
+          ) : null}
         </aside>
       </div>
 
@@ -475,7 +543,7 @@ export function BodyMap() {
           : 'Click a region or organ, or move to it with Tab and press Enter · Drag to pan · Scroll to zoom'}
       </p>
 
-      <Dialog open={draft !== null} onOpenChange={(open) => (open ? null : setDraft(null))}>
+      <Dialog open={draft !== null} onOpenChange={(open) => (open ? null : closeDraft())}>
         <DialogContent onKeyDown={onDialogKey}>
           <form
             className="space-y-4"
@@ -490,6 +558,33 @@ export function BodyMap() {
               </DialogDescription>
               <DialogTitle>{dialogRegion}</DialogTitle>
             </DialogHeader>
+            {(editing ?? draft?.pick) ? (
+              <RelatedLinks
+                log={editing ?? { region: dialogRegion, organ: draft?.pick?.organ ?? null }}
+                className="text-sm"
+              />
+            ) : null}
+
+            <div className="grid gap-1.5">
+              <Label htmlFor="pain-when">Date and time of the pain</Label>
+              <Input
+                id="pain-when"
+                type="datetime-local"
+                value={draft?.when ?? ''}
+                onChange={(e) => {
+                  if (!draft) return
+                  setWhenError(null)
+                  setDraft({ ...draft, when: e.target.value })
+                }}
+                aria-invalid={whenError ? true : undefined}
+                aria-describedby={whenError ? 'pain-when-error' : undefined}
+              />
+              {whenError ? (
+                <p id="pain-when-error" className="text-sm font-medium text-destructive">
+                  {whenError}
+                </p>
+              ) : null}
+            </div>
 
             <fieldset className="space-y-2">
               <legend className="flex w-full justify-between text-sm font-medium">
@@ -565,17 +660,69 @@ export function BodyMap() {
                   variant="ghost"
                   className="sm:mr-auto"
                   onClick={() => {
-                    deletePainReport(editing.id)
-                    setDraft(null)
+                    deletePainLog(editing.id)
+                    closeDraft()
                   }}
                 >
                   Delete
                 </Button>
               ) : null}
-              <Button type="button" variant="outline" onClick={() => setDraft(null)}>
+              <Button type="button" variant="outline" onClick={closeDraft}>
                 Cancel
               </Button>
               <Button type="submit">Save</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={saving !== null} onOpenChange={(open) => (open ? null : setSaving(null))}>
+        <DialogContent>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault()
+              saveReport()
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>Save report</DialogTitle>
+              <DialogDescription>
+                Choose the pain logs to include. The report is kept on the Reports page, where it
+                can be downloaded as a JSON file. The pain log stays as it is.
+              </DialogDescription>
+            </DialogHeader>
+            <fieldset className="max-h-72 space-y-1 overflow-auto">
+              <legend className="sr-only">Pain logs to include</legend>
+              {logs.map((l, i) => (
+                <div key={l.id} className="flex min-h-9 items-center gap-2">
+                  <Checkbox
+                    id={`include-${l.id}`}
+                    checked={saving?.has(l.id) ?? false}
+                    onCheckedChange={(checked) =>
+                      setSaving((current) => {
+                        const next = new Set(current)
+                        if (checked === true) next.add(l.id)
+                        else next.delete(l.id)
+                        return next
+                      })
+                    }
+                  />
+                  <Label htmlFor={`include-${l.id}`} className="font-normal">
+                    <span className="num">{pad(i + 1)}</span> {l.region} ·{' '}
+                    <span className="num">{l.intensity}/10</span> ·{' '}
+                    <span className="num">{formatDateTime(l.recordedAt)}</span>
+                  </Label>
+                </div>
+              ))}
+            </fieldset>
+            <DialogFooter className="gap-2">
+              <Button type="button" variant="outline" onClick={() => setSaving(null)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!saving || saving.size === 0}>
+                Save report ({saving?.size ?? 0})
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

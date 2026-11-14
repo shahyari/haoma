@@ -141,3 +141,29 @@ describe('Avatar card', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Home' })).toBeTruthy()
   })
 })
+
+describe('Owner layout changes of 2026-11-14', () => {
+  it('drops the banner column when there are no banners, so the body map fills the width', async () => {
+    renderApp('/', [{ ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' }])
+    await screen.findByRole('region', { name: 'Body map' })
+    expect(screen.queryByRole('region', { name: 'Health status' })).toBeNull()
+  })
+
+  it('opens Reports from the avatar menu; Settings, About and Reports have a Back button', () => {
+    renderApp('/about')
+    expect(screen.getByRole('heading', { level: 1, name: 'About' })).toBeTruthy()
+    fireEvent.click(openProfile().getByRole('link', { name: 'Reports' }))
+    expect(screen.getByRole('heading', { level: 1, name: 'Reports' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    expect(screen.getByRole('heading', { level: 1, name: 'About' })).toBeTruthy()
+    // Opened directly, Back goes Home.
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    expect(screen.getByRole('heading', { level: 1, name: 'Home' })).toBeTruthy()
+  })
+
+  it('Settings has a Back button', () => {
+    renderApp('/settings')
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    expect(screen.getByRole('heading', { level: 1, name: 'Home' })).toBeTruthy()
+  })
+})

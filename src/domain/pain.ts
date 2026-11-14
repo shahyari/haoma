@@ -1,5 +1,5 @@
 /**
- * Self-reported pain points from the body map (owner prototype "body-map.html", 2026-11-14).
+ * Self-reported pain logs (points on the body map) and saved pain reports (owner prototype "body-map.html", 2026-11-14).
  *
  * Self-reported data only: the app stores and shows these reports and never
  * interprets them. No rule, threshold, or status uses them.
@@ -24,7 +24,7 @@ export const PAIN_NOTE_MAX_LENGTH = 240
 
 export type Vec3 = [number, number, number]
 
-export interface PainReport {
+export interface PainLog {
   id: string
   /** ISO 8601 date-time when the point was logged. */
   recordedAt: string
@@ -52,7 +52,7 @@ const isNullableString = (v: unknown) => v === null || typeof v === 'string'
 const isDateTime = (v: unknown) => typeof v === 'string' && !Number.isNaN(Date.parse(v))
 
 /** Structural validation of a stored pain report; returns undefined when invalid. */
-export function validatePainReport(input: unknown): PainReport | undefined {
+export function validatePainLog(input: unknown): PainLog | undefined {
   if (!isRecord(input)) return undefined
   const r = input
   const ok =
@@ -88,4 +88,41 @@ export function validatePainReport(input: unknown): PainReport | undefined {
     ...(r.character ? { character: r.character as PainCharacter } : {}),
     ...(r.note ? { note: r.note as string } : {}),
   }
+}
+
+/** A saved report: a snapshot of one or more pain logs (owner decision 2026-11-14). */
+export interface PainReport {
+  id: string
+  /** ISO 8601 date-time when the report was saved. */
+  createdAt: string
+  logs: PainLog[]
+}
+
+export function validatePainReport(input: unknown): PainReport | undefined {
+  if (!isRecord(input)) return undefined
+  if (typeof input.id !== 'string' || input.id === '' || !isDateTime(input.createdAt))
+    return undefined
+  if (!Array.isArray(input.logs) || input.logs.length === 0) return undefined
+  const logs: PainLog[] = []
+  for (const item of input.logs) {
+    const log = validatePainLog(item)
+    if (!log) return undefined
+    logs.push(log)
+  }
+  return { id: input.id, createdAt: input.createdAt as string, logs }
+}
+
+/** The downloadable JSON of a report. Self-reported data with its disclaimer. */
+export function painReportJson(report: PainReport): string {
+  return JSON.stringify(
+    {
+      schema: 'haoma.painReport.v1',
+      id: report.id,
+      createdAt: report.createdAt,
+      note: 'Self-reported pain logs from the haoma body map. Not a diagnosis. Hackathon prototype; not a medical device.',
+      logs: report.logs,
+    },
+    null,
+    2,
+  )
 }

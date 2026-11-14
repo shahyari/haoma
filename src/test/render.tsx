@@ -7,6 +7,7 @@ import type { HealthEntry } from '@/domain/indicators'
 import { HomePage } from '@/pages/HomePage'
 import { AboutPage } from '@/pages/AboutPage'
 import { IndicatorPage } from '@/pages/IndicatorPage'
+import { ReportsPage } from '@/pages/ReportsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { SettingsProvider } from '@/settings/SettingsProvider'
 import { createAppStore, createDefaultData } from '@/storage/storage'
@@ -23,6 +24,7 @@ export function renderApp(path = '/', entries: HealthEntry[] = []) {
             <Route element={<AppShell />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/indicators/:indicatorId" element={<IndicatorPage />} />
+              <Route path="/reports" element={<ReportsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/about" element={<AboutPage />} />
             </Route>

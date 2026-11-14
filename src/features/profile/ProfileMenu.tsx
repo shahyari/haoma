@@ -1,4 +1,4 @@
-import { Info, Settings } from 'lucide-react'
+import { FileText, Info, Settings } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 
@@ -88,6 +88,10 @@ export function ProfileMenu() {
             ) : null}
           </div>
           <nav aria-label="Profile menu" className="border-t pt-1">
+            <Link to="/reports" className={linkClass} onClick={() => setOpen(false)}>
+              <FileText aria-hidden="true" className="size-4" />
+              Reports
+            </Link>
             <Link to="/settings" className={linkClass} onClick={() => setOpen(false)}>
               <Settings aria-hidden="true" className="size-4" />
               Settings

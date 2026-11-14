@@ -7,7 +7,7 @@
  */
 import type { HealthEntry } from '@/domain/indicators'
 import { DEFAULT_MISSION_PHASE, MISSION_PHASES, type MissionPhase } from '@/domain/mission'
-import { validatePainReport, type PainReport } from '@/domain/pain'
+import { validatePainLog, validatePainReport, type PainLog, type PainReport } from '@/domain/pain'
 import { isRecord, validateEntry } from '@/domain/validation'
 
 export const SCHEMA_VERSION = 1
@@ -18,7 +18,9 @@ export interface AppData {
   missionPhase: MissionPhase
   entries: HealthEntry[]
   /** Self-reported pain points from the body map. Absent in data saved before 2026-11-14 (read as empty). */
-  painReports: PainReport[]
+  painLogs: PainLog[]
+  /** Saved pain reports (snapshots of pain logs). Absent in older data (read as empty). */
+  reports: PainReport[]
 }
 
 export type LoadStatus =
@@ -48,7 +50,8 @@ export function createDefaultData(): AppData {
     schemaVersion: SCHEMA_VERSION,
     missionPhase: DEFAULT_MISSION_PHASE,
     entries: [],
-    painReports: [],
+    painLogs: [],
+    reports: [],
   }
 }
 
@@ -71,20 +74,28 @@ function parseAppData(raw: string): AppData | undefined {
     if (!result.ok) return undefined
     entries.push(result.value)
   }
-  const painReports: PainReport[] = []
-  if (parsed.painReports !== undefined) {
-    if (!Array.isArray(parsed.painReports)) return undefined
-    for (const item of parsed.painReports) {
-      const report = validatePainReport(item)
-      if (!report) return undefined
-      painReports.push(report)
+  // Optional lists, absent in older data. Pain logs were stored as `painReports` before
+  // saved reports existed (2026-11-14); that field is still read.
+  const list = <T>(raw: unknown, validate: (item: unknown) => T | undefined): T[] | undefined => {
+    if (raw === undefined) return []
+    if (!Array.isArray(raw)) return undefined
+    const out: T[] = []
+    for (const item of raw) {
+      const value = validate(item)
+      if (!value) return undefined
+      out.push(value)
     }
+    return out
   }
+  const painLogs = list(parsed.painLogs ?? parsed.painReports, validatePainLog)
+  const reports = list(parsed.reports, validatePainReport)
+  if (!painLogs || !reports) return undefined
   return {
     schemaVersion: SCHEMA_VERSION,
     missionPhase: phase as MissionPhase,
     entries,
-    painReports,
+    painLogs,
+    reports,
   }
 }
 

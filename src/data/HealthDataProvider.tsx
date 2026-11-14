@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 
 import type { HealthEntry } from '@/domain/indicators'
 import type { MissionPhase } from '@/domain/mission'
-import type { PainReport } from '@/domain/pain'
+import type { PainLog, PainReport } from '@/domain/pain'
 import {
   createAppStore,
   createDefaultData,
@@ -23,9 +23,11 @@ interface HealthDataValue {
   replaceEntries: (entries: HealthEntry[]) => void
   setMissionPhase: (phase: MissionPhase) => void
   /** Adds the report, or replaces the stored one with the same id. */
+  savePainLog: (report: PainLog) => void
+  deletePainLog: (id: string) => void
+  clearPainLogs: () => void
   savePainReport: (report: PainReport) => void
   deletePainReport: (id: string) => void
-  clearPainReports: () => void
   clearAll: () => void
 }
 
@@ -60,16 +62,19 @@ export function HealthDataProvider({ children, store }: { children: ReactNode; s
         })),
       replaceEntries: (entries) => change((d) => ({ ...d, entries })),
       setMissionPhase: (missionPhase) => change((d) => ({ ...d, missionPhase })),
-      savePainReport: (report) =>
+      savePainLog: (report) =>
         change((d) => ({
           ...d,
-          painReports: d.painReports.some((r) => r.id === report.id)
-            ? d.painReports.map((r) => (r.id === report.id ? report : r))
-            : [...d.painReports, report],
+          painLogs: d.painLogs.some((r) => r.id === report.id)
+            ? d.painLogs.map((r) => (r.id === report.id ? report : r))
+            : [...d.painLogs, report],
         })),
+      deletePainLog: (id) =>
+        change((d) => ({ ...d, painLogs: d.painLogs.filter((r) => r.id !== id) })),
+      clearPainLogs: () => change((d) => ({ ...d, painLogs: [] })),
+      savePainReport: (report) => change((d) => ({ ...d, reports: [...d.reports, report] })),
       deletePainReport: (id) =>
-        change((d) => ({ ...d, painReports: d.painReports.filter((r) => r.id !== id) })),
-      clearPainReports: () => change((d) => ({ ...d, painReports: [] })),
+        change((d) => ({ ...d, reports: d.reports.filter((r) => r.id !== id) })),
       clearAll: () => {
         appStore.clear()
         setData(createDefaultData())

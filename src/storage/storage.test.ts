@@ -17,7 +17,8 @@ const data: AppData = {
   schemaVersion: 1,
   missionPhase: 'postLanding',
   entries: [entry],
-  painReports: [],
+  painLogs: [],
+  reports: [],
 }
 
 /** Minimal in-memory Storage, so tests don't depend on the environment's localStorage. */
@@ -123,17 +124,37 @@ describe('pain reports', () => {
 
   it('loads data saved before pain reports existed, with an empty list', () => {
     const storage = fakeStorage()
-    const { painReports: _omit, ...legacy } = data
+    const { painLogs: _omit, ...legacy } = data
     storage.setItem(STORAGE_KEY, JSON.stringify(legacy))
     const result = createAppStore(storage).load()
     expect(result.status).toBe('ok')
-    expect(result.data.painReports).toEqual([])
+    expect(result.data.painLogs).toEqual([])
+  })
+
+  it('reads pain logs stored under the earlier field name "painReports"', () => {
+    const storage = fakeStorage()
+    const { painLogs: _l, reports: _r, ...legacy } = data
+    storage.setItem(STORAGE_KEY, JSON.stringify({ ...legacy, painReports: [report] }))
+    const result = createAppStore(storage).load()
+    expect(result.status).toBe('ok')
+    expect(result.data.painLogs).toEqual([report])
+    expect(result.data.reports).toEqual([])
+  })
+
+  it('round-trips a saved report and rejects an empty one', () => {
+    const saved = { id: 'r1', createdAt: '2026-11-14T09:00:00.000Z', logs: [report] }
+    const store = createAppStore(fakeStorage())
+    store.save({ ...data, reports: [saved as AppData['reports'][number]] })
+    expect(store.load().data.reports).toEqual([saved])
+    const storage = fakeStorage()
+    storage.setItem(STORAGE_KEY, JSON.stringify({ ...data, reports: [{ ...saved, logs: [] }] }))
+    expect(createAppStore(storage).load().status).toBe('corrupt')
   })
 
   it('round-trips a valid report', () => {
     const store = createAppStore(fakeStorage())
-    store.save({ ...data, painReports: [report as AppData['painReports'][number]] })
-    expect(store.load().data.painReports).toEqual([report])
+    store.save({ ...data, painLogs: [report as AppData['painLogs'][number]] })
+    expect(store.load().data.painLogs).toEqual([report])
   })
 
   it.each([
@@ -145,10 +166,7 @@ describe('pain reports', () => {
     ['bad position', { position: [0, 1] }],
   ])('treats a report with %s as corrupt', (_label, change) => {
     const storage = fakeStorage()
-    storage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ ...data, painReports: [{ ...report, ...change }] }),
-    )
+    storage.setItem(STORAGE_KEY, JSON.stringify({ ...data, painLogs: [{ ...report, ...change }] }))
     expect(createAppStore(storage).load().status).toBe('corrupt')
   })
 })

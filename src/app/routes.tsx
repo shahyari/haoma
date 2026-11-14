@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { AboutPage } from '@/pages/AboutPage'
 import { HomePage } from '@/pages/HomePage'
 import { IndicatorPage } from '@/pages/IndicatorPage'
+import { ReportsPage } from '@/pages/ReportsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 
 export interface AppRoute {
@@ -23,6 +24,7 @@ export const APP_ROUTES: AppRoute[] = [
     element: <IndicatorPage />,
     hidden: true,
   },
+  { path: '/reports', label: 'Reports', element: <ReportsPage /> },
   { path: '/settings', label: 'Settings', element: <SettingsPage /> },
   { path: '/about', label: 'About', element: <AboutPage /> },
 ]

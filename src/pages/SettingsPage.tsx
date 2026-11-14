@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { BackLink } from '@/components/BackLink'
 import { StatusBadge } from '@/components/StatusBadge'
 import { useHealthData } from '@/data/HealthDataProvider'
 import { createDemoEntries } from '@/demo/demo'
@@ -64,7 +65,8 @@ export function SettingsPage() {
 
   return (
     // The fixed width used before the full-width layout (owner, 2026-11-14).
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="mx-auto w-full max-w-5xl space-y-4">
+      <BackLink />
       <div className="max-w-2xl space-y-6">
         <h1 className="text-2xl font-semibold">Settings</h1>
         <h2 className="text-lg font-medium">Display</h2>
