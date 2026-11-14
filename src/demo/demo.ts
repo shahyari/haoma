@@ -8,8 +8,12 @@
 import { addDays } from '@/domain/dates'
 import type { HealthEntry } from '@/domain/indicators'
 
+/** Provisional fictional profile (owner decision 2026-11-14). Not a real person or mission. */
 export const DEMO_PROFILE = {
-  name: 'Demo astronaut',
+  name: 'Alex Morgan',
+  role: 'Flight Engineer',
+  mission: 'Aster-1 Lunar Transit Mission',
+  missionDay: 42,
   label: 'Fictional profile',
 } as const
 
@@ -25,7 +29,10 @@ function mulberry32(seed: number) {
   }
 }
 
-/** One simulated entry per indicator per day for the 14 days before `now`, plus one PHQ-2 on the first day. */
+/** Day offset of the simulated PHQ-2, so that it is still current (AU-5) when the demo is loaded. */
+const DEMO_PHQ2_OFFSET = 10
+
+/** One simulated entry per indicator per day for the 14 days before `now`, plus one PHQ-2. */
 export function createDemoEntries(now: Date): HealthEntry[] {
   const random = mulberry32(2026)
   const between = (min: number, max: number, decimals = 0) => {
@@ -49,7 +56,7 @@ export function createDemoEntries(now: Date): HealthEntry[] {
         systolicMmHg: between(108, 118),
         diastolicMmHg: between(68, 76),
       },
-      { ...base('hr'), indicator: 'heartRate', bpm: between(62, 70) },
+      { ...base('hr'), indicator: 'heartRate', bpm: between(62, 70), activity: 'rest' },
       {
         ...base('glucose'),
         indicator: 'bloodGlucose',
@@ -67,7 +74,7 @@ export function createDemoEntries(now: Date): HealthEntry[] {
       { ...base('sleep'), indicator: 'sleep', hours: between(6.5, 7.9, 1), source: 'selfReport' },
       { ...base('mood'), indicator: 'mood', kind: 'dailyRating', rating: between(3, 5) },
     )
-    if (offset === DEMO_DAYS)
+    if (offset === DEMO_PHQ2_OFFSET)
       entries.push({ ...base('phq2'), indicator: 'mood', kind: 'phq2', score: 0 })
   }
   return entries

@@ -23,7 +23,16 @@ export const STATUS_ICONS: Record<DisplayStatus, LucideIcon> = {
  * Status is always conveyed by icon shape and text, never by colour alone.
  * "Not evaluated" and "No measurement" are neutral: they get no status colour.
  */
-export function StatusBadge({ status, className }: { status: DisplayStatus; className?: string }) {
+export function StatusBadge({
+  status,
+  label,
+  className,
+}: {
+  status: DisplayStatus
+  /** Replaces the default status name (owner-set wording such as "Below screening cutoff"). */
+  label?: string
+  className?: string
+}) {
   const Icon = STATUS_ICONS[status]
   const tiered = status === 'normal' || status === 'attention' || status === 'escalate'
   return (
@@ -36,7 +45,7 @@ export function StatusBadge({ status, className }: { status: DisplayStatus; clas
       )}
     >
       <Icon aria-hidden="true" className={cn('size-4', tiered && 'text-(--status-color)')} />
-      {DISPLAY_STATUS_LABELS[status]}
+      {label ?? DISPLAY_STATUS_LABELS[status]}
     </span>
   )
 }

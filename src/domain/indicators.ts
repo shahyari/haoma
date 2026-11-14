@@ -40,6 +40,10 @@ export type GlucoseDevice = (typeof GLUCOSE_DEVICES)[number]
 export const TEMPERATURE_METHODS = ['oral', 'forehead'] as const
 export type TemperatureMethod = (typeof TEMPERATURE_METHODS)[number]
 
+/** Whether a heart-rate reading was taken at rest (owner decision AU-3, 2026-11-14). */
+export const HEART_RATE_ACTIVITIES = ['rest', 'afterActivity'] as const
+export type HeartRateActivity = (typeof HEART_RATE_ACTIVITIES)[number]
+
 export const SLEEP_SOURCES = ['selfReport', 'actigraphy'] as const
 export type SleepSource = (typeof SLEEP_SOURCES)[number]
 
@@ -74,10 +78,12 @@ export interface BloodPressureEntry extends EntryBase {
   diastolicMmHg: number
 }
 
-/** Resting heart rate. */
+/** Heart rate. The rest-based rules (RULE-06, RULE-07, RULE-29) use resting readings only. */
 export interface HeartRateEntry extends EntryBase {
   indicator: 'heartRate'
   bpm: number
+  /** Required for new entries; absent on entries stored before 2026-11-14 (treated as unknown). */
+  activity?: HeartRateActivity
 }
 
 export interface BloodGlucoseEntry extends EntryBase {

@@ -32,14 +32,15 @@ describe('HomePage', () => {
 
   it('keeps "Within reference", "Not evaluated" and "No measurement" distinct', () => {
     renderApp('/', [
-      { ...daysAgo(0), indicator: 'heartRate', bpm: 70 },
+      { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
       { ...daysAgo(0), indicator: 'bloodGlucose', mgDl: 140, context: 'nonFasting', device: 'cgm' },
       { ...daysAgo(0), indicator: 'sleep', hours: 5, source: 'selfReport' },
     ])
     expect(row('Heart rate').textContent).toContain('Within reference')
     expect(row('Blood glucose').textContent).toContain('Not evaluated')
     expect(row('Blood glucose').textContent).toContain('trend only')
-    expect(row('Sleep').textContent).toContain('Not evaluated')
+    expect(row('Sleep').textContent).toContain('Below general sleep recommendation')
+    expect(row('Sleep').textContent).not.toContain('Escalate')
     expect(row('Blood pressure').textContent).toContain('No measurement')
   })
 
@@ -59,7 +60,7 @@ describe('HomePage', () => {
 
   it('counts completed check-ins and indicators to review separately, with no overall score', () => {
     renderApp('/', [
-      { ...daysAgo(0), indicator: 'heartRate', bpm: 70 },
+      { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
       { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
       { ...daysAgo(1), indicator: 'sleep', hours: 6.5, source: 'selfReport' },
     ])
@@ -78,6 +79,12 @@ describe('HomePage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Load simulated demo history' }))
     expect(screen.getByText(/entries marked “Simulated”\s+are invented/)).toBeTruthy()
     expect(row('Heart rate').textContent).toContain('Simulated')
+    const profile = within(screen.getByRole('region', { name: 'Profile' }))
+    expect(profile.getByText('Alex Morgan')).toBeTruthy()
+    expect(profile.getByText('Fictional profile')).toBeTruthy()
+    expect(profile.getByText('Aster-1 Lunar Transit Mission')).toBeTruthy()
+    expect(profile.getByText(/All health measurements in the demo are simulated/)).toBeTruthy()
+    expect(screen.getByText(/PHQ-2 screening/).textContent).toContain('Below screening cutoff')
     const { entries } = store.load().data
     expect(entries.length).toBe(14 * 6 + 1)
     expect(entries.every((e) => e.origin === 'simulated')).toBe(true)

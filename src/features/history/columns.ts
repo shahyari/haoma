@@ -1,6 +1,7 @@
 import {
   GLUCOSE_CONTEXT_LABELS,
   GLUCOSE_DEVICE_LABELS,
+  HEART_RATE_ACTIVITY_LABELS,
   SLEEP_SOURCE_LABELS,
   TEMPERATURE_METHOD_LABELS,
 } from '@/domain/format'
@@ -82,11 +83,15 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
     {
       id: 'heartRate',
       unit: 'bpm',
-      series: [
-        { key: 'bpm', label: 'Resting heart rate', value: pick((e: E<'heartRate'>) => e.bpm) },
-      ],
+      series: [{ key: 'bpm', label: 'Heart rate', value: pick((e: E<'heartRate'>) => e.bpm) }],
       columns: [
         { header: 'Heart rate (bpm)', numeric: true, cell: pick((e: E<'heartRate'>) => e.bpm) },
+        {
+          header: 'Taken',
+          cell: pick((e: E<'heartRate'>) =>
+            e.activity ? HEART_RATE_ACTIVITY_LABELS[e.activity] : 'Not recorded',
+          ),
+        },
         symptoms,
         provenance,
       ],
@@ -182,7 +187,7 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
       id: 'phq2',
       title: 'PHQ-2 depression screening',
       description:
-        'Two questions about the past 2 weeks, taken every 14 days. Total score 0–6. The PHQ-2 is a screener, not a diagnosis, and it is not a daily mood score.',
+        'Two questions about the last 2 weeks (the questionnaire’s recall period). Scheduled every 14 days (team decision). Total score 0–6. A screener validated in primary care and obstetrics-gynecology patients, not in astronauts; not a diagnosis and not a daily mood score.',
       unit: 'score',
       yDomain: [0, 6],
       filter: (e) => e.indicator === 'mood' && e.kind === 'phq2',

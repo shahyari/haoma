@@ -34,6 +34,25 @@ TODO (owner): how the app learns the astronaut's condition for the "suggested" o
 |---|---|---|---|
 | TODO: component | TODO: default/focus/error/... | TODO: behavior | TODO: label/keyboard |
 
+## Body figure (F-04): interaction proposal (Claude, 2026-11-14) — awaiting owner approval
+
+Owner direction (2026-11-14): an original, lightweight 2D SVG silhouette as accessible navigation; regions chest (blood pressure, heart rate), abdomen (glucose), head (sleep, mood), and whole body (temperature); several indicators may share a region; no colour may suggest organ damage or a diagnosis; keyboard access and a text equivalent.
+
+Proposal:
+
+1. **Place:** replaces the placeholder in the middle column of Home, above the status banners. One front view, about 240 px tall on phones.
+2. **Regions:** four focusable regions with a hit area of at least 44 × 44 px: Head, Chest, Abdomen, and **Whole body** as a labeled button directly under the figure. An outline around the whole silhouette would be hard to see and to tap.
+3. **Activation:** click, tap, Enter, or Space opens a small popover that lists the region's indicators. Each entry shows the latest value, its status badge, and a link to its history page. Escape closes the popover and returns focus to the region. Using the same popover for every region, including the single-indicator ones, keeps the interaction predictable.
+4. **Status on the figure:** regions stay neutral, with no organ shapes and no fills. A region with items to review gets a small badge with the status icon and a count, for example "1 to review". The figure caption says: "The figure is for navigation. Badges show the status of the linked measurements, not the condition of a body part."
+5. **Text equivalent:** the SVG is a `role="group"` named "Body figure: navigation to indicators". Each region is a button whose name lists its indicators and its count to review, for example "Chest: blood pressure, heart rate, 1 to review". The Indicators card on Home remains the full text navigation to all six indicators.
+6. **Keyboard order:** Head, Chest, Abdomen, Whole body.
+
+Questions for the owner:
+
+- (a) Is the popover for every region acceptable, or should single-indicator regions open the history page directly?
+- (b) Badge only (recommended), or a status-tinted outline on the region?
+- (c) Whole body as a separate button (recommended), or an outline around the silhouette?
+
 ## Health communication
 
 - Never rely on color alone for attention states. This also applies to the optional color coding (`challenge.md` O-05).

@@ -15,9 +15,11 @@ import type {
   HeartRateEntry,
   IndicatorId,
   MoodEntry,
+  MoodPhq2Entry,
   SleepEntry,
 } from '@/domain/indicators'
-import { INDICATOR_IDS } from '@/domain/indicators'
+import { INDICATOR_IDS, PHQ2_CADENCE_DAYS } from '@/domain/indicators'
+import { calendarDaysBetween } from '@/domain/dates'
 import type { MissionPhase } from '@/domain/mission'
 import { TEAM_PARAMETERS, type TeamParameters } from '@/domain/parameters'
 import {
@@ -35,6 +37,8 @@ import type { Finding, IndicatorAssessment, RuleDefinition, Status } from './typ
 export interface EvaluationContext {
   missionPhase: MissionPhase
   parameters?: TeamParameters
+  /** Reference time for time-limited results (PHQ-2 validity). Defaults to the current time. */
+  now?: Date
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -62,8 +66,8 @@ function median(values: number[]): number {
 
 /**
  * P-1 / P-2: rolling median of the last N valid earlier readings; undefined
- * until the minimum is met. Callers pass only same-method readings.
- * TODO: P-1 also says "at a similar time of day", which is not defined yet and is not applied.
+ * until the minimum is met. Callers pass only comparable readings (same
+ * temperature method; resting heart rate). No time-of-day matching (AU-7).
  */
 export function baseline(earlier: number[], p: TeamParameters): number | undefined {
   if (earlier.length < p.baselineMinReadings) return undefined
@@ -76,7 +80,8 @@ function assess(indicator: IndicatorId, findings: Finding[], note?: string): Ind
   const worst = sorted[0].rule.status
   // A Normal finding is dropped when anything else applies.
   const shown = worst === 'normal' ? sorted : sorted.filter((f) => f.rule.status !== 'normal')
-  return { indicator, status: worst, findings: shown }
+  const label = sorted[0].rule.statusLabel
+  return { indicator, status: worst, findings: shown, ...(label ? { label } : {}) }
 }
 
 function bloodPressure(entries: BloodPressureEntry[], ctx: EvaluationContext): IndicatorAssessment {
@@ -89,8 +94,18 @@ function bloodPressure(entries: BloodPressureEntry[], ctx: EvaluationContext): I
   else if (sys >= 140 || dia >= 90) findings.push(finding(RULES['RULE-03']))
   else if (sys >= 120 || dia >= 80) findings.push(finding(RULES['RULE-02']))
 
-  if (low) findings.push(finding(hasAny(e, LOW_BP_SYMPTOMS) ? RULES['RULE-25'] : RULES['RULE-05']))
-  else if (ctx.missionPhase === 'postLanding' && hasAny(e, POST_LANDING_SYMPTOMS)) {
+  // AU-4 (owner, 2026-11-14): "below 90/60" = systolic below 90 OR diastolic below 60.
+  if (low) {
+    const which = [
+      sys < 90 ? `systolic ${sys} is below 90` : '',
+      dia < 60 ? `diastolic ${dia} is below 60` : '',
+    ]
+      .filter(Boolean)
+      .join(' and ')
+    const reason = `The ${which}.`
+    if (hasAny(e, LOW_BP_SYMPTOMS)) findings.push(finding(RULES['RULE-25'], undefined, reason))
+    else findings.push(finding(RULES['RULE-05'], undefined, `${reason} No symptoms reported.`))
+  } else if (ctx.missionPhase === 'postLanding' && hasAny(e, POST_LANDING_SYMPTOMS)) {
     findings.push(finding(RULES['RULE-26']))
   }
 
@@ -103,19 +118,30 @@ function heartRate(entries: HeartRateEntry[], ctx: EvaluationContext): Indicator
   const e = entries[entries.length - 1]
   const findings: Finding[] = []
   const outside = e.bpm < 60 || e.bpm > 100
+  const atRest = e.activity === 'rest'
 
-  // RULE-08 also covers "a rate regularly above 100 at rest"; "regularly" has
-  // no approved definition, so that clause is not evaluated.
+  // RULE-08 also covers "a rate regularly above 100 at rest"; the owner rejected a
+  // frequency threshold (AU-3), so that clause is not evaluated; the history view
+  // describes repeated readings above 100 instead. The symptom and rhythm clauses are
+  // kept for every reading, as before the rest state was recorded (open question for the owner).
   if ((outside && hasAny(e, HEART_RATE_SYMPTOMS)) || hasAny(e, ['irregularRhythm'])) {
     findings.push(finding(RULES['RULE-08']))
-  } else if (outside) {
+  } else if (outside && atRest) {
     findings.push(finding(RULES['RULE-07']))
   }
 
-  const usual = baseline(
-    entries.slice(0, -1).map((x) => x.bpm),
-    p,
-  )
+  // RULE-06, RULE-07 and RULE-29 are worded for resting readings.
+  if (!atRest) {
+    return assess(
+      'heartRate',
+      findings,
+      e.activity === 'afterActivity'
+        ? 'Taken after activity. The heart-rate rules apply to resting readings, so it is not evaluated.'
+        : 'It was not recorded whether this reading was taken at rest, so it is not evaluated.',
+    )
+  }
+
+  const usual = baseline(restingEarlier(entries), p)
   if (usual !== undefined && Math.abs(e.bpm - usual) >= p.heartRateShiftBpm) {
     const diff = Math.round(Math.abs(e.bpm - usual))
     const direction = e.bpm > usual ? 'above' : 'below'
@@ -129,6 +155,30 @@ function heartRate(entries: HeartRateEntry[], ctx: EvaluationContext): Indicator
 
   if (findings.length === 0) findings.push(finding(RULES['RULE-06']))
   return assess('heartRate', findings)
+}
+
+function restingEarlier(entries: HeartRateEntry[]): number[] {
+  return entries
+    .slice(0, -1)
+    .filter((x) => x.activity === 'rest')
+    .map((x) => x.bpm)
+}
+
+/** Days covered by the descriptive count of resting readings above 100 bpm (display window, not a threshold). */
+export const ELEVATED_HR_WINDOW_DAYS = 7
+
+/**
+ * AU-3 (owner, 2026-11-14): repeated resting readings above 100 bpm (the RULE-07
+ * reference) are described, never classified. No frequency threshold applies.
+ */
+export function restingAbove100(
+  allEntries: HealthEntry[],
+  now: Date,
+): { above: number; resting: number } {
+  const resting = entriesOf(allEntries, 'heartRate').filter(
+    (x) => x.activity === 'rest' && time(x) > now.getTime() - ELEVATED_HR_WINDOW_DAYS * DAY_MS,
+  )
+  return { above: resting.filter((x) => x.bpm > 100).length, resting: resting.length }
 }
 
 function bloodGlucose(entries: BloodGlucoseEntry[]): IndicatorAssessment {
@@ -179,14 +229,19 @@ function bodyTemperature(
   )
   const aboveBaseline = usual !== undefined && e.celsius > usual + p.temperatureShiftCelsius
   const findings: Finding[] = []
+  // AU-2 (pending): the 37.5 °C level is stated for oral readings; say so for forehead readings.
+  const siteNote =
+    e.method === 'forehead'
+      ? 'The 37.5 °C level is stated for oral readings (REF-50); this reading is from a forehead sensor.'
+      : undefined
 
   if (e.celsius >= 39.4) findings.push(finding(RULES['RULE-17']))
   else if (e.celsius >= 38.0) {
     if (usual === undefined || aboveBaseline || (e.symptoms?.length ?? 0) > 0) {
       findings.push(finding(RULES['RULE-16']))
     }
-  } else if (e.celsius >= 37.5) findings.push(finding(RULES['RULE-15']))
-  else if (!aboveBaseline) findings.push(finding(RULES['RULE-14']))
+  } else if (e.celsius >= 37.5) findings.push(finding(RULES['RULE-15'], undefined, siteNote))
+  else if (!aboveBaseline) findings.push(finding(RULES['RULE-14'], undefined, siteNote))
 
   return assess(
     'bodyTemperature',
@@ -212,25 +267,58 @@ function sleep(entries: SleepEntry[], ctx: EvaluationContext): IndicatorAssessme
   if (shortNights >= minNights) {
     findings.push(finding(RULES['RULE-20']))
   } else if (e.hours >= 7) findings.push(finding(RULES['RULE-18']))
-  else if (e.hours > 6) findings.push(finding(RULES['RULE-19']))
+  // AU-1 (owner, 2026-11-14): any single night under 7 h, including 6 h or less, unless RULE-20 applies.
+  else findings.push(finding(RULES['RULE-19']))
   // RULE-28 (short night before an EVA) needs the task schedule; not evaluated yet.
 
-  return assess(
-    'sleep',
-    findings,
-    'No approved rule assigns a status to a single night of 6 hours or less. Watch the next nights.',
-  )
+  return assess('sleep', findings)
 }
 
 function average(values: number[]): number {
   return values.reduce((sum, v) => sum + v, 0) / values.length
 }
 
+export type Phq2State = 'belowCutoff' | 'furtherAssessment' | 'due' | 'notAssessed'
+
+/** Owner-set PHQ-2 wording (2026-11-14). */
+export const PHQ2_STATE_LABELS: Record<Phq2State, string> = {
+  belowCutoff: 'Below screening cutoff',
+  furtherAssessment: 'Further assessment recommended',
+  due: 'Screening due',
+  notAssessed: 'Not assessed',
+}
+
+export interface Phq2Screening {
+  state: Phq2State
+  /** The latest screening, current or historical. */
+  latest?: MoodPhq2Entry
+  /** True while the latest screening is less than 14 days old (AU-5). */
+  current: boolean
+}
+
+/**
+ * AU-5 (owner, 2026-11-14): a PHQ-2 result is current for 14 days (the scheduling
+ * cadence, OD-6), then historical, and the next screening is due. The 2-week recall
+ * period is part of the questionnaire and is a separate thing.
+ */
+export function phq2Screening(allEntries: HealthEntry[], now: Date): Phq2Screening {
+  const latest = entriesOf(allEntries, 'mood')
+    .filter((x): x is MoodPhq2Entry => x.kind === 'phq2')
+    .at(-1)
+  if (!latest) return { state: 'notAssessed', current: false }
+  if (calendarDaysBetween(new Date(latest.recordedAt), now) >= PHQ2_CADENCE_DAYS) {
+    return { state: 'due', latest, current: false }
+  }
+  // RULE-23: the validated cutoff is 3.
+  return { state: latest.score >= 3 ? 'furtherAssessment' : 'belowCutoff', latest, current: true }
+}
+
 function mood(entries: MoodEntry[], ctx: EvaluationContext): IndicatorAssessment {
   const p = ctx.parameters ?? TEAM_PARAMETERS
   const findings: Finding[] = []
 
-  const phq2 = entries.filter((x) => x.kind === 'phq2').at(-1)
+  const screening = phq2Screening(entries, ctx.now ?? new Date())
+  const phq2 = screening.current ? screening.latest : undefined
   if (phq2) {
     if (phq2.score >= 3) findings.push(finding(RULES['RULE-23']))
     else if (phq2.score === 2) findings.push(finding(RULES['RULE-22'], undefined, 'PHQ-2 score 2.'))
@@ -257,11 +345,16 @@ function mood(entries: MoodEntry[], ctx: EvaluationContext): IndicatorAssessment
     }
   }
 
-  return assess(
+  const result = assess(
     'mood',
     findings,
-    'Daily mood ratings are used for the trend only. No PHQ-2 screening is recorded yet.',
+    screening.state === 'due'
+      ? 'The last PHQ-2 is more than 14 days old, so it is history only. Daily mood ratings are used for the trend only.'
+      : 'No PHQ-2 screening is recorded. Daily mood ratings are used for the trend only.',
   )
+  return result.status === 'none'
+    ? { ...result, label: PHQ2_STATE_LABELS[screening.state] }
+    : result
 }
 
 export interface PersonalBaseline {
@@ -283,9 +376,7 @@ export function personalBaseline(
 ): PersonalBaseline | undefined {
   let earlier: number[]
   if (indicator === 'heartRate') {
-    earlier = entriesOf(allEntries, 'heartRate')
-      .slice(0, -1)
-      .map((x) => x.bpm)
+    earlier = restingEarlier(entriesOf(allEntries, 'heartRate'))
   } else if (indicator === 'bodyTemperature') {
     const entries = entriesOf(allEntries, 'bodyTemperature')
     const latest = entries.at(-1)

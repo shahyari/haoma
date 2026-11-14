@@ -17,6 +17,7 @@ import { useHealthData } from '@/data/HealthDataProvider'
 import {
   GLUCOSE_CONTEXT_LABELS,
   GLUCOSE_DEVICE_LABELS,
+  HEART_RATE_ACTIVITY_LABELS,
   SLEEP_SOURCE_LABELS,
   TEMPERATURE_METHOD_LABELS,
 } from '@/domain/format'
@@ -37,7 +38,7 @@ interface NumberFieldSpec {
 /** Measurement notes from docs/scientific-foundations.md -> "Indicator summary". */
 const HINTS: Partial<Record<IndicatorId, string>> = {
   bloodPressure: 'Cuff reading at rest.',
-  heartRate: 'At rest, ideally first thing after waking.',
+  heartRate: 'Resting readings are best taken first thing after waking.',
   bloodGlucose: 'Fasting means no caloric intake for at least 8 hours.',
   sleep: 'Hours slept last night.',
 }
@@ -95,6 +96,7 @@ function buildEntry(
     ...(symptoms.length > 0 ? { symptoms } : {}),
   }
   for (const field of NUMBER_FIELDS[indicator]) raw[field.name] = toNumber(v[field.name])
+  if (indicator === 'heartRate') raw.activity = v.activity
   if (indicator === 'bloodGlucose') Object.assign(raw, { context: v.context, device: v.device })
   if (indicator === 'bodyTemperature') {
     Object.assign(raw, { method: v.method, exercisedLast30Min: v.exercisedLast30Min === 'true' })
@@ -178,9 +180,12 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
   function submit(event: FormEvent) {
     event.preventDefault()
     const result = validateEntry(buildEntry(indicator, values, symptoms))
-    if (!result.ok) {
+    // The model accepts a missing rest state on old stored entries; new entries must record it.
+    const missingActivity = indicator === 'heartRate' && !values.activity
+    if (!result.ok || missingActivity) {
       const next: Record<string, string> = {}
-      for (const issue of result.issues) {
+      if (missingActivity) next.activity = 'Choose an option.'
+      for (const issue of result.ok ? [] : result.issues) {
         // A missing PHQ-2 answer surfaces on the score.
         const field = issue.field === 'score' ? (values.phq2a ? 'phq2b' : 'phq2a') : issue.field
         next[field] = ISSUE_MESSAGES[issue.code] ?? 'Choose an option.'
@@ -193,7 +198,18 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
   }
 
   let extra: ReactNode = null
-  if (indicator === 'bloodGlucose') {
+  if (indicator === 'heartRate') {
+    extra = (
+      <Choice
+        name="activity"
+        legend="When was it taken?"
+        options={HEART_RATE_ACTIVITY_LABELS}
+        values={values}
+        onChange={set}
+        error={errors.activity}
+      />
+    )
+  } else if (indicator === 'bloodGlucose') {
     extra = (
       <>
         <Choice
@@ -262,7 +278,7 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
           />
         ) : (
           <p className="text-sm text-muted-foreground">
-            The PHQ-2 screening asks about the past 2 weeks, so it is taken every 14 days. Next due{' '}
+            PHQ-2 screening is scheduled every 14 days (team decision). Next due{' '}
             <span className="num">{formatDate(phq2.nextDue!)}</span>.
           </p>
         )}
@@ -283,7 +299,8 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
               />
             ))}
             <p className="text-sm text-muted-foreground">
-              The PHQ-2 is a screener, not a diagnosis, and it is not a daily mood score.
+              The questions ask about the last 2 weeks. The PHQ-2 is a screener, not a diagnosis or
+              a daily mood score, and it has not been validated for astronauts.
             </p>
           </>
         ) : (

@@ -11,6 +11,7 @@ import {
   ENTRY_ORIGINS,
   GLUCOSE_CONTEXTS,
   GLUCOSE_DEVICES,
+  HEART_RATE_ACTIVITIES,
   INDICATOR_IDS,
   MOOD_KINDS,
   PHQ2_SCORE_RANGE,
@@ -134,7 +135,13 @@ export function validateEntry(input: unknown): ValidationResult<HealthEntry> {
       }
       break
     case 'heartRate':
-      fields = { bpm: c.nonNegative('bpm') }
+      fields = {
+        bpm: c.nonNegative('bpm'),
+        // Optional so that entries stored before the field existed still load.
+        ...(input.activity !== undefined
+          ? { activity: c.oneOf('activity', HEART_RATE_ACTIVITIES) }
+          : {}),
+      }
       break
     case 'bloodGlucose':
       fields = {

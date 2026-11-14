@@ -1,5 +1,5 @@
 import { ArrowLeft, Plus } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { EmptyState } from '@/components/states/StatePanel'
@@ -12,14 +12,27 @@ import { INDICATOR_IDS, INDICATORS, type HealthEntry, type IndicatorId } from '@
 import { phq2Schedule } from '@/features/checkin/checkin'
 import { EntryDialog } from '@/features/entry/EntryDialog'
 import { HISTORY_VIEWS, ORIGIN_LABELS, type HistoryView } from '@/features/history/columns'
-import { HistoryChart, type ChartPoint } from '@/features/history/HistoryChart'
+import type { ChartPoint } from '@/features/history/HistoryChart'
 import { FindingList, REFERENCES_URL, RuleEvidence } from '@/features/home/StatusBanner'
 import { NotFoundPage } from '@/pages/NotFoundPage'
-import { entriesOf, evaluateIndicator, personalBaseline } from '@/rules/evaluate'
+import {
+  ELEVATED_HR_WINDOW_DAYS,
+  entriesOf,
+  evaluateIndicator,
+  personalBaseline,
+  PHQ2_STATE_LABELS,
+  phq2Screening,
+  restingAbove100,
+} from '@/rules/evaluate'
 import { MOOD_SAFETY_MESSAGE, RULES } from '@/rules/rules'
 import type { RuleDefinition } from '@/rules/types'
 
 const sectionHeading = 'text-lg font-medium'
+
+// The chart library is loaded only when a history chart is shown, to keep it out of the main bundle.
+const HistoryChart = lazy(() =>
+  import('@/features/history/HistoryChart').then((m) => ({ default: m.HistoryChart })),
+)
 
 function HistorySection({
   view,
@@ -54,14 +67,20 @@ function HistorySection({
       ) : (
         <>
           <figure className="rounded-lg border bg-card p-3">
-            <HistoryChart
-              label={`Line chart of ${name}, ${rows.length} readings. The same values are in the table that follows.`}
-              series={view.series}
-              points={points}
-              unit={view.unit}
-              baseline={baseline}
-              yDomain={view.yDomain}
-            />
+            <Suspense
+              fallback={
+                <div className="h-56 animate-pulse rounded-md bg-muted" aria-hidden="true" />
+              }
+            >
+              <HistoryChart
+                label={`Line chart of ${name}, ${rows.length} readings. The same values are in the table that follows.`}
+                series={view.series}
+                points={points}
+                unit={view.unit}
+                baseline={baseline}
+                yDomain={view.yDomain}
+              />
+            </Suspense>
             <figcaption className="mt-2 text-sm text-muted-foreground">
               Measured values only
               {baseline !== undefined ? ', with your personal baseline as a dotted line' : ''}. No
@@ -134,13 +153,18 @@ export function IndicatorPage() {
 
   const { label } = INDICATORS[indicator]
   const latest = entries.at(-1)
-  const assessment = evaluateIndicator(indicator, data.entries, { missionPhase: data.missionPhase })
+  const assessment = evaluateIndicator(indicator, data.entries, {
+    missionPhase: data.missionPhase,
+    now,
+  })
   const baseline = personalBaseline(indicator, data.entries)
   const rules = (Object.values(RULES) as RuleDefinition[]).filter(
     (rule) => rule.indicator === indicator,
   )
   const context = latest ? formatContext(latest) : undefined
   const phq2 = indicator === 'mood' ? phq2Schedule(data.entries, now) : undefined
+  const screening = indicator === 'mood' ? phq2Screening(data.entries, now) : undefined
+  const elevated = indicator === 'heartRate' ? restingAbove100(data.entries, now) : undefined
 
   return (
     <div className="space-y-8">
@@ -183,7 +207,7 @@ export function IndicatorPage() {
             <p className="text-muted-foreground">Nothing has been recorded yet.</p>
           )}
           <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={assessment.status} />
+            <StatusBadge status={assessment.status} label={assessment.label} />
             {assessment.status === 'none' ? (
               <span className="text-sm">{assessment.note}</span>
             ) : null}
@@ -196,28 +220,52 @@ export function IndicatorPage() {
           ) : null}
           {assessment.status === 'normal' || assessment.status === 'none' ? (
             <p className="text-sm text-muted-foreground">
-              “Within reference” and “Not evaluated” describe this reading against the rules below.
-              They are not a medical clearance.
+              This label describes the latest reading against the rules below. It is not a medical
+              clearance.
             </p>
           ) : null}
         </div>
-        {phq2 ? (
+        {phq2 && screening ? (
+          <div className="space-y-1 rounded-lg border bg-card p-4 text-sm">
+            <p>
+              <span className="font-medium">PHQ-2 screening:</span>{' '}
+              {PHQ2_STATE_LABELS[screening.state]}
+              {screening.latest ? (
+                <>
+                  {' '}
+                  (score <span className="num">{screening.latest.score}</span>, taken{' '}
+                  <span className="num">{formatDate(screening.latest.recordedAt)}</span>
+                  {screening.current ? '' : ', now history only'})
+                </>
+              ) : null}
+              .{' '}
+              {phq2.due ? (
+                'The next screening is due now.'
+              ) : (
+                <>
+                  Next due <span className="num">{formatDate(phq2.nextDue!)}</span>.
+                </>
+              )}
+            </p>
+            <p className="text-muted-foreground">
+              The questions cover the last 2 weeks; the screening is scheduled every 14 days (team
+              decision), and a result counts for 14 days. The PHQ-2 is a screener validated in
+              primary care and obstetrics-gynecology patients, not in astronauts. It is not a
+              diagnosis and not a daily mood rating.
+            </p>
+          </div>
+        ) : null}
+        {elevated && elevated.resting > 0 ? (
           <p className="text-sm">
-            PHQ-2 screening:{' '}
-            {phq2.last ? (
-              <>
-                last taken <span className="num">{formatDate(phq2.last)}</span>;{' '}
-                {phq2.due ? (
-                  'the next one is due now.'
-                ) : (
-                  <>
-                    next due <span className="num">{formatDate(phq2.nextDue!)}</span>.
-                  </>
-                )}
-              </>
-            ) : (
-              'not taken yet.'
-            )}
+            Resting readings above 100 bpm in the last{' '}
+            <span className="num">{ELEVATED_HR_WINDOW_DAYS}</span> days:{' '}
+            <span className="num">
+              {elevated.above} of {elevated.resting}
+            </span>
+            .{' '}
+            <span className="text-muted-foreground">
+              A description only: no approved rule sets how often is too often.
+            </span>
           </p>
         ) : null}
         {indicator === 'mood' ? (
@@ -237,7 +285,9 @@ export function IndicatorPage() {
                 <span className="num">
                   {baseline.value} {INDICATORS[indicator].unit}
                 </span>{' '}
-                (median of your last readings).
+                (median of your last{' '}
+                {indicator === 'heartRate' ? 'resting readings' : 'readings with the same method'}).
+                It is not matched to the time of day.
               </>
             ) : (
               <>
@@ -245,7 +295,7 @@ export function IndicatorPage() {
                 earlier readings
                 {indicator === 'bodyTemperature'
                   ? ' taken with the same method and not after exercise'
-                  : ''}
+                  : ' taken at rest'}
                 , and <span className="num">{baseline.readings}</span> exist.
               </>
             )}
@@ -293,7 +343,7 @@ export function IndicatorPage() {
         <ul className="divide-y rounded-lg border bg-card text-sm">
           {rules.map((rule) => (
             <li key={rule.id} className="space-y-1 p-3">
-              <StatusBadge status={rule.status} />
+              <StatusBadge status={rule.status} label={rule.statusLabel} />
               <p>{rule.condition}</p>
               {rule.action ? <p>Action: {rule.action}</p> : null}
               <RuleEvidence rule={rule} />

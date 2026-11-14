@@ -41,6 +41,8 @@ export interface RuleDefinition {
   actionLabels: EvidenceLabel[]
   /** REF IDs in docs/references.md. */
   refs: string[]
+  /** Owner-set wording that replaces the tier name in badges (the tier and colour stay). */
+  statusLabel?: string
 }
 
 export interface Finding {
@@ -61,4 +63,6 @@ export interface IndicatorAssessment {
   findings: Finding[]
   /** Neutral explanation when status is `none`. */
   note?: string
+  /** Owner-set wording that replaces the status name in badges; see `statusLabel`. */
+  label?: string
 }

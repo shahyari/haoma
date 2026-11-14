@@ -69,7 +69,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-44', 'REF-45'],
-    'Below 90/60 with no symptoms.',
+    'Systolic below 90 or diastolic below 60 (below 90/60), with no symptoms. Measurement review, not an escalation.',
     'Re-measure and compare with the trend.',
   ),
   'RULE-25': rule(
@@ -79,7 +79,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-44', 'REF-45'],
-    'Below 90/60 with dizziness, faintness, blurred vision or fainting.',
+    'Systolic below 90 or diastolic below 60 (below 90/60), with dizziness, faintness, blurred vision or fainting.',
     'Stop what you’re doing and secure yourself. Re-measure in 5 minutes. If symptoms continue or you fainted, contact the crew medical officer or flight surgeon.',
   ),
   'RULE-26': rule(
@@ -241,16 +241,19 @@ export const RULES = {
     ['REF-35'],
     '7 hours or more (AASM/SRS consensus for adults 18–60).',
   ),
-  'RULE-19': rule(
-    'RULE-19',
-    'sleep',
-    'attention',
-    ['GCR'],
-    ['TDD'],
-    ['REF-35', 'REF-36'],
-    'More than 6 but under 7 hours.',
-    'Adjust schedule and lighting; watch for a run of short nights.',
-  ),
+  'RULE-19': {
+    ...rule(
+      'RULE-19',
+      'sleep',
+      'attention',
+      ['GCR'],
+      ['TDD'],
+      ['REF-35', 'REF-36'],
+      'A single night under 7 hours, when RULE-20 does not apply (general adult recommendation, AASM/SRS; not validated for astronauts).',
+      'Adjust schedule and lighting; watch for a run of short nights.',
+    ),
+    statusLabel: 'Below general sleep recommendation',
+  },
   'RULE-20': rule(
     'RULE-20',
     'sleep',
@@ -262,15 +265,18 @@ export const RULES = {
     'Raise at next private medical conference, and before EVAs or critical operations.',
   ),
   // Mood
-  'RULE-21': rule(
-    'RULE-21',
-    'mood',
-    'normal',
-    ['TDD'],
-    [],
-    ['REF-51', 'REF-40'],
-    'PHQ-2 score 0–1, and stable daily ratings.',
-  ),
+  'RULE-21': {
+    ...rule(
+      'RULE-21',
+      'mood',
+      'normal',
+      ['TDD'],
+      [],
+      ['REF-51', 'REF-40'],
+      'PHQ-2 score 0–1 within the last 14 days, and stable daily ratings.',
+    ),
+    statusLabel: 'Below screening cutoff',
+  },
   'RULE-22': rule(
     'RULE-22',
     'mood',
@@ -278,19 +284,22 @@ export const RULES = {
     ['TDD'],
     ['TDD'],
     ['REF-51', 'REF-40', 'REF-42'],
-    'PHQ-2 score 2 (team choice: an earlier attention level below the validated cutoff of 3), or a declining daily trend (team-set parameter P-5).',
+    'PHQ-2 score 2 within the last 14 days (team choice: an earlier attention level below the validated cutoff of 3), or a declining daily trend (team-set parameter P-5).',
     'Check in, use self-care time, talk to crewmates.',
   ),
-  'RULE-23': rule(
-    'RULE-23',
-    'mood',
-    'escalate',
-    ['GCR'],
-    ['TDD'],
-    ['REF-51', 'REF-40'],
-    'PHQ-2 score 3 or more (validated cutpoint in primary care and obstetrics-gynecology patients).',
-    'The flight surgeon or behavioral health team can do a fuller assessment. Arrange a private conference with the flight surgeon / behavioral health.',
-  ),
+  'RULE-23': {
+    ...rule(
+      'RULE-23',
+      'mood',
+      'escalate',
+      ['GCR'],
+      ['TDD'],
+      ['REF-51', 'REF-40'],
+      'PHQ-2 score 3 or more within the last 14 days (validated cutpoint in primary care and obstetrics-gynecology patients, not in astronauts).',
+      'The flight surgeon or behavioral health team can do a fuller assessment. Arrange a private conference with the flight surgeon / behavioral health.',
+    ),
+    statusLabel: 'Further assessment recommended',
+  },
 } as const satisfies Record<string, RuleDefinition>
 
 /** RULE-24: safety message shown on every mood screen (not a detection rule). */

@@ -98,7 +98,7 @@ Estimated hours are guidance, not hard limits. Priority order:
 6. Optional enhancements.
 
 - Don't polish low-impact details while P0 work is incomplete.
-- **Feature freeze:** Claude recommends a freeze when the remaining time is needed for stabilization, testing, the slide deck, and submission. Default proposal: **Sunday 18:00 CET** freeze, **Sunday 22:00 CET** submission target. The owner decides.
+- **Release schedule (owner decision 2026-11-14):** feature freeze **Sun 2026-11-15 18:00 CET**; internal submission target **Sun 2026-11-15 22:00 CET**; official deadline **Sun 2026-11-15 23:59 CET**. After the freeze, only bugs, accessibility, scientific integrity, documentation, and submission.
 
 ## Stop / cut rules
 

@@ -7,6 +7,10 @@ export const GLUCOSE_CONTEXT_LABELS = {
 } as const
 export const GLUCOSE_DEVICE_LABELS = { fingerstick: 'Fingerstick', cgm: 'CGM' } as const
 export const TEMPERATURE_METHOD_LABELS = { oral: 'Oral', forehead: 'Forehead sensor' } as const
+export const HEART_RATE_ACTIVITY_LABELS = {
+  rest: 'At rest',
+  afterActivity: 'After activity',
+} as const
 export const SLEEP_SOURCE_LABELS = { selfReport: 'Self-report', actigraphy: 'Actigraphy' } as const
 
 /** The reading with its unit, e.g. "118/76 mmHg". */
@@ -32,6 +36,8 @@ export function formatContext(entry: HealthEntry): string | undefined {
   switch (entry.indicator) {
     case 'bloodGlucose':
       return `${GLUCOSE_CONTEXT_LABELS[entry.context]} · ${GLUCOSE_DEVICE_LABELS[entry.device]}`
+    case 'heartRate':
+      return entry.activity ? HEART_RATE_ACTIVITY_LABELS[entry.activity] : 'Rest state not recorded'
     case 'bodyTemperature':
       return entry.exercisedLast30Min
         ? `${TEMPERATURE_METHOD_LABELS[entry.method]} · after exercise`

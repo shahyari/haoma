@@ -75,12 +75,12 @@ describe('demo history', () => {
       expect(entry.origin).toBe('simulated')
     }
   })
-  it('ends yesterday, leaving today’s check-in open and the PHQ-2 due', () => {
+  it('ends yesterday, leaving today’s check-in open, with a PHQ-2 that is still current', () => {
     expect(dailyCheckIn(entries, now).every((i) => !i.done)).toBe(true)
-    expect(phq2Schedule(entries, now).due).toBe(true)
+    expect(phq2Schedule(entries, now).due).toBe(false)
   })
   it('contains no Escalate reading', () => {
-    const statuses = evaluateAll(entries, { missionPhase: 'inFlight' }).map((a) => a.status)
+    const statuses = evaluateAll(entries, { missionPhase: 'inFlight', now }).map((a) => a.status)
     expect(statuses).not.toContain('escalate')
     expect(statuses).not.toContain('missing')
   })

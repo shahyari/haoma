@@ -13,7 +13,7 @@ import { INDICATORS } from '@/domain/indicators'
 import { createDemoEntries, DEMO_PROFILE } from '@/demo/demo'
 import { dailyCheckIn, phq2Schedule } from '@/features/checkin/checkin'
 import { StatusBanner } from '@/features/home/StatusBanner'
-import { entriesOf, evaluateAll } from '@/rules/evaluate'
+import { entriesOf, evaluateAll, PHQ2_STATE_LABELS, phq2Screening } from '@/rules/evaluate'
 import { PRE_LANDING_REMINDER } from '@/rules/rules'
 
 const focusRing = 'outline-none focus-visible:ring-2 focus-visible:ring-ring'
@@ -23,8 +23,8 @@ export function HomePage() {
   const [now] = useState(() => new Date())
 
   const assessments = useMemo(
-    () => evaluateAll(data.entries, { missionPhase: data.missionPhase }),
-    [data.entries, data.missionPhase],
+    () => evaluateAll(data.entries, { missionPhase: data.missionPhase, now }),
+    [data.entries, data.missionPhase, now],
   )
   const rows = assessments.map((assessment) => ({
     assessment,
@@ -40,6 +40,7 @@ export function HomePage() {
   const checkIn = dailyCheckIn(data.entries, now)
   const done = checkIn.filter((item) => item.done).length
   const phq2 = phq2Schedule(data.entries, now)
+  const screening = phq2Screening(data.entries, now)
   const hasSimulated = data.entries.some((e) => e.origin === 'simulated')
 
   return (
@@ -81,12 +82,13 @@ export function HomePage() {
                               <span className="num block text-lg">{formatValue(latest)}</span>
                               <span className="block text-sm text-muted-foreground">
                                 {context ? `${context} · ` : ''}
+                                Latest reading{' '}
                                 <span className="num">{formatDateTime(latest.recordedAt)}</span>
                                 {latest.origin === 'simulated' ? ' · Simulated' : ''}
                               </span>
                             </>
                           ) : null}
-                          <StatusBadge status={status} />
+                          <StatusBadge status={status} label={assessment.label} />
                           {status === 'none' ? (
                             <span className="block text-sm text-muted-foreground">
                               {assessment.note}
@@ -145,6 +147,17 @@ export function HomePage() {
                   </span>
                 </p>
                 <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm">
+                  <dt>Role</dt>
+                  <dd className="text-right">{DEMO_PROFILE.role}</dd>
+                  <dt>Mission</dt>
+                  <dd className="text-right">{DEMO_PROFILE.mission}</dd>
+                  <dt>Mission day</dt>
+                  <dd className="num text-right">{DEMO_PROFILE.missionDay}</dd>
+                </dl>
+                <p className="text-sm text-muted-foreground">
+                  Fictional person and mission. All health measurements in the demo are simulated.
+                </p>
+                <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 border-t pt-3 text-sm">
                   <dt>Check-ins completed today</dt>
                   <dd className="num text-right">
                     {done} of {checkIn.length}
@@ -194,17 +207,21 @@ export function HomePage() {
                   ))}
                 </ul>
                 <p className="mt-3 border-t pt-3 text-sm text-muted-foreground">
-                  PHQ-2 screening (every 14 days):{' '}
+                  PHQ-2 screening (scheduled every 14 days):{' '}
+                  <span className="text-foreground">{PHQ2_STATE_LABELS[screening.state]}</span>
                   {phq2.due ? (
-                    <Link
-                      to="/indicators/mood"
-                      className={`rounded-sm text-foreground underline underline-offset-2 ${focusRing}`}
-                    >
-                      due now
-                    </Link>
+                    <>
+                      {' · '}
+                      <Link
+                        to="/indicators/mood"
+                        className={`rounded-sm text-foreground underline underline-offset-2 ${focusRing}`}
+                      >
+                        take it now
+                      </Link>
+                    </>
                   ) : (
                     <>
-                      next due <span className="num">{formatDate(phq2.nextDue!)}</span>
+                      {' · '}next due <span className="num">{formatDate(phq2.nextDue!)}</span>
                     </>
                   )}
                 </p>

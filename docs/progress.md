@@ -8,14 +8,13 @@
 
 ## Completed
 
-- Phase A foundation (Checkpoint A).
-- Display settings (`design.md` → "Display settings").
-- Rule evaluation RULE-01–RULE-30 (`src/rules/`), with three distinct neutral states: **No measurement**, **Not evaluated**, **Within reference** (the label for Normal).
-- Home: indicator list linking to history pages, Attention/Escalate banners, RULE-30 reminder, fictional profile with "check-ins completed today" and "indicators to review" (no health score), daily check-in card with the PHQ-2 14-day cadence, "Load simulated demo history".
-- Per-indicator history view (`/indicators/:id`): latest value with unit, time, and provenance; status with the applying rule, its condition, action, evidence labels, and REF IDs; personal baseline (heart rate, temperature); Recharts line chart (blood pressure as separate systolic and diastolic series; mood as separate daily-rating and PHQ-2 charts) followed by an accessible data table; empty states; approved rules listed separately as reference information.
-- Rule audit (`scientific-foundations.md` → "Implementation audit", AU-1–AU-8); no approved rule was changed. RULE-20 night counting fixed.
-- Mood/PHQ-2 review: wording matched to REF-40; PHQ-2 offered every 14 days only and never counted as the daily rating.
-- Docs: data provenance and privacy statement (`data-and-limitations.md`), tested accessibility results (`design-decisions.md`).
+- Phase A foundation (Checkpoint A). Display settings (`design.md` → "Display settings").
+- Rule evaluation RULE-01–RULE-30 (`src/rules/`) with three distinct neutral states: **No measurement**, **Not evaluated**, **Within reference**.
+- Home: indicator list with the latest reading's timestamp and status, Attention/Escalate banners, RULE-30 reminder, fictional profile Alex Morgan (Flight Engineer, Aster-1 Lunar Transit Mission, Mission Day 42), check-ins completed today and indicators to review (no health score), daily check-in, PHQ-2 screening state, "Load simulated demo history".
+- Per-indicator history view (`/indicators/:id`): latest value, unit, time, provenance; status with rule, action, evidence labels, REF IDs; personal baseline; chart plus accessible table; approved rules listed separately. Chart library lazy-loaded (main bundle 780 → 423 kB).
+- OD-14 applied (owner decisions on the audit, `scientific-foundations.md`): AU-1 sleep label; AU-3 heart-rate rest state, rest-only rules and baseline, descriptive count of readings above 100; AU-4 systolic < 90 OR diastolic < 60; AU-5 PHQ-2 current for 14 days, with the owner's four labels; AU-6 timestamps and separate check-in completeness; AU-7 time-of-day clause removed. Tests added for each.
+- AU-2 temperature: revised, evidence-backed proposal written (`scientific-foundations.md` → "AU-2 revised proposal"); display-only note for forehead readings; no rule changed.
+- Body figure: interaction proposal written (`design.md` → "Body figure"); not built.
 
 ## Decisions made
 
@@ -44,32 +43,19 @@
 | 2026-11-14 | Owner review: history view approved; no overall health score; XP deferred; 2D SVG body figure (spec pending); one fictional profile; simple daily check-in; no averaged statuses; crew comparison, sensors, roles, real-time reporting deferred; clinical rules read-only; no zone-specific reference ranges | `product.md` |
 | 2026-11-14 | Owner brainstorm Sections 13–15 received; Section 14 and the decided parts of Section 13 implemented | `product.md`, `design.md` |
 | 2026-11-14 | Kickoff received 09:00 CET; repo created and Phase A executed | `implementation.md` |
+| 2026-11-14 | OD-14: audit decisions (AU-1, AU-3–AU-7 applied; AU-2 to revise), PHQ-2 labels, D-01 charts approved, provisional demo profile, body-figure direction, lazy-load charts | `scientific-foundations.md`, `design.md`, `data-and-limitations.md` |
+| 2026-11-14 | Release schedule: freeze Sun 18:00 CET, internal target Sun 22:00 CET, deadline Sun 23:59 CET | `implementation.md` |
 | 2026-11-14 | OD-13: OSDR cross-check applied (C-5 to C-8); REF-54 Polaris Dawn, REF-55 OSD-575 added as `Unverified`; no rule changed | `scientific-foundations.md`, `references.md` |
 
 ## Outstanding decisions (owner)
 
-**Rule audit (`scientific-foundations.md` → "Implementation audit")**
-
-1. AU-1 Sleep: extend RULE-19 to "under 7 h when RULE-20 does not apply".
-2. AU-2a–e Temperature: 38.0–39.3 °C near baseline without symptoms; sub-fever rise above baseline; RULE-16 symptom list; oral threshold applied to forehead readings; "keeps rising" in RULE-17.
-3. AU-3 Heart rate: define "regularly above 100" (proposed P-9: ≥ 3 of the last 7 days).
-4. AU-4 Blood pressure: confirm "below 90/60" = either number low (current).
-5. AU-5 PHQ-2 status validity of 14 days; AU-6 optional age limit for the latest reading; AU-7 P-1 "similar time of day".
-6. Mood: status label for PHQ-2 0–1 ("Within reference" vs. e.g. "Below screening cutoff").
-
-**Product and content**
-
-7. Body figure feature spec (2D SVG).
-8. Demo profile details: name, role, mission (currently "Demo astronaut", labeled fictional).
-9. D-01: no reference bands on charts (rules listed separately). Confirm or change.
-10. Settings and About placement in the navigation.
-11. Auto mode source (LED lighting), zone source, how condition-based suggestions are triggered.
-
-**Other**
-
-12. Feature-freeze time (proposal: Sun 18:00 CET freeze, Sun 22:00 CET submission target).
-13. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
-14. Berlin Local Event name and local judging times.
+1. AU-2 temperature: decide AU-2a–e (`scientific-foundations.md` → "AU-2 revised proposal").
+2. PHQ-2 score 2: keep the RULE-22 🟡 level alongside the "Below screening cutoff" label, or drop it.
+3. Heart rate: keep applying the RULE-08 symptom clause to after-activity readings (current, conservative), or limit it to resting readings.
+4. Body figure: approve the interaction proposal, including questions (a)–(c) (`design.md` → "Body figure").
+5. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
+6. Settings and About placement in the navigation; auto-mode source (LED lighting), zone source, condition-based suggestions.
+7. Berlin Local Event name and local judging times.
 
 ## Environment status (2026-11-14)
 
@@ -78,15 +64,14 @@
 
 ## Unresolved scientific questions
 
-SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (owner, 2026-11-14); none is implemented in code yet.
+SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (owner, 2026-11-14) and implemented in `src/rules/`.
 
 ## Verification
 
-- 2026-11-14: `npm run lint` → 0 problems; `npm run typecheck` → exit 0; `npm test` → 12 files, 179 tests passed; `npm run build` → exit 0.
-- Includes: rule boundaries, overlaps, and precedence; missing-data states; keyboard (jsdom); token contrast for 16 combinations; localStorage persistence across reloads. Results: `design-decisions.md` → Accessibility.
-- Browser check (headless Chrome): history pages at 500 px and desktop width, light and dark.
+- 2026-11-14 (after OD-14): `npm run format:check` clean; `npm run lint` 0 problems; `npm run typecheck` exit 0; `npm test` 12 files, 195 tests passed; `npm run build` exit 0, no chunk-size warning.
+- Covers: rule boundaries, overlaps, precedence; OD-14 behaviour (AU-1, AU-3, AU-4, AU-5); missing-data states; keyboard (jsdom); token contrast for 16 combinations; localStorage persistence. Results: `design-decisions.md` → Accessibility.
 - Not done: manual keyboard pass in a real browser, screen reader, true 320 px render of seeded pages. No WCAG conformance is claimed.
 
 ## Next action
 
-Owner decisions on the audit items (1–6) and the body-figure spec. Buildable meanwhile without new decisions: a manual keyboard and screen-reader pass in a real browser; a 320 px layout check of the history pages.
+Owner decisions 1–4 above. Unblocked meanwhile: a real-browser keyboard and responsive pass; slide deck and submission text before the freeze (Sun 18:00 CET).

@@ -6,7 +6,7 @@
 
 | ID | Decision | User problem | Design approach | UX principle or evidence (REF ID) | Trade-off | Validation performed |
 |---|---|---|---|---|---|---|
-| D-01 | No reference ranges drawn on history charts; approved rules listed below the chart instead | Shaded "normal" bands would look like personal or astronaut-specific ranges, and several rules depend on symptoms, context, or a baseline that a band cannot show | Chart shows measured values and the personal baseline only; the rules section is labeled as reference information | `science.md` (do not present general-population ranges as astronaut rules) | Less at-a-glance context on the chart | Owner review pending |
+| D-01 | No reference ranges drawn on history charts; approved rules listed below the chart instead | Shaded "normal" bands would look like personal or astronaut-specific ranges, and several rules depend on symptoms, context, or a baseline that a band cannot show | Chart shows measured values and the personal baseline only; the rules section is labeled as reference information | `science.md` (do not present general-population ranges as astronaut rules) | Less at-a-glance context on the chart | Approved by the owner 2026-11-14 |
 
 ## Accessibility (tested results only)
 

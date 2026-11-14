@@ -21,7 +21,7 @@ describe('keyboard', () => {
 
   it('adds an entry using only the keyboard; Escape closes the dialog and returns focus', async () => {
     const user = userEvent.setup()
-    const store = renderApp('/indicators/heartRate')
+    const store = renderApp('/indicators/sleep')
     const add = screen.getByRole('button', { name: 'Add entry' })
 
     add.focus()
@@ -33,12 +33,15 @@ describe('keyboard', () => {
     await waitFor(() => expect(document.activeElement).toBe(add))
 
     await user.keyboard('{Enter}')
-    await user.type(
-      within(screen.getByRole('dialog')).getByLabelText('Heart rate (bpm)'),
-      '66{Enter}',
-    )
+    const form = within(screen.getByRole('dialog'))
+    await user.type(form.getByLabelText('Sleep (hours)'), '7.5')
+    // Tab into the "Source" radio group; Space selects the focused option; Enter submits.
+    await user.tab()
+    await user.keyboard(' ')
+    form.getByLabelText('Sleep (hours)').focus()
+    await user.keyboard('{Enter}')
     expect(screen.queryByRole('dialog')).toBeNull()
-    expect(store.load().data.entries).toMatchObject([{ indicator: 'heartRate', bpm: 66 }])
+    expect(store.load().data.entries).toMatchObject([{ indicator: 'sleep', hours: 7.5 }])
   })
 
   it('selects radio options and checkboxes with the keyboard', async () => {

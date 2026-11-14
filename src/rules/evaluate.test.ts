@@ -4,7 +4,7 @@ import type { HealthEntry } from '@/domain/indicators'
 import type { MissionPhase } from '@/domain/mission'
 import type { SymptomId } from '@/domain/symptoms'
 
-import { evaluateIndicator } from './evaluate'
+import { evaluateIndicator, phq2Screening, restingAbove100 } from './evaluate'
 
 let n = 0
 /** Day `day` of a fictional timeline, at 07:00. */
@@ -22,10 +22,16 @@ const bp = (sys: number, dia: number, symptoms?: SymptomId[], day = 1): HealthEn
   diastolicMmHg: dia,
   symptoms,
 })
-const hr = (bpm: number, symptoms?: SymptomId[], day = 1): HealthEntry => ({
+const hr = (
+  bpm: number,
+  symptoms?: SymptomId[],
+  day = 1,
+  activity: 'rest' | 'afterActivity' | null = 'rest',
+): HealthEntry => ({
   ...at(day),
   indicator: 'heartRate',
   bpm,
+  ...(activity ? { activity } : {}),
   symptoms,
 })
 const glucose = (
@@ -75,8 +81,14 @@ const rating = (value: number, day: number): HealthEntry => ({
   rating: value,
 })
 
-function run(entries: HealthEntry[], missionPhase: MissionPhase = 'inFlight') {
-  const result = evaluateIndicator(entries[0].indicator, entries, { missionPhase })
+/** Reference time for the fictional timeline: day 14, noon. */
+const NOW = new Date(Date.UTC(2026, 0, 14, 12))
+
+function evaluate(entries: HealthEntry[], missionPhase: MissionPhase = 'inFlight', now = NOW) {
+  return evaluateIndicator(entries[0].indicator, entries, { missionPhase, now })
+}
+function run(entries: HealthEntry[], missionPhase: MissionPhase = 'inFlight', now = NOW) {
+  const result = evaluate(entries, missionPhase, now)
   return [result.status, ...result.findings.map((f) => f.rule.id)].join(' ')
 }
 
@@ -212,14 +224,17 @@ describe('sleep (RULE-18–20)', () => {
     [7, 'normal RULE-18'],
     [6.9, 'attention RULE-19'],
     [6.1, 'attention RULE-19'],
-    [6, 'none'],
+    [6, 'attention RULE-19'],
+    [3, 'attention RULE-19'],
   ])('%f h → %s', (hours, expected) => {
     expect(run([sleep(hours)])).toBe(expected)
   })
   it('escalates 6 h or less on 3 of the last 7 nights (RULE-20, P-7)', () => {
     expect(run([sleep(5, 1), sleep(8, 2), sleep(6, 3), sleep(8, 4)])).toBe('normal RULE-18')
     expect(run([sleep(5, 1), sleep(8, 2), sleep(6, 3), sleep(5.5, 4)])).toBe('escalate RULE-20')
-    expect(run([sleep(5, 1), sleep(6, 2), sleep(8, 3), sleep(8, 9), sleep(5, 10)])).toBe('none')
+    expect(run([sleep(5, 1), sleep(6, 2), sleep(8, 3), sleep(8, 9), sleep(5, 10)])).toBe(
+      'attention RULE-19',
+    )
   })
 })
 
@@ -333,7 +348,6 @@ describe('audit: overlaps and precedence', () => {
 describe('audit: reported gaps stay "Not evaluated", never "Within reference"', () => {
   const steady = (value: number) => [1, 2, 3, 4, 5].map((day) => temp(value, { day }))
   it.each([
-    ['sleep: one night of 6 h or less', () => [sleep(5)]],
     [
       'temperature: 38.0–39.3 °C close to the baseline, no symptoms',
       () => [...steady(37.9), temp(38.3, { day: 6 })],
@@ -347,9 +361,110 @@ describe('audit: reported gaps stay "Not evaluated", never "Within reference"', 
   ])('%s', (_label, make) => {
     expect(run(make())).toBe('none')
   })
-  it('heart rate: repeated readings above 100 without symptoms stay Attention ("regularly" is undefined)', () => {
+  it('heart rate: repeated resting readings above 100 without symptoms stay Attention (AU-3: no frequency threshold)', () => {
     expect(run([101, 104, 108, 103].map((v, i) => hr(v, undefined, i + 1)))).toBe(
       'attention RULE-07',
     )
+  })
+})
+
+/** Owner decisions of 2026-11-14 on the audit (AU-1, AU-3, AU-4, AU-5, AU-7). */
+describe('AU-1 sleep: a single short night', () => {
+  it('is "Below general sleep recommendation" (Attention), never Escalate', () => {
+    for (const hours of [6.5, 6, 4, 0]) {
+      const result = evaluate([sleep(hours)])
+      expect(result.status).toBe('attention')
+      expect(result.label).toBe('Below general sleep recommendation')
+    }
+  })
+  it('keeps RULE-20 and its precedence for a run of short nights', () => {
+    const result = evaluate([sleep(5, 1), sleep(6, 2), sleep(4, 3)])
+    expect(result.status).toBe('escalate')
+    expect(result.findings.map((f) => f.rule.id)).toEqual(['RULE-20'])
+    expect(result.label).toBeUndefined()
+  })
+  it('7 h or more stays Within reference without the label', () => {
+    expect(evaluate([sleep(7)]).label).toBeUndefined()
+  })
+})
+
+describe('AU-3 heart rate: rest state', () => {
+  it('does not evaluate a reading taken after activity or without a recorded rest state', () => {
+    const after = evaluate([hr(130, undefined, 1, 'afterActivity')])
+    expect(after.status).toBe('none')
+    expect(after.note).toContain('after activity')
+    const unknown = evaluate([hr(130, undefined, 1, null)])
+    expect(unknown.status).toBe('none')
+    expect(unknown.note).toContain('not recorded')
+  })
+  it('keeps the RULE-08 symptom and rhythm clauses for any reading', () => {
+    expect(run([hr(130, ['chestPain'], 1, 'afterActivity')])).toBe('escalate RULE-08')
+    expect(run([hr(80, ['irregularRhythm'], 1, null)])).toBe('escalate RULE-08')
+  })
+  it('builds the baseline from resting readings only', () => {
+    const resting = [62, 64, 63, 65].map((v, i) => hr(v, undefined, i + 1))
+    const active = hr(120, undefined, 5, 'afterActivity')
+    // Only 4 resting readings: no baseline yet, so no RULE-29.
+    expect(run([...resting, active, hr(80, undefined, 6)])).toBe('normal RULE-06')
+    expect(run([...resting, hr(64, undefined, 5), hr(80, undefined, 6)])).toBe('attention RULE-29')
+  })
+  it('counts resting readings above 100 in the last 7 days as a description only', () => {
+    const entries = [
+      hr(104, undefined, 6),
+      hr(108, undefined, 9),
+      hr(99, undefined, 10),
+      hr(120, undefined, 11, 'afterActivity'),
+      hr(103, undefined, 13),
+    ]
+    expect(restingAbove100(entries, NOW)).toEqual({ above: 2, resting: 3 })
+  })
+})
+
+describe('AU-4 blood pressure: below 90/60 = systolic < 90 or diastolic < 60', () => {
+  it('names the low number, and separates measurement review from escalation', () => {
+    const review = evaluate([bp(85, 70)])
+    expect(review.findings[0].rule.id).toBe('RULE-05')
+    expect(review.findings[0].reason).toBe('The systolic 85 is below 90. No symptoms reported.')
+    const escalation = evaluate([bp(85, 55, ['fainting'])])
+    expect(escalation.findings[0].rule.id).toBe('RULE-25')
+    expect(escalation.findings[0].reason).toBe(
+      'The systolic 85 is below 90 and diastolic 55 is below 60.',
+    )
+  })
+})
+
+describe('AU-5 PHQ-2: a result counts for 14 days', () => {
+  const day = (d: number) => new Date(Date.UTC(2026, 0, d, 12))
+  it('uses the labels set by the owner', () => {
+    expect(evaluate([phq2(0)]).label).toBe('Below screening cutoff')
+    expect(evaluate([phq2(3)]).label).toBe('Further assessment recommended')
+    expect(phq2Screening([phq2(2)], NOW).state).toBe('belowCutoff')
+    expect(phq2Screening([], NOW).state).toBe('notAssessed')
+  })
+  it('score 2 is below the screening cutoff but keeps the RULE-22 team attention level', () => {
+    const result = evaluate([phq2(2)])
+    expect(result.status).toBe('attention')
+    expect(result.label).toBeUndefined()
+  })
+  it('becomes history after 14 days, and the mood status shows "Screening due"', () => {
+    expect(run([phq2(5, 1)], 'inFlight', day(14))).toBe('escalate RULE-23')
+    expect(phq2Screening([phq2(5, 1)], day(15))).toMatchObject({ state: 'due', current: false })
+    const stale = evaluate([phq2(5, 1)], 'inFlight', day(15))
+    expect(stale.status).toBe('none')
+    expect(stale.label).toBe('Screening due')
+  })
+  it('shows "Not assessed" when only daily ratings exist and no trend applies', () => {
+    const result = evaluate([rating(4, 1), rating(4, 2)])
+    expect(result.status).toBe('none')
+    expect(result.label).toBe('Not assessed')
+  })
+})
+
+describe('AU-2 temperature (display only, rules unchanged)', () => {
+  it('notes that 37.5 °C is an oral level when the reading is from a forehead sensor', () => {
+    const result = evaluate([temp(37.6, { method: 'forehead' })])
+    expect(result.findings[0].rule.id).toBe('RULE-15')
+    expect(result.findings[0].reason).toContain('stated for oral readings')
+    expect(evaluate([temp(37.6)]).findings[0].reason).toBeUndefined()
   })
 })

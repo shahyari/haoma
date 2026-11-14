@@ -7,7 +7,7 @@
  * the rules that use them are implemented in Phase B from a feature spec.
  */
 export interface TeamParameters {
-  /** P-1: rolling median of the last N valid readings (same method, similar time of day). */
+  /** P-1: rolling median of the last N valid readings (same method; no time-of-day matching, AU-7). */
   baselineWindowReadings: number
   /** P-2: valid readings required before any baseline rule may fire. */
   baselineMinReadings: number

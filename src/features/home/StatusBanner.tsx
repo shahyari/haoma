@@ -67,7 +67,7 @@ export function StatusBanner({
         <Icon aria-hidden="true" className="size-5 shrink-0 text-(--status-color)" />
         <span className="flex-1">
           <span className="font-medium">
-            {STATUS_LABELS[status]}: {INDICATORS[assessment.indicator].label}
+            {assessment.label ?? STATUS_LABELS[status]}: {INDICATORS[assessment.indicator].label}
           </span>{' '}
           {assessment.indicator === 'mood' ? null : (
             <span className="num">{formatValue(latest)}</span>

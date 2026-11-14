@@ -27,7 +27,7 @@ describe('IndicatorPage', () => {
     expect(latest().getByText('No measurement')).toBeTruthy()
     expect(latest().queryByText('Within reference')).toBeNull()
     expect(screen.getByText(/a baseline needs/).textContent).toContain(
-      '5 earlier readings, and 0 exist',
+      '5 earlier readings taken at rest, and 0 exist',
     )
     expect(
       within(screen.getByRole('region', { name: 'History' })).getByText(
@@ -104,6 +104,7 @@ describe('IndicatorPage', () => {
       ...daysAgo(6 - i),
       indicator: 'heartRate',
       bpm,
+      activity: 'rest',
     }))
     renderApp('/indicators/heartRate', readings)
     expect(screen.getByRole('region', { name: 'Personal baseline' }).textContent).toContain(
@@ -111,6 +112,33 @@ describe('IndicatorPage', () => {
     )
     expect(latest().getByText(/80 bpm, which is 16 bpm above your usual/)).toBeTruthy()
     expect(latest().getByText('Attention')).toBeTruthy()
+  })
+
+  it('requires the rest state for a new heart-rate entry and does not evaluate after-activity readings', () => {
+    const store = renderApp('/indicators/heartRate')
+    enter({ 'Heart rate (bpm)': '120' })
+    expect(within(screen.getByRole('dialog')).getByText('Choose an option.')).toBeTruthy()
+    expect(store.load().data.entries).toEqual([])
+    fireEvent.click(within(screen.getByRole('dialog')).getByLabelText('After activity'))
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Save entry' }))
+    expect(latest().getByText('Not evaluated')).toBeTruthy()
+    expect(latest().getByText(/Taken after activity/)).toBeTruthy()
+    expect(store.load().data.entries).toMatchObject([{ bpm: 120, activity: 'afterActivity' }])
+  })
+
+  it('describes resting readings above 100 bpm without classifying how often', () => {
+    renderApp(
+      '/indicators/heartRate',
+      [104, 96, 108].map((bpm, i): HealthEntry => ({
+        ...daysAgo(3 - i),
+        indicator: 'heartRate',
+        bpm,
+        activity: 'rest',
+      })),
+    )
+    expect(screen.getByText(/Resting readings above 100 bpm in the last/).textContent).toMatch(
+      /7 days: 2 of 3\..*no approved rule sets how often is too often/,
+    )
   })
 
   it('has no baseline section for indicators whose rules do not use one', () => {
@@ -157,10 +185,9 @@ describe('Mood: daily rating and PHQ-2 are separate', () => {
     ])
     expect(screen.getByRole('heading', { name: 'Daily mood rating' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'PHQ-2 depression screening' })).toBeTruthy()
-    expect(latest().getByText('Not evaluated')).toBeTruthy()
-    expect(
-      screen.getByText(/screener, not a diagnosis, and it is not a daily mood score/),
-    ).toBeTruthy()
+    expect(latest().getByText('Not assessed')).toBeTruthy()
+    expect(latest().queryByText(/Within reference|Below screening cutoff/)).toBeNull()
+    expect(screen.getByText(/It is not a diagnosis and not a daily mood rating/)).toBeTruthy()
     expect(
       screen.getAllByText(/thoughts of harming yourself, contact the flight surgeon now/).length,
     ).toBe(1)
@@ -180,7 +207,7 @@ describe('Mood: daily rating and PHQ-2 are separate', () => {
     fireEvent.click(dialog.getAllByLabelText('More than half the days')[1])
     fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
     expect(within(table(/PHQ-2 depression screening: table/)).getByText('3')).toBeTruthy()
-    expect(latest().getByText('Escalate')).toBeTruthy()
+    expect(latest().getAllByText('Further assessment recommended').length).toBeGreaterThan(0)
     expect(latest().getByText(/can do a fuller assessment/)).toBeTruthy()
   })
 
@@ -189,12 +216,22 @@ describe('Mood: daily rating and PHQ-2 are separate', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add entry' }))
     const dialog = within(screen.getByRole('dialog'))
     expect(dialog.queryByLabelText(/PHQ-2 depression screening/)).toBeNull()
-    expect(dialog.getByText(/taken every 14 days\. Next due/)).toBeTruthy()
+    expect(dialog.getByText(/scheduled every 14 days \(team decision\)\. Next due/)).toBeTruthy()
     cleanup()
     renderApp('/indicators/mood', [{ ...daysAgo(14), indicator: 'mood', kind: 'phq2', score: 1 }])
     fireEvent.click(screen.getByRole('button', { name: 'Add entry' }))
     expect(
       within(screen.getByRole('dialog')).getByLabelText(/PHQ-2 depression screening/),
     ).toBeTruthy()
+  })
+
+  it('labels a current PHQ-2 below the cutoff, and a PHQ-2 older than 14 days as history', () => {
+    renderApp('/indicators/mood', [{ ...daysAgo(3), indicator: 'mood', kind: 'phq2', score: 1 }])
+    expect(latest().getAllByText('Below screening cutoff').length).toBeGreaterThan(0)
+    cleanup()
+    renderApp('/indicators/mood', [{ ...daysAgo(15), indicator: 'mood', kind: 'phq2', score: 4 }])
+    expect(latest().getAllByText('Screening due').length).toBeGreaterThan(0)
+    expect(latest().getByText(/now history only/)).toBeTruthy()
+    expect(latest().queryByText('Further assessment recommended')).toBeNull()
   })
 })
