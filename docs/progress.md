@@ -4,7 +4,7 @@
 
 **Last updated:** 2026-11-14
 **Current phase:** B — Features, working from the owner's brainstorm (Sections 13–15).
-**Build status:** Passing. Repository https://github.com/shahyari/haoma (public). Production https://haoma-mu.vercel.app.
+**Build status:** Passing. Repository https://github.com/shahyari/haoma (public). Production https://haomaho.vercel.app.
 
 ## Completed
 

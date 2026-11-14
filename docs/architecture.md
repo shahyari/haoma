@@ -141,7 +141,7 @@ The `verify` skill reads these.
 - Lint/typecheck: `npm run lint` and `npm run typecheck`
 - Format: `npm run format` (check only: `npm run format:check`)
 - Deploy: `git push origin main` (the Vercel project `haoma` is connected to `shahyari/haoma` and builds `main` as production). Manual fallback: `npx vercel --prod`
-- Production URL: https://haoma-mu.vercel.app
+- Production URL: https://haomaho.vercel.app
 
 ## Deployment smoke test
 

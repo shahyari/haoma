@@ -49,7 +49,7 @@ The sections below are completed during the hackathon.
 
 ## Explore
 
-- **Live app:** https://haoma-mu.vercel.app (foundation build with placeholder pages)
+- **Live app:** https://haomaho.vercel.app (in development)
 - **Presentation (official demo):** TODO: slides URL
 - **NASA project page:** TODO: project page URL
 
