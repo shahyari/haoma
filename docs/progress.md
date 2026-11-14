@@ -13,7 +13,8 @@
 - Home: indicator list with the latest reading's timestamp and status, Attention/Escalate banners, RULE-30 reminder, fictional profile Alex Morgan (Flight Engineer, Aster-1 Lunar Transit Mission, Mission Day 42), check-ins completed today and indicators to review (no health score), daily check-in, PHQ-2 screening state, "Load simulated demo history".
 - Per-indicator history view (`/indicators/:id`): latest value, unit, time, provenance; status with rule, action, evidence labels, REF IDs; personal baseline; chart plus accessible table; approved rules listed separately. Chart library lazy-loaded (main bundle 780 → 423 kB).
 - OD-14 applied (owner decisions on the audit, `scientific-foundations.md`): AU-1 sleep label; AU-3 heart-rate rest state, rest-only rules and baseline, descriptive count of readings above 100; AU-4 systolic < 90 OR diastolic < 60; AU-5 PHQ-2 current for 14 days, with the owner's four labels; AU-6 timestamps and separate check-in completeness; AU-7 time-of-day clause removed. Tests added for each.
-- AU-2 temperature: revised, evidence-backed proposal written (`scientific-foundations.md` → "AU-2 revised proposal"); display-only note for forehead readings; no rule changed.
+- OD-15 applied: temperature method required for new entries; RULE-14–RULE-17 for oral readings only; forehead and legacy readings ("Method not recorded") shown with trend and same-method baseline difference, unclassified; one chart line per method; "keeps rising" trigger removed. PHQ-2 single cutoff 3 (score 2 alone no longer Attention; REF-56 documents the ≥ 2 alternative). Heart rate: rate rules resting-only, RULE-08 symptom-based escalation for any reading.
+- Owner logo applied as favicon and header mark (TP-16).
 - Body figure: interaction proposal written (`design.md` → "Body figure"); not built.
 
 ## Decisions made
@@ -44,18 +45,18 @@
 | 2026-11-14 | Owner brainstorm Sections 13–15 received; Section 14 and the decided parts of Section 13 implemented | `product.md`, `design.md` |
 | 2026-11-14 | Kickoff received 09:00 CET; repo created and Phase A executed | `implementation.md` |
 | 2026-11-14 | OD-14: audit decisions (AU-1, AU-3–AU-7 applied; AU-2 to revise), PHQ-2 labels, D-01 charts approved, provisional demo profile, body-figure direction, lazy-load charts | `scientific-foundations.md`, `design.md`, `data-and-limitations.md` |
+| 2026-11-14 | OD-15: temperature method-specific rules, PHQ-2 single cutoff 3, RULE-08 symptom-based for any reading; owner logo | `scientific-foundations.md`, `references.md` |
 | 2026-11-14 | Release schedule: freeze Sun 18:00 CET, internal target Sun 22:00 CET, deadline Sun 23:59 CET | `implementation.md` |
 | 2026-11-14 | OD-13: OSDR cross-check applied (C-5 to C-8); REF-54 Polaris Dawn, REF-55 OSD-575 added as `Unverified`; no rule changed | `scientific-foundations.md`, `references.md` |
 
 ## Outstanding decisions (owner)
 
-1. AU-2 temperature: decide AU-2a–e (`scientific-foundations.md` → "AU-2 revised proposal").
-2. PHQ-2 score 2: keep the RULE-22 🟡 level alongside the "Below screening cutoff" label, or drop it.
-3. Heart rate: keep applying the RULE-08 symptom clause to after-activity readings (current, conservative), or limit it to resting readings.
-4. Body figure: approve the interaction proposal, including questions (a)–(c) (`design.md` → "Body figure").
-5. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
-6. Settings and About placement in the navigation; auto-mode source (LED lighting), zone source, condition-based suggestions.
-7. Berlin Local Event name and local judging times.
+1. RULE-17 vs. its source (REF-50): the source describes a fever that "stays at or keeps rising above" 39.4 °C and gives 40.6 °C as its single-reading level; RULE-17 escalates on one oral reading ≥ 39.4 °C. Keep, or align (`scientific-foundations.md` → "OD-15 verification").
+2. REF-56 (PHQ-2 meta-analysis, context only): approve or reject.
+3. Body figure: approve the interaction proposal, questions (a)–(c) (`design.md` → "Body figure"); remaining UX decisions (owner is preparing them).
+4. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
+5. Settings and About placement; auto-mode source (LED lighting), zone source, condition-based suggestions.
+6. Berlin Local Event name and local judging times.
 
 ## Environment status (2026-11-14)
 
@@ -68,8 +69,8 @@ SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (
 
 ## Verification
 
-- 2026-11-14 (after OD-14): `npm run format:check` clean; `npm run lint` 0 problems; `npm run typecheck` exit 0; `npm test` 12 files, 195 tests passed; `npm run build` exit 0, no chunk-size warning.
-- Covers: rule boundaries, overlaps, precedence; OD-14 behaviour (AU-1, AU-3, AU-4, AU-5); missing-data states; keyboard (jsdom); token contrast for 16 combinations; localStorage persistence. Results: `design-decisions.md` → Accessibility.
+- 2026-11-14 (after OD-15): `npm run format:check` clean; `npm run lint` 0 problems; `npm run typecheck` exit 0; `npm test` 12 files, 216 tests passed; `npm run build` exit 0, no chunk-size warning.
+- Covers: rule boundaries, overlaps, precedence; temperature methods and legacy records; heart-rate rest state and symptom-based escalation; PHQ-2 single cutoff and 14-day validity; a sweep that no reading without an applicable rule is shown as Within reference; keyboard (jsdom); token contrast; persistence.
 - Not done: manual keyboard pass in a real browser, screen reader, true 320 px render of seeded pages. No WCAG conformance is claimed.
 
 ## Next action

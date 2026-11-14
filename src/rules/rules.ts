@@ -100,7 +100,7 @@ export const RULES = {
     ['GCR'],
     [],
     ['REF-22'],
-    '60–100 bpm at rest (AHA). Lower rates can be normal in very fit people.',
+    '60–100 bpm at rest (AHA). Lower rates can be normal in very fit people. Resting readings only.',
   ),
   'RULE-07': rule(
     'RULE-07',
@@ -109,7 +109,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-22'],
-    'Below 60 or above 100 at rest without symptoms.',
+    'Below 60 or above 100 at rest without symptoms. Resting readings only; a rate after activity is not interpreted against this range.',
     'Re-check at rest the next morning and compare with personal baseline.',
   ),
   'RULE-08': rule(
@@ -119,7 +119,7 @@ export const RULES = {
     ['TDD'],
     ['TDD'],
     ['REF-22', 'REF-23'],
-    'Resting rate outside 60–100 with dizziness, fainting, breathlessness or chest pain, a rate regularly above 100 at rest, or a felt irregular rhythm.',
+    'Symptom-based, for any reading (OD-15): dizziness, fainting, breathlessness or chest pain with a rate outside 60–100, or a felt irregular rhythm. The clause “a rate regularly above 100 at rest” is not evaluated (OD-14).',
     'Contact flight surgeon.',
   ),
   'RULE-29': rule(
@@ -199,7 +199,7 @@ export const RULES = {
     ['GCR', 'TDD'],
     [],
     ['REF-50', 'REF-31'],
-    'Below 37.5 °C oral, and within 0.5 °C of the personal baseline (team-set parameter P-4).',
+    'Oral readings only: below 37.5 °C, and within 0.5 °C of the oral baseline (team-set parameter P-4).',
   ),
   'RULE-15': rule(
     'RULE-15',
@@ -208,7 +208,7 @@ export const RULES = {
     ['GCR'],
     ['GCR', 'TDD'],
     ['REF-50', 'REF-31', 'REF-32'],
-    '37.5–37.9 °C (often called low-grade fever).',
+    'Oral readings only: 37.5–37.9 °C (often called low-grade fever).',
     'Rest, drink fluids, re-check in a few hours. Do not judge right after exercise.',
   ),
   'RULE-16': rule(
@@ -218,7 +218,7 @@ export const RULES = {
     ['GCR', 'TDD'],
     ['TDD'],
     ['REF-30', 'REF-32'],
-    '38.0 °C or higher and either symptoms or a reading more than 0.5 °C above the baseline. Until a baseline exists, 38.0 °C or higher alone.',
+    'Oral readings only: 38.0 °C or higher and either reported symptoms or a reading more than 0.5 °C above the oral baseline. Until a baseline exists, 38.0 °C or higher alone.',
     'Report, especially with other symptoms.',
   ),
   'RULE-17': rule(
@@ -228,7 +228,7 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-50', 'REF-31'],
-    '39.4 °C (103 °F) or higher. Fixed safety ceiling; the baseline never overrides it.',
+    'Oral readings only: 39.4 °C (103 °F) or higher. Fixed safety ceiling; the baseline never overrides it.',
     'Contact flight surgeon promptly.',
   ),
   // Sleep
@@ -270,10 +270,10 @@ export const RULES = {
       'RULE-21',
       'mood',
       'normal',
-      ['TDD'],
+      ['GCR'],
       [],
       ['REF-51', 'REF-40'],
-      'PHQ-2 score 0–1 within the last 14 days, and stable daily ratings.',
+      'PHQ-2 score 0–2 within the last 14 days (below the validated cutoff of 3), and stable daily ratings. A score below the cutoff does not rule out depression.',
     ),
     statusLabel: 'Below screening cutoff',
   },
@@ -283,8 +283,8 @@ export const RULES = {
     'attention',
     ['TDD'],
     ['TDD'],
-    ['REF-51', 'REF-40', 'REF-42'],
-    'PHQ-2 score 2 within the last 14 days (team choice: an earlier attention level below the validated cutoff of 3), or a declining daily trend (team-set parameter P-5).',
+    ['REF-42'],
+    'A declining daily mood trend (team-set parameter P-5). A PHQ-2 score of 2 alone no longer triggers this rule (OD-15).',
     'Check in, use self-care time, talk to crewmates.',
   ),
   'RULE-23': {

@@ -29,15 +29,25 @@ interface Props {
   unit: string
   /** Personal baseline, drawn as a dashed reference line. */
   baseline?: number
+  /** Label of the baseline line; defaults to "Personal baseline". */
+  baselineLabel?: string
   yDomain?: [number, number]
 }
 
-const COLORS = ['var(--chart-1)', 'var(--chart-2)']
-/** The second series is dashed and uses a different marker, so series never differ by colour alone. */
-const DASHES = [undefined, '6 4']
+const COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)']
+/** Later series are dashed or dotted with hollow markers, so series never differ by colour alone. */
+const DASHES = [undefined, '6 4', '1 3']
 
 /** Measured values over time. The data table next to it carries the same values. */
-export function HistoryChart({ label, series, points, unit, baseline, yDomain }: Props) {
+export function HistoryChart({
+  label,
+  series,
+  points,
+  unit,
+  baseline,
+  baselineLabel = 'Personal baseline',
+  yDomain,
+}: Props) {
   const config: ChartConfig = Object.fromEntries(
     series.map((s, i) => [s.key, { label: s.label, color: COLORS[i % COLORS.length] }]),
   )
@@ -86,7 +96,7 @@ export function HistoryChart({ label, series, points, unit, baseline, yDomain }:
             stroke="var(--foreground)"
             strokeDasharray="2 4"
             label={{
-              value: 'Personal baseline',
+              value: baselineLabel,
               position: 'insideTopRight',
               fill: 'var(--foreground)',
             }}

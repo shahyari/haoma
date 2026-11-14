@@ -73,5 +73,6 @@ Questions for the owner:
 ## Design assets
 
 - Figma link: TODO: URL or none
-- Icons / fonts / licenses: TODO: sources (record them in `references.md`)
+- Logo: owner-supplied `logo.svg` (2026-11-14), used as the favicon (`public/favicon.svg`, white in dark mode) and as the header mark (`src/components/Logo.tsx`, filled with the text colour). Recorded as TP-16 in `references.md`.
+- Icons: Lucide only (TP-08). Fonts: TODO: sources (record them in `references.md`)
 - Screenshots / prototypes: TODO: paths

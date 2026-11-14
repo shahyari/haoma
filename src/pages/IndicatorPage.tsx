@@ -7,7 +7,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { useHealthData } from '@/data/HealthDataProvider'
 import { formatDate, formatDateTime } from '@/domain/dates'
-import { formatContext, formatValue } from '@/domain/format'
+import { formatContext, formatValue, temperatureMethodLabel } from '@/domain/format'
 import { INDICATOR_IDS, INDICATORS, type HealthEntry, type IndicatorId } from '@/domain/indicators'
 import { phq2Schedule } from '@/features/checkin/checkin'
 import { EntryDialog } from '@/features/entry/EntryDialog'
@@ -38,17 +38,21 @@ function HistorySection({
   view,
   entries,
   baseline,
+  baselineLabel,
   label,
 }: {
   view: HistoryView
   entries: HealthEntry[]
   baseline?: number
+  baselineLabel?: string
   label: string
 }) {
   const rows = view.filter ? entries.filter(view.filter) : entries
+  // Only series with readings get a line and a legend entry.
+  const series = view.series.filter((s) => rows.some((r) => s.value(r) !== undefined))
   const points: ChartPoint[] = rows.map((entry) => {
     const point: ChartPoint = { t: Date.parse(entry.recordedAt) }
-    for (const s of view.series) {
+    for (const s of series) {
       const value = s.value(entry)
       if (value !== undefined) point[s.key] = value
     }
@@ -74,10 +78,11 @@ function HistorySection({
             >
               <HistoryChart
                 label={`Line chart of ${name}, ${rows.length} readings. The same values are in the table that follows.`}
-                series={view.series}
+                series={series}
                 points={points}
                 unit={view.unit}
                 baseline={baseline}
+                baselineLabel={baselineLabel}
                 yDomain={view.yDomain}
               />
             </Suspense>
@@ -158,6 +163,17 @@ export function IndicatorPage() {
     now,
   })
   const baseline = personalBaseline(indicator, data.entries)
+  const baselineMethod =
+    baseline?.method && baseline.method !== 'unknown'
+      ? temperatureMethodLabel(baseline.method)
+      : undefined
+  // A plain difference for temperature (shown for every method, including forehead readings that no rule classifies).
+  const difference =
+    indicator === 'bodyTemperature' &&
+    baseline?.value !== undefined &&
+    latest?.indicator === 'bodyTemperature'
+      ? Math.round((latest.celsius - baseline.value) * 10) / 10
+      : undefined
   const rules = (Object.values(RULES) as RuleDefinition[]).filter(
     (rule) => rule.indicator === indicator,
   )
@@ -251,7 +267,8 @@ export function IndicatorPage() {
               The questions cover the last 2 weeks; the screening is scheduled every 14 days (team
               decision), and a result counts for 14 days. The PHQ-2 is a screener validated in
               primary care and obstetrics-gynecology patients, not in astronauts. It is not a
-              diagnosis and not a daily mood rating.
+              diagnosis and not a daily mood rating. A score below the cutoff does not rule out
+              depression.
             </p>
           </div>
         ) : null}
@@ -279,22 +296,39 @@ export function IndicatorPage() {
             Personal baseline
           </h2>
           <p className="text-sm">
-            {baseline.value !== undefined && latest ? (
+            {baseline.method === 'unknown' ? (
+              <>
+                Not available: the latest reading has no recorded method, and readings from
+                different methods are never combined.
+              </>
+            ) : baseline.value !== undefined && latest ? (
               <>
                 Your usual value before the latest reading is{' '}
                 <span className="num">
                   {baseline.value} {INDICATORS[indicator].unit}
                 </span>{' '}
                 (median of your last{' '}
-                {indicator === 'heartRate' ? 'resting readings' : 'readings with the same method'}).
-                It is not matched to the time of day.
+                {indicator === 'heartRate'
+                  ? 'resting readings'
+                  : `${baselineMethod?.toLowerCase()} readings`}
+                ). It is not matched to the time of day.
+                {difference !== undefined ? (
+                  <>
+                    {' '}
+                    The latest reading is{' '}
+                    <span className="num">
+                      {Math.abs(difference)} {INDICATORS[indicator].unit}
+                    </span>{' '}
+                    {difference >= 0 ? 'above' : 'below'} it.
+                  </>
+                ) : null}
               </>
             ) : (
               <>
                 Not available yet: a baseline needs <span className="num">{baseline.required}</span>{' '}
                 earlier readings
                 {indicator === 'bodyTemperature'
-                  ? ' taken with the same method and not after exercise'
+                  ? ` taken with the same method (${baselineMethod?.toLowerCase()}) and not after exercise`
                   : ' taken at rest'}
                 , and <span className="num">{baseline.readings}</span> exist.
               </>
@@ -317,6 +351,7 @@ export function IndicatorPage() {
             view={view}
             entries={entries}
             baseline={baseline?.value}
+            baselineLabel={baselineMethod ? `Personal baseline (${baselineMethod})` : undefined}
             label={label}
           />
         ))}

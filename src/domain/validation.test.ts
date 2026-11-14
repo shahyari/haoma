@@ -92,11 +92,11 @@ describe('validateEntry', () => {
     ])
   })
 
-  it('requires the temperature method and exercise flag', () => {
-    expect(
-      issuesOf({ ...base, indicator: 'bodyTemperature', celsius: 37, exercisedLast30Min: 'no' }),
-    ).toEqual([
-      { field: 'method', code: 'required' },
+  it('accepts a legacy temperature without a method, but rejects an unknown method', () => {
+    const temp = { ...base, indicator: 'bodyTemperature', celsius: 37, exercisedLast30Min: false }
+    expect(issuesOf(temp)).toEqual([])
+    expect(issuesOf({ ...temp, method: 'ear', exercisedLast30Min: 'no' })).toEqual([
+      { field: 'method', code: 'notAllowed' },
       { field: 'exercisedLast30Min', code: 'notABoolean' },
     ])
   })

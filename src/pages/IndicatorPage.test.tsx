@@ -141,6 +141,24 @@ describe('IndicatorPage', () => {
     )
   })
 
+  it('requires a temperature method and shows it in the details and history; legacy readings say "Method not recorded"', () => {
+    const store = renderApp('/indicators/bodyTemperature', [
+      { ...daysAgo(2), indicator: 'bodyTemperature', celsius: 36.6, exercisedLast30Min: false },
+    ])
+    enter({ 'Temperature (°C)': '37.1' })
+    expect(within(screen.getByRole('dialog')).getByText('Choose an option.')).toBeTruthy()
+    fireEvent.click(within(screen.getByRole('dialog')).getByLabelText('Forehead sensor'))
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Save entry' }))
+    expect(latest().getByText(/Forehead sensor/)).toBeTruthy()
+    expect(latest().getByText('Not evaluated')).toBeTruthy()
+    const cells = within(table(/table of readings/))
+      .getAllByRole('row')
+      .slice(1)
+      .map((r) => within(r).getAllByRole('cell')[1].textContent)
+    expect(cells).toEqual(['Forehead sensor', 'Method not recorded'])
+    expect(store.load().data.entries.at(-1)).toMatchObject({ method: 'forehead' })
+  })
+
   it('has no baseline section for indicators whose rules do not use one', () => {
     renderApp('/indicators/sleep')
     expect(screen.queryByRole('region', { name: 'Personal baseline' })).toBeNull()

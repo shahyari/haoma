@@ -180,11 +180,13 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
   function submit(event: FormEvent) {
     event.preventDefault()
     const result = validateEntry(buildEntry(indicator, values, symptoms))
-    // The model accepts a missing rest state on old stored entries; new entries must record it.
+    // The model accepts these fields missing on old stored entries; new entries must record them.
     const missingActivity = indicator === 'heartRate' && !values.activity
-    if (!result.ok || missingActivity) {
+    const missingMethod = indicator === 'bodyTemperature' && !values.method
+    if (!result.ok || missingActivity || missingMethod) {
       const next: Record<string, string> = {}
       if (missingActivity) next.activity = 'Choose an option.'
+      if (missingMethod) next.method = 'Choose an option.'
       for (const issue of result.ok ? [] : result.issues) {
         // A missing PHQ-2 answer surfaces on the score.
         const field = issue.field === 'score' ? (values.phq2a ? 'phq2b' : 'phq2a') : issue.field

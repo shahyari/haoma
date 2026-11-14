@@ -13,6 +13,10 @@ export const HEART_RATE_ACTIVITY_LABELS = {
 } as const
 export const SLEEP_SOURCE_LABELS = { selfReport: 'Self-report', actigraphy: 'Actigraphy' } as const
 
+export function temperatureMethodLabel(method: keyof typeof TEMPERATURE_METHOD_LABELS | undefined) {
+  return method ? TEMPERATURE_METHOD_LABELS[method] : 'Method not recorded'
+}
+
 /** The reading with its unit, e.g. "118/76 mmHg". */
 export function formatValue(entry: HealthEntry): string {
   switch (entry.indicator) {
@@ -38,10 +42,10 @@ export function formatContext(entry: HealthEntry): string | undefined {
       return `${GLUCOSE_CONTEXT_LABELS[entry.context]} · ${GLUCOSE_DEVICE_LABELS[entry.device]}`
     case 'heartRate':
       return entry.activity ? HEART_RATE_ACTIVITY_LABELS[entry.activity] : 'Rest state not recorded'
-    case 'bodyTemperature':
-      return entry.exercisedLast30Min
-        ? `${TEMPERATURE_METHOD_LABELS[entry.method]} · after exercise`
-        : TEMPERATURE_METHOD_LABELS[entry.method]
+    case 'bodyTemperature': {
+      const method = temperatureMethodLabel(entry.method)
+      return entry.exercisedLast30Min ? `${method} · after exercise` : method
+    }
     case 'sleep':
       return SLEEP_SOURCE_LABELS[entry.source]
     default:

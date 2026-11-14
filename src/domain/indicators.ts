@@ -96,7 +96,8 @@ export interface BloodGlucoseEntry extends EntryBase {
 export interface BodyTemperatureEntry extends EntryBase {
   indicator: 'bodyTemperature'
   celsius: number
-  method: TemperatureMethod
+  /** Required for new entries; absent on legacy entries (shown as "Method not recorded", never assumed oral). */
+  method?: TemperatureMethod
   exercisedLast30Min: boolean
 }
 

@@ -97,10 +97,10 @@ A mission-phase setting: **In flight / Approaching landing / Post-landing**, wit
 
 | Rule | Tier | Condition | Action | Threshold | Action label | Evidence | Status |
 |---|---|---|---|---|---|---|---|
-| RULE-06 | 🟢 Normal | 60–100 bpm at rest (AHA). Lower rates can be normal in very fit people. | — | GCR | — | REF-22 | Approved |
-| RULE-07 | 🟡 Attention | Below 60 or above 100 at rest without symptoms | Re-check at rest the next morning and compare with personal baseline. | GCR | TDD | REF-22; baseline P-1 | Approved |
+| RULE-06 | 🟢 Normal | 60–100 bpm at rest (AHA). Lower rates can be normal in very fit people. Resting readings only (OD-14, OD-15). | — | GCR | — | REF-22 | Approved |
+| RULE-07 | 🟡 Attention | Below 60 or above 100 at rest without symptoms. Resting readings only; a rate after activity is never interpreted against this range (OD-15) | Re-check at rest the next morning and compare with personal baseline. | GCR | TDD | REF-22; baseline P-1 | Approved |
 | RULE-29 | 🟡 Attention | Resting HR differs from the personal baseline by P-3 (±10 bpm), with the baseline minimum P-2 met | "Your resting heart rate is [X] bpm, which is [N] bpm [above/below] your usual. Re-check at rest tomorrow morning. If it stays different, or you feel dizzy, short of breath or notice an irregular heartbeat, contact the flight surgeon." (Symptoms lead to the same contact as RULE-08, so the two rules don't conflict.) | TDD | TDD | Informed by REF-18 | Approved |
-| RULE-08 | 🔴 Escalate | Resting rate outside 60–100 with dizziness, fainting, breathlessness or chest pain, a rate regularly above 100 at rest, or a felt irregular rhythm | Contact flight surgeon. | TDD | TDD | Informed by REF-22, REF-23 | Approved |
+| RULE-08 | 🔴 Escalate | **Symptom-based, for any reading, resting or after activity (OD-15):** dizziness, fainting, breathlessness or chest pain with a rate outside 60–100, or a felt irregular rhythm. The clause "a rate regularly above 100 at rest" is not evaluated (OD-14) | Contact flight surgeon. | TDD | TDD | Informed by REF-22, REF-23 | Approved |
 
 ### Blood glucose
 
@@ -142,10 +142,10 @@ A mission-phase setting: **In flight / Approaching landing / Post-landing**, wit
 
 | Rule | Tier | Condition | Action | Threshold | Action label | Evidence | Status |
 |---|---|---|---|---|---|---|---|
-| RULE-14 | 🟢 Normal | Below 37.5 °C oral, and within 0.5 °C of the personal baseline (P-4) | — | GCR (37.5 °C) + TDD (baseline margin) | — | REF-50 (oral fever "above 99°F to 99.5°F (37.2°C to 37.5°C), depending on the time of day"), REF-31; P-1, P-4 | Approved |
-| RULE-15 | 🟡 Attention | 37.5–37.9 °C (often called low-grade fever) | Rest, drink fluids, re-check in a few hours. Do not judge right after exercise. | GCR | GCR (fluids/rest: "Drink fluids and rest", REF-50); exercise note = TDD | REF-50, REF-31 (the term "low-grade"); REF-32 | Approved |
-| RULE-16 | 🔴 Escalate | ≥ 38.0 °C **and** either symptoms or a reading more than 0.5 °C above the baseline. Until a baseline exists (P-2), ≥ 38.0 °C alone. | Report, especially with other symptoms. | GCR (38.0 °C) + TDD (baseline/symptom condition) | TDD | REF-30, REF-32; P-4 | Approved |
-| RULE-17 | 🔴 Escalate | 39.4 °C (103 °F) or higher, or a fever that keeps rising. Fixed safety ceiling; the baseline never overrides it. | Contact flight surgeon promptly. | GCR | TDD | REF-50 ("a fever that stays at or keeps rising above 103°F (39.4°C)"), REF-31 | Approved |
+| RULE-14 | 🟢 Normal | **Oral readings only (OD-15):** below 37.5 °C, and within 0.5 °C of the oral baseline (P-4) | — | GCR (37.5 °C) + TDD (baseline margin) | — | REF-50 (oral fever "above 99°F to 99.5°F (37.2°C to 37.5°C), depending on the time of day"), REF-31; P-1, P-4 | Approved |
+| RULE-15 | 🟡 Attention | **Oral readings only (OD-15):** 37.5–37.9 °C (often called low-grade fever) | Rest, drink fluids, re-check in a few hours. Do not judge right after exercise. | GCR | GCR (fluids/rest: "Drink fluids and rest", REF-50); exercise note = TDD | REF-50, REF-31 (the term "low-grade"); REF-32 | Approved |
+| RULE-16 | 🔴 Escalate | **Oral readings only (OD-15):** ≥ 38.0 °C **and** either reported symptoms or a reading more than 0.5 °C above the oral baseline. Until a baseline exists (P-2), ≥ 38.0 °C alone. "Symptoms" stays undefined: any reported symptom flag counts; no list is invented (OD-15) | Report, especially with other symptoms. | GCR (38.0 °C) + TDD (baseline/symptom condition) | TDD | REF-30, REF-32; P-4 | Approved |
+| RULE-17 | 🔴 Escalate | **Oral readings only (OD-15):** 39.4 °C (103 °F) or higher. Fixed safety ceiling; the baseline never overrides it. The automated "a fever that keeps rising" trigger is removed until an evidence-backed definition exists (OD-15). Source discrepancy, not yet acted on: see "OD-15 verification" | Contact flight surgeon promptly. | GCR | TDD | REF-50 ("a fever that stays at or keeps rising above 103°F (39.4°C)"), REF-31 | Approved |
 
 ### Sleep
 
@@ -179,8 +179,8 @@ A mission-phase setting: **In flight / Approaching landing / Post-landing**, wit
 
 | Rule | Tier | Condition | Action | Threshold | Action label | Evidence | Status |
 |---|---|---|---|---|---|---|---|
-| RULE-21 | 🟢 Normal, labeled **"Below screening cutoff"** | PHQ-2 score 0–1 within the last 14 days (OD-14, AU-5), and stable daily ratings. | — | TDD (follows from the score-2 team level in RULE-22; the validated cutoff is 3) | — | REF-51, REF-40 | Approved |
-| RULE-22 | 🟡 Attention | PHQ-2 score 2 within the last 14 days (team choice: an earlier attention level below the validated cutoff of 3), or a declining daily trend (P-5) | Check in, use self-care time, talk to crewmates. | TDD (score 2, informed by REF-51, REF-40; daily trend) | TDD (informed by REF-42) | REF-51, REF-40, REF-42; P-5 | Approved |
+| RULE-21 | 🟢 Normal, labeled **"Below screening cutoff"** | PHQ-2 score 0–2 within the last 14 days (OD-14, OD-15), and stable daily ratings. A score below the cutoff does not rule out depression | — | GCR (validated cutoff of 3, REF-51) | — | REF-51, REF-40 | Approved |
+| RULE-22 | 🟡 Attention | A declining daily mood trend (P-5). The PHQ-2 score-2 trigger was removed (OD-15): the app uses one cutoff, 3 | Check in, use self-care time, talk to crewmates. | TDD (daily trend) | TDD (informed by REF-42) | REF-42; P-5 | Approved |
 | RULE-23 | 🔴 Escalate, labeled **"Further assessment recommended"** | PHQ-2 score 3 or more within the last 14 days (validated cutpoint: "a PHQ-2 score > or =3 had a sensitivity of 83% and a specificity of 92% for major depression", primary care and obstetrics-gynecology patients) | "The flight surgeon or behavioral health team can do a fuller assessment." Arrange a private conference with the flight surgeon / behavioral health. | GCR | TDD | REF-51, REF-40 | Approved |
 | RULE-24 | Safety message (not a detection rule) | Always shown on every mood screen | "If you're having thoughts of harming yourself, contact the flight surgeon now." | — | TDD | — | Approved |
 
@@ -201,6 +201,7 @@ A mission-phase setting: **In flight / Approaching landing / Post-landing**, wit
 | OD-11 (2026-11-14) | C-1: MedlinePlus (REF-50) approved as a 2b source and primary for temperature; C-3: REF-46 primary for fasting glucose; C-4: Kroenke 2003 (REF-51) for PHQ-2, with score 2 as a team decision | RULE-09, RULE-10, RULE-13–RULE-15, RULE-17, RULE-21–RULE-23 |
 | OD-12 (2026-11-14) | C-2: low glucose is symptom-gated (Endocrine Society, REF-53); the ADA 54/70 levels are kept and labeled "defined for people with diabetes"; symptom checklist from REF-25 | RULE-09, RULE-11, RULE-12 |
 | OD-14 (2026-11-14) | Owner decisions on the implementation audit: AU-1 conditionally approved (single nights < 7 h labeled "Below general sleep recommendation", 🟡 only; RULE-20 and its precedence kept); AU-2 to be revised (see audit); AU-3 frequency threshold rejected, rest state recorded, repeated readings > 100 described only; AU-4 approved (systolic < 90 OR diastolic < 60; review vs. escalation kept separate); AU-5 approved (PHQ-2 result current for 14 days, then "Screening due"); AU-6 no expiry threshold, timestamps shown; AU-7 "similar time of day" removed. PHQ-2 labels: 0–2 "Below screening cutoff", 3–6 "Further assessment recommended", overdue "Screening due", no data "Not assessed" | P-1, RULE-05, RULE-06–RULE-08, RULE-19, RULE-21–RULE-25, RULE-29 |
+| OD-15 (2026-11-14) | Temperature: method required for new entries; RULE-14–RULE-17 apply to oral readings only; forehead and legacy (method not recorded) readings show trend and same-method baseline comparison, unclassified; baselines never mix methods; "keeps rising" trigger removed; no symptom list invented. PHQ-2: one cutoff (3); score 2 alone no longer gives 🟡; the daily trend part of RULE-22 is unchanged. Heart rate: rate-based rules use resting readings only; RULE-08 symptom-based escalation applies to every reading | RULE-08, RULE-14–RULE-17, RULE-21, RULE-22 |
 | OD-13 (2026-11-14) | OSDR cross-check (owner's report, Claude Desktop): C-5 Inspiration4 smartwatch claim replaced by the NASA Polaris Dawn source; C-6 bare OSDR root URL updated; C-7 OSD-575 added as glucose context; C-8 no in-flight Inspiration4 blood claim found. No threshold or rule changed. Changed items are `Unverified` until the owner approves them | Heart rate row, Blood glucose notes |
 
 **Still open (owner):** approve the OD-13 items (`references.md` → "Policy compliance review", C-5 to C-8):
@@ -216,7 +217,7 @@ The app implements RULE-01–RULE-30 as written above (`src/rules/`). Thresholds
 | ID | Gap found | Owner decision (OD-14) | Implemented |
 |---|---|---|---|
 | AU-1 | One or two nights of ≤ 6 h fell between RULE-19 and RULE-20 | Conditionally approved: a single night < 7 h is "Below general sleep recommendation" (general adult guidance, REF-35); RULE-20 and its precedence unchanged; never an emergency | Yes: RULE-19 widened; 🟡 only |
-| AU-2 | Temperature: 38.0–39.3 °C near baseline without symptoms; sub-fever rise above baseline; RULE-16 symptoms undefined; oral threshold applied to forehead readings; "keeps rising" undefined | Revise before implementing (proposal below) | Display only: forehead readings say that 37.5 °C is an oral level. No rule changed |
+| AU-2 | Temperature: 38.0–39.3 °C near baseline without symptoms; sub-fever rise above baseline; RULE-16 symptoms undefined; oral threshold applied to forehead readings; "keeps rising" undefined | OD-15: method-specific rules (oral only); no invented symptom list or escalation; "keeps rising" trigger removed | Yes. AU-2a (38.0–39.3 °C near baseline) and AU-2b stay **Not evaluated** with the baseline difference shown as a fact |
 | AU-3 | "a rate regularly above 100 at rest" (RULE-08) undefined | Proposed 3-of-7 threshold rejected. Record rest vs. after activity; describe repeated readings > 100, no frequency threshold | Yes: rest state required for new entries; RULE-06, RULE-07, RULE-29 and the baseline use resting readings only; history shows "resting readings above 100 bpm in the last 7 days: N of M" as a description |
 | AU-4 | "below 90/60" did not say one or both numbers | Approved: systolic < 90 OR diastolic < 60 (REF-44 gives "less than 90/60"; the OR reading is the owner's decision). RULE-05 = measurement review (🟡, re-measure); RULE-25 = escalation (🔴, with symptoms) | Yes: condition wording and the low number shown in the finding |
 | AU-5 | The latest PHQ-2 drove the status with no age limit | Approved: a result is current for 14 days, then history, and the next screening is due. The 2-week recall period is part of the questionnaire and stays distinct from the 14-day schedule | Yes, with the owner's four labels |
@@ -226,27 +227,25 @@ The app implements RULE-01–RULE-30 as written above (`src/rules/`). Thresholds
 
 **Fixed without changing a rule:** RULE-20 counted entries, so two entries for the same night counted as two short nights. It now counts nights (latest entry per local calendar day), as P-7 states.
 
-### AU-2 revised proposal (Claude, 2026-11-14) — owner decision needed
+### AU-2 evidence (Claude, 2026-11-14)
 
-Evidence checked 2026-11-14 against the approved sources:
+Evidence checked against the approved sources (the basis of OD-15):
 
-- **≥ 38.0 °C:** CDC defines fever as "a measured temperature of 100.4°F [38°C] or greater" (REF-30). The definition is for public-health screening of ill travelers on aircraft and ships, and it does not name a measurement site. MedlinePlus gives an adult **oral** level of 37.2–37.5 °C, depending on the time of day (REF-50). It gives no forehead level and covers only mouth, rectum and armpit. In-flight core temperature can reach about 38 °C (REF-32, forehead core sensor). So a 38.0 °C level is a general adult reference, not an astronaut-specific trigger.
-- **Symptom list for RULE-16:** the only list in an approved source is CDC's (REF-30). For aircraft, it lists fever with one or more of: "skin rash", "difficulty breathing", "persistent cough", "decreased consciousness or confusion of recent onset", "new unexplained bruising or bleeding (without previous injury)", "persistent diarrhea", "persistent vomiting (other than air sickness)", "headache with stiff neck", and "appears obviously unwell". It is a public-health reporting list for ill travelers, not a clinical triage list. MedlinePlus (REF-50) names some situations to contact a provider: a new rash or bruises, pain when urinating, a weakened immune system, or recent travel.
-- **"A fever that keeps rising" (RULE-17):** the REF-50 wording is "a fever that stays at or keeps rising above 103°F (39.4°C)". The clause applies **above 39.4 °C**, which the fixed 39.4 °C ceiling already covers. The source gives no separate rule for a rise below that level. REF-50 also lists a fever lasting more than 48 to 72 hours, which is not in RULE-17.
+- **≥ 38.0 °C:** CDC defines fever as "a measured temperature of 100.4°F [38°C] or greater" (REF-30). This is a public-health screening definition for ill travelers on aircraft and ships, and it names no measurement site. MedlinePlus gives an adult **oral** level of 37.2–37.5 °C, depending on the time of day (REF-50). It gives no forehead level. In-flight core temperature can reach about 38 °C (REF-32, forehead core sensor). The 38.0 °C level is a general adult reference, not an astronaut-specific trigger.
+- **Symptom lists:** CDC (REF-30) lists signs that, together with fever, make an ill traveler reportable (for example "skin rash", "difficulty breathing", "persistent cough"). It is a public-health reporting list, not a clinical triage list. Under OD-15 it is **not** used as the RULE-16 list.
 
-Proposal (each item is a separate decision):
+### OD-15 verification (Claude, 2026-11-14) — discrepancies reported, behavior unchanged
 
-| Item | Proposal | Basis | Label |
-|---|---|---|---|
-| AU-2a | 38.0–39.3 °C near the baseline without symptoms: show 🟡 "At or above general fever reference (38.0 °C, CDC screening definition; not validated for astronauts)" with the RULE-15 action. It never escalates on its own | REF-30, REF-32 | GCR (38.0 °C) + TDD |
-| AU-2b | Below 37.5 °C but > 0.5 °C above the baseline: keep **Not evaluated**, and show the difference from the baseline as a fact | No source gives a sub-fever alert level | — |
-| AU-2c | RULE-16 symptoms = the CDC aircraft list above, labeled "public-health screening list (CDC), not a clinical triage list" | REF-30 | GCR (list) |
-| AU-2d | Method is required (already). Forehead readings: either (i) evaluate against the same-method baseline and RULE-17 only, or (ii) keep the current rules with the "oral level" note now shown. Recommendation: (i), because no approved source gives a forehead fever level | REF-50, REF-32 | TDD |
-| AU-2e | Reword RULE-17 to the source wording ("39.4 °C or higher, including a fever that stays at or keeps rising above it") and drop the separate "keeps rising" trigger. Optionally add REF-50's "fever lasting more than 48 to 72 hours" as a new 🔴 condition | REF-50 | GCR |
+- **RULE-17 vs. REF-50:** MedlinePlus lists, under "Contact your provider right away if you are an adult and you:", the item "Have a fever that stays at or keeps rising above 103°F (39.4°C)", and, separately, "Have a fever of 105°F (40.6°C) or higher". Three differences from RULE-17, which escalates on a **single** reading ≥ 39.4 °C:
+  1. **Persistence:** "stays at or keeps rising" describes a fever that persists or rises, not a single reading. RULE-17 escalates on one reading, which is stricter.
+  2. **Boundary:** "above 103°F" excludes exactly 39.4 °C; RULE-17 uses "39.4 °C or higher".
+  3. **Single-reading level:** the source's single-reading item is 40.6 °C (105 °F).
+  
+  REF-50 names no measurement site for these items. Under OD-15 the rule is applied to oral readings only. Not changed, because this is an escalation condition (owner decision needed).
+- **RULE-08 irregular rhythm:** REF-23 (NASA) names "heart arrythmias" as a possible cardiovascular risk of spaceflight, but it gives no crew procedure. REF-22 (AHA) covers resting rate only. So the irregular-rhythm condition is **informed by** REF-23 (labeled TDD, as recorded) and has no clinical source for its action. The action "Contact flight surgeon." routes the crew member to medical review and makes no diagnostic claim.
+- **RULE-08 after activity:** the approved symptom condition combines symptoms with a rate outside 60–100. For after-activity readings the app keeps this combination (OD-15: symptom-based escalation applies in every context). The rate alone after activity is never classified. A rate inside 60–100 with symptoms does not escalate in any context, because no approved condition covers it.
 
-**Mood and PHQ-2 (2026-11-14):** the item wording, the stem ("Over the last 2 weeks, how often have you been bothered by the following problems?"), the answer scale (0–3 per item) and the total (0–6) match REF-40. The cutoff of 3 matches REF-51. Labels follow OD-14. The app states that the PHQ-2 is a screener validated in primary care and obstetrics-gynecology patients, not in astronauts, and that it is neither a diagnosis nor a daily mood rating. **Open point:** a PHQ-2 score of 2 is labeled "Below screening cutoff" in the screening line, but RULE-22 (team decision, OD-11) still gives the mood indicator 🟡 Attention for it. Both are shown. Owner to confirm, or to drop the score-2 attention level.
-
-**Open point, heart rate:** the RULE-08 symptom clause says "resting rate". The app still applies the symptom and irregular-rhythm clauses to after-activity readings, as it did before the rest state was recorded, so that no escalation is lost. Owner to confirm, or to limit the symptom clause to resting readings.
+**Mood and PHQ-2 (2026-11-14):** the item wording, the stem ("Over the last 2 weeks, how often have you been bothered by the following problems?"), the answer scale (0–3 per item) and the total (0–6) match REF-40. The app uses **one cutoff, 3** (REF-51; OD-15). A meta-analysis also reports a cutoff of 2: sensitivity 0.91 and specificity 0.67 for ≥ 2, against 0.72 and 0.85 for ≥ 3 (semistructured-interview studies). It recommends ≥ 2 mainly as the first step before a PHQ-9 [REF-56, `Unverified`]. The prototype does not mix the two cutoffs. The app states that the PHQ-2 is a screener validated in primary care and obstetrics-gynecology patients, not in astronauts, that it is neither a diagnosis nor a daily mood rating, and that a score below the cutoff does not rule out depression.
 
 ## Challenge guiding questions → evidence
 

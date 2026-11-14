@@ -17,6 +17,7 @@ import type {
   MoodEntry,
   MoodPhq2Entry,
   SleepEntry,
+  TemperatureMethod,
 } from '@/domain/indicators'
 import { INDICATOR_IDS, PHQ2_CADENCE_DAYS } from '@/domain/indicators'
 import { calendarDaysBetween } from '@/domain/dates'
@@ -120,17 +121,26 @@ function heartRate(entries: HeartRateEntry[], ctx: EvaluationContext): Indicator
   const outside = e.bpm < 60 || e.bpm > 100
   const atRest = e.activity === 'rest'
 
-  // RULE-08 also covers "a rate regularly above 100 at rest"; the owner rejected a
-  // frequency threshold (AU-3), so that clause is not evaluated; the history view
-  // describes repeated readings above 100 instead. The symptom and rhythm clauses are
-  // kept for every reading, as before the rest state was recorded (open question for the owner).
-  if ((outside && hasAny(e, HEART_RATE_SYMPTOMS)) || hasAny(e, ['irregularRhythm'])) {
-    findings.push(finding(RULES['RULE-08']))
+  // RULE-08 is symptom-based and applies to every reading, resting or not (OD-15).
+  // Its clause "a rate regularly above 100 at rest" is not evaluated (OD-14, AU-3);
+  // the history view describes repeated readings above 100 instead.
+  const irregular = hasAny(e, ['irregularRhythm'])
+  const symptomsWithRate = outside && hasAny(e, HEART_RATE_SYMPTOMS)
+  if (irregular || symptomsWithRate) {
+    findings.push(
+      finding(
+        RULES['RULE-08'],
+        undefined,
+        irregular
+          ? 'Irregular heartbeat reported.'
+          : 'Symptoms reported with a rate outside 60–100 bpm.',
+      ),
+    )
   } else if (outside && atRest) {
     findings.push(finding(RULES['RULE-07']))
   }
 
-  // RULE-06, RULE-07 and RULE-29 are worded for resting readings.
+  // Rate-based interpretation (RULE-06, RULE-07, RULE-29) uses resting readings only.
   if (!atRest) {
     return assess(
       'heartRate',
@@ -204,6 +214,16 @@ function bloodGlucose(entries: BloodGlucoseEntry[]): IndicatorAssessment {
   )
 }
 
+/** Earlier readings taken with the latest reading's method and not after exercise (P-1, P-6). Never mixes methods. */
+function sameMethodEarlier(entries: BodyTemperatureEntry[]): number[] {
+  const method = entries.at(-1)?.method
+  if (!method) return []
+  return entries
+    .slice(0, -1)
+    .filter((x) => x.method === method && !x.exercisedLast30Min)
+    .map((x) => x.celsius)
+}
+
 function bodyTemperature(
   entries: BodyTemperatureEntry[],
   ctx: EvaluationContext,
@@ -219,29 +239,30 @@ function bodyTemperature(
     )
   }
 
-  // Baseline: earlier readings with the same method, not taken after exercise.
-  const usual = baseline(
-    entries
-      .slice(0, -1)
-      .filter((x) => x.method === e.method && !x.exercisedLast30Min)
-      .map((x) => x.celsius),
-    p,
-  )
+  // OD-15: RULE-14–RULE-17 use oral levels, so they apply to oral readings only.
+  // Forehead and legacy readings without a method are shown with their trend, never classified.
+  if (e.method !== 'oral') {
+    return assess(
+      'bodyTemperature',
+      [],
+      e.method === 'forehead'
+        ? 'No approved rule gives a level for forehead readings, so it is not classified. Compare it with your trend and your forehead baseline.'
+        : 'The measurement method was not recorded, so no rule applies. Compare it with your trend.',
+    )
+  }
+
+  const usual = baseline(sameMethodEarlier(entries), p)
   const aboveBaseline = usual !== undefined && e.celsius > usual + p.temperatureShiftCelsius
   const findings: Finding[] = []
-  // AU-2 (pending): the 37.5 °C level is stated for oral readings; say so for forehead readings.
-  const siteNote =
-    e.method === 'forehead'
-      ? 'The 37.5 °C level is stated for oral readings (REF-50); this reading is from a forehead sensor.'
-      : undefined
 
+  // RULE-17's "a fever that keeps rising" has no evidence-backed definition and is not evaluated (OD-15).
   if (e.celsius >= 39.4) findings.push(finding(RULES['RULE-17']))
   else if (e.celsius >= 38.0) {
     if (usual === undefined || aboveBaseline || (e.symptoms?.length ?? 0) > 0) {
       findings.push(finding(RULES['RULE-16']))
     }
-  } else if (e.celsius >= 37.5) findings.push(finding(RULES['RULE-15'], undefined, siteNote))
-  else if (!aboveBaseline) findings.push(finding(RULES['RULE-14'], undefined, siteNote))
+  } else if (e.celsius >= 37.5) findings.push(finding(RULES['RULE-15']))
+  else if (!aboveBaseline) findings.push(finding(RULES['RULE-14']))
 
   return assess(
     'bodyTemperature',
@@ -321,14 +342,14 @@ function mood(entries: MoodEntry[], ctx: EvaluationContext): IndicatorAssessment
   const phq2 = screening.current ? screening.latest : undefined
   if (phq2) {
     if (phq2.score >= 3) findings.push(finding(RULES['RULE-23']))
-    else if (phq2.score === 2) findings.push(finding(RULES['RULE-22'], undefined, 'PHQ-2 score 2.'))
-    else findings.push(finding(RULES['RULE-21']))
+    // OD-15: one cutoff (3). A score of 2 alone is below the cutoff and no longer gives Attention.
+    else findings.push(finding(RULES['RULE-21'], undefined, `PHQ-2 score ${phq2.score}.`))
   }
 
   // P-5: short-window average at least N points below the long-window average. Never escalates.
   const ratings = entries.filter((x) => x.kind === 'dailyRating')
   const last = ratings.at(-1)
-  if (last && !findings.some((f) => f.rule.id === 'RULE-22')) {
+  if (last) {
     const { shortWindowDays, longWindowDays, minDropPoints } = p.moodTrend
     const within = (days: number) =>
       ratings.filter((x) => time(x) > time(last) - days * DAY_MS).map((x) => x.rating)
@@ -363,6 +384,8 @@ export interface PersonalBaseline {
   /** Earlier valid readings available for the baseline. */
   readings: number
   required: number
+  /** Temperature only: the method the baseline is built for (that of the latest reading). */
+  method?: TemperatureMethod | 'unknown'
 }
 
 /**
@@ -379,11 +402,13 @@ export function personalBaseline(
     earlier = restingEarlier(entriesOf(allEntries, 'heartRate'))
   } else if (indicator === 'bodyTemperature') {
     const entries = entriesOf(allEntries, 'bodyTemperature')
-    const latest = entries.at(-1)
-    earlier = entries
-      .slice(0, -1)
-      .filter((x) => x.method === latest?.method && !x.exercisedLast30Min)
-      .map((x) => x.celsius)
+    earlier = sameMethodEarlier(entries)
+    return {
+      value: baseline(earlier, p),
+      readings: earlier.length,
+      required: p.baselineMinReadings,
+      method: entries.at(-1)?.method ?? 'unknown',
+    }
   } else return undefined
   return { value: baseline(earlier, p), readings: earlier.length, required: p.baselineMinReadings }
 }

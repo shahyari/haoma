@@ -4,7 +4,7 @@ import type { HealthEntry } from '@/domain/indicators'
 import type { MissionPhase } from '@/domain/mission'
 import type { SymptomId } from '@/domain/symptoms'
 
-import { evaluateIndicator, phq2Screening, restingAbove100 } from './evaluate'
+import { evaluateIndicator, personalBaseline, phq2Screening, restingAbove100 } from './evaluate'
 
 let n = 0
 /** Day `day` of a fictional timeline, at 07:00. */
@@ -242,7 +242,7 @@ describe('mood (RULE-21–23)', () => {
   it.each([
     [0, 'normal RULE-21'],
     [1, 'normal RULE-21'],
-    [2, 'attention RULE-22'],
+    [2, 'normal RULE-21'],
     [3, 'escalate RULE-23'],
     [6, 'escalate RULE-23'],
   ])('PHQ-2 %i → %s', (score, expected) => {
@@ -441,10 +441,17 @@ describe('AU-5 PHQ-2: a result counts for 14 days', () => {
     expect(phq2Screening([phq2(2)], NOW).state).toBe('belowCutoff')
     expect(phq2Screening([], NOW).state).toBe('notAssessed')
   })
-  it('score 2 is below the screening cutoff but keeps the RULE-22 team attention level', () => {
+  it('score 2 alone is "Below screening cutoff", with no Attention (OD-15)', () => {
     const result = evaluate([phq2(2)])
-    expect(result.status).toBe('attention')
-    expect(result.label).toBeUndefined()
+    expect(result.status).toBe('normal')
+    expect(result.label).toBe('Below screening cutoff')
+    expect(result.findings[0].reason).toBe('PHQ-2 score 2.')
+  })
+  it('the daily trend still gives Attention on its own, alongside a below-cutoff PHQ-2', () => {
+    const stable = Array.from({ length: 10 }, (_, i) => rating(4, i + 1))
+    expect(run([phq2(2, 1), ...stable, rating(2, 11), rating(2, 12), rating(2, 13)])).toBe(
+      'attention RULE-22',
+    )
   })
   it('becomes history after 14 days, and the mood status shows "Screening due"', () => {
     expect(run([phq2(5, 1)], 'inFlight', day(14))).toBe('escalate RULE-23')
@@ -460,11 +467,97 @@ describe('AU-5 PHQ-2: a result counts for 14 days', () => {
   })
 })
 
-describe('AU-2 temperature (display only, rules unchanged)', () => {
-  it('notes that 37.5 °C is an oral level when the reading is from a forehead sensor', () => {
-    const result = evaluate([temp(37.6, { method: 'forehead' })])
-    expect(result.findings[0].rule.id).toBe('RULE-15')
-    expect(result.findings[0].reason).toContain('stated for oral readings')
-    expect(evaluate([temp(37.6)]).findings[0].reason).toBeUndefined()
+describe('OD-15 temperature: method-specific rules', () => {
+  const series = (value: number, method: 'oral' | 'forehead') =>
+    [1, 2, 3, 4, 5].map((day) => temp(value, { day, method }))
+  const legacy = (celsius: number, day = 6): HealthEntry => ({
+    ...at(day),
+    indicator: 'bodyTemperature',
+    celsius,
+    exercisedLast30Min: false,
+  })
+
+  it.each([37.4, 37.5, 38.0, 39.4, 40.6])(
+    'a forehead reading of %f °C is never classified, not even by the 39.4 °C rule',
+    (celsius) => {
+      const result = evaluate([temp(celsius, { method: 'forehead', symptoms: ['otherSymptoms'] })])
+      expect(result.status).toBe('none')
+      expect(result.note).toContain('forehead')
+    },
+  )
+  it('oral boundaries are unchanged', () => {
+    expect(run([temp(37.49)])).toBe('normal RULE-14')
+    expect(run([temp(37.5)])).toBe('attention RULE-15')
+    expect(run([temp(38.0)])).toBe('escalate RULE-16')
+    expect(run([temp(39.39)])).toBe('escalate RULE-16')
+    expect(run([temp(39.4)])).toBe('escalate RULE-17')
+  })
+  it('a legacy reading without a method is "not recorded", never assumed oral', () => {
+    const result = evaluate([legacy(39.5, 1)])
+    expect(result.status).toBe('none')
+    expect(result.note).toContain('method was not recorded')
+  })
+  it('baselines never combine methods', () => {
+    // Five forehead readings do not form a baseline for an oral reading.
+    expect(
+      personalBaseline('bodyTemperature', [...series(36.5, 'forehead'), temp(37.0, { day: 6 })]),
+    ).toMatchObject({ value: undefined, readings: 0, method: 'oral' })
+    expect(
+      personalBaseline('bodyTemperature', [
+        ...series(36.5, 'forehead'),
+        temp(36.9, { day: 6, method: 'forehead' }),
+      ]),
+    ).toMatchObject({ value: 36.5, readings: 5, method: 'forehead' })
+    // Legacy readings are left out of every baseline.
+    const withLegacy = [...[1, 2, 3, 4].map((d) => temp(36.6, { day: d })), legacy(36.6, 5)]
+    expect(
+      personalBaseline('bodyTemperature', [...withLegacy, temp(36.7, { day: 6 })]),
+    ).toMatchObject({ value: undefined, readings: 4 })
+    expect(personalBaseline('bodyTemperature', [legacy(36.6, 1)])).toMatchObject({
+      method: 'unknown',
+      readings: 0,
+    })
+  })
+  it('the post-exercise window (P-6) still comes first', () => {
+    expect(evaluate([temp(39.6, { exercised: true })]).note).toContain('after exercise')
+  })
+})
+
+describe('OD-15 heart rate: rate-based vs symptom-based', () => {
+  it('never interprets an after-activity rate against the resting range', () => {
+    for (const bpm of [45, 120, 170])
+      expect(run([hr(bpm, undefined, 1, 'afterActivity')])).toBe('none')
+  })
+  it('symptom-based escalation applies to resting and after-activity readings alike', () => {
+    expect(run([hr(130, ['chestPain'])])).toBe('escalate RULE-08')
+    expect(run([hr(130, ['chestPain'], 1, 'afterActivity')])).toBe('escalate RULE-08')
+    expect(run([hr(70, ['irregularRhythm'], 1, 'afterActivity')])).toBe('escalate RULE-08')
+    expect(evaluate([hr(70, ['irregularRhythm'], 1, 'afterActivity')]).findings[0].reason).toBe(
+      'Irregular heartbeat reported.',
+    )
+  })
+  it('symptoms with a rate inside 60–100 do not escalate (only the approved conditions apply)', () => {
+    expect(run([hr(90, ['breathlessness'], 1, 'afterActivity')])).toBe('none')
+    expect(run([hr(90, ['breathlessness'])])).toBe('normal RULE-06')
+  })
+})
+
+describe('no reading without an applicable rule is classified as Within reference', () => {
+  const cases: [string, HealthEntry[]][] = [
+    ['forehead temperature', [temp(36.8, { method: 'forehead' })]],
+    [
+      'temperature without method',
+      [{ ...at(1), indicator: 'bodyTemperature', celsius: 36.8, exercisedLast30Min: false }],
+    ],
+    ['temperature after exercise', [temp(36.8, { exercised: true })]],
+    ['heart rate after activity', [hr(75, undefined, 1, 'afterActivity')]],
+    ['heart rate without rest state', [hr(75, undefined, 1, null)]],
+    ['non-fasting glucose', [glucose(110, 'nonFasting')]],
+    ['daily mood ratings only', [rating(4, 1)]],
+    ['PHQ-2 older than 14 days', [phq2(0, 1)]],
+  ]
+  it.each(cases)('%s', (_label, entries) => {
+    const now = _label.startsWith('PHQ-2') ? new Date(Date.UTC(2026, 0, 20)) : NOW
+    expect(evaluate(entries, 'inFlight', now).status).toBe('none')
   })
 })

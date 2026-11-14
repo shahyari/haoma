@@ -3,7 +3,7 @@ import {
   GLUCOSE_DEVICE_LABELS,
   HEART_RATE_ACTIVITY_LABELS,
   SLEEP_SOURCE_LABELS,
-  TEMPERATURE_METHOD_LABELS,
+  temperatureMethodLabel,
 } from '@/domain/format'
 import type { EntryOrigin, HealthEntry, IndicatorId } from '@/domain/indicators'
 import { SYMPTOMS, type SymptomId } from '@/domain/symptoms'
@@ -118,11 +118,24 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
     {
       id: 'bodyTemperature',
       unit: '°C',
+      // One line per method: readings from different methods are never joined (OD-15).
       series: [
         {
-          key: 'celsius',
-          label: 'Temperature',
-          value: pick((e: E<'bodyTemperature'>) => e.celsius),
+          key: 'oral',
+          label: 'Oral',
+          value: pick((e: E<'bodyTemperature'>) => (e.method === 'oral' ? e.celsius : undefined)),
+        },
+        {
+          key: 'forehead',
+          label: 'Forehead sensor',
+          value: pick((e: E<'bodyTemperature'>) =>
+            e.method === 'forehead' ? e.celsius : undefined,
+          ),
+        },
+        {
+          key: 'unknownMethod',
+          label: 'Method not recorded',
+          value: pick((e: E<'bodyTemperature'>) => (e.method ? undefined : e.celsius)),
         },
       ],
       columns: [
@@ -133,7 +146,7 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
         },
         {
           header: 'Method',
-          cell: pick((e: E<'bodyTemperature'>) => TEMPERATURE_METHOD_LABELS[e.method]),
+          cell: pick((e: E<'bodyTemperature'>) => temperatureMethodLabel(e.method)),
         },
         {
           header: 'Within 30 min after exercise',

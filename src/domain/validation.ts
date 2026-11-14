@@ -153,7 +153,8 @@ export function validateEntry(input: unknown): ValidationResult<HealthEntry> {
     case 'bodyTemperature':
       fields = {
         celsius: c.number('celsius'),
-        method: c.oneOf('method', TEMPERATURE_METHODS),
+        // Optional so that legacy entries without a method still load; the form requires it.
+        ...(input.method !== undefined ? { method: c.oneOf('method', TEMPERATURE_METHODS) } : {}),
         exercisedLast30Min: c.boolean('exercisedLast30Min'),
       }
       break

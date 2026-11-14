@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 
+import { Logo } from '@/components/Logo'
 import { INDICATOR_IDS, INDICATORS } from '@/domain/indicators'
 import { cn } from '@/lib/utils'
 
@@ -38,7 +39,10 @@ export function AppShell() {
 
       <header className="border-b">
         <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3">
-          <span className="text-lg font-semibold">{APP_NAME}</span>
+          <span className="inline-flex items-center gap-2 text-lg font-semibold">
+            <Logo className="size-6 shrink-0" />
+            {APP_NAME}
+          </span>
           <nav aria-label="Main">
             <ul className="flex flex-wrap gap-1">
               {APP_ROUTES.filter((route) => !route.hidden).map((route) => (
