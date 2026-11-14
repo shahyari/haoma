@@ -6,7 +6,7 @@ Build **haoma**, a web-based astronaut health self-assessment prototype for the 
 
 ## Phase gate
 
-**Current phase: A — FOUNDATION** (kickoff received Sat 2026-11-14 09:00 CET). Product screens and rule logic wait for Phase B specs.
+**Current phase: B — FEATURES** (Checkpoint A passed 2026-11-14). The owner's brainstorm (Sections 13–15, `docs/product.md`) authorizes the items marked there; undecided items wait for owner answers (`docs/progress.md`).
 
 | Phase | Starts when | Allowed |
 |---|---|---|

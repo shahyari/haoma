@@ -7,7 +7,10 @@
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-body);
-  --spacing: var(--space-1);
+  --font-mono: var(--font-numeric);
+  --color-status-normal: var(--status-normal);
+  --color-status-attention: var(--status-attention);
+  --color-status-escalate: var(--status-escalate);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,85 +52,224 @@
 }
 
 /*
- * haoma design tokens (docs/design.md -> "Design tokens").
- * NEUTRAL PLACEHOLDER VALUES: not design decisions. The owner defines the
- * final values; change them here and the shadcn variables below follow.
+ * Display system (docs/design.md -> "Display settings", owner spec 2026-11-14).
+ * <html> carries: data-theme (earth | space | moon | mars), class "dark",
+ * data-contrast (normal | high), data-font-size (small | medium | large),
+ * data-colorblind (true | false). Set by src/settings/applySettings.ts.
  */
-:root {
-  --color-bg: oklch(1 0 0);
-  --color-text: oklch(0.145 0 0);
-  --color-accent: oklch(0.205 0 0);
-  --space-1: 0.25rem;
-  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
-  /* shadcn/ui variables */
-  --background: var(--color-bg);
-  --foreground: var(--color-text);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: var(--color-accent);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  /* --radius-md (design.md) = --radius * 0.8, see @theme above */
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+/* 1. Theme = gray scale. Earth: mist. Space: slate. Moon: zinc. Mars: neutral with a small orange hue. */
+:root,
+[data-theme='space'] {
+  --g-50: var(--color-slate-50);
+  --g-100: var(--color-slate-100);
+  --g-200: var(--color-slate-200);
+  --g-300: var(--color-slate-300);
+  --g-400: var(--color-slate-400);
+  --g-500: var(--color-slate-500);
+  --g-600: var(--color-slate-600);
+  --g-700: var(--color-slate-700);
+  --g-800: var(--color-slate-800);
+  --g-900: var(--color-slate-900);
+  --g-950: var(--color-slate-950);
+}
+[data-theme='earth'] {
+  --g-50: var(--color-mist-50);
+  --g-100: var(--color-mist-100);
+  --g-200: var(--color-mist-200);
+  --g-300: var(--color-mist-300);
+  --g-400: var(--color-mist-400);
+  --g-500: var(--color-mist-500);
+  --g-600: var(--color-mist-600);
+  --g-700: var(--color-mist-700);
+  --g-800: var(--color-mist-800);
+  --g-900: var(--color-mist-900);
+  --g-950: var(--color-mist-950);
+}
+[data-theme='moon'] {
+  --g-50: var(--color-zinc-50);
+  --g-100: var(--color-zinc-100);
+  --g-200: var(--color-zinc-200);
+  --g-300: var(--color-zinc-300);
+  --g-400: var(--color-zinc-400);
+  --g-500: var(--color-zinc-500);
+  --g-600: var(--color-zinc-600);
+  --g-700: var(--color-zinc-700);
+  --g-800: var(--color-zinc-800);
+  --g-900: var(--color-zinc-900);
+  --g-950: var(--color-zinc-950);
+}
+[data-theme='mars'] {
+  /* Tailwind "neutral" lightness steps with a small chroma at an orange hue. */
+  --g-50: oklch(98.5% 0.004 50);
+  --g-100: oklch(97% 0.006 50);
+  --g-200: oklch(92.2% 0.01 50);
+  --g-300: oklch(87% 0.014 50);
+  --g-400: oklch(70.8% 0.02 50);
+  --g-500: oklch(55.6% 0.022 50);
+  --g-600: oklch(43.9% 0.02 50);
+  --g-700: oklch(37.1% 0.018 50);
+  --g-800: oklch(26.9% 0.014 50);
+  --g-900: oklch(20.5% 0.012 50);
+  --g-950: oklch(14.5% 0.01 50);
 }
 
+/* 2. Mode and contrast = which steps of the scale each role uses. Normal targets WCAG AA, high targets AAA. */
+:root {
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-numeric: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --radius: 0.625rem;
+
+  --background: var(--g-50);
+  --foreground: var(--g-950);
+  --card: white;
+  --card-foreground: var(--g-950);
+  --popover: white;
+  --popover-foreground: var(--g-950);
+  --primary: var(--g-900);
+  --primary-foreground: var(--g-50);
+  --secondary: var(--g-100);
+  --secondary-foreground: var(--g-900);
+  --muted: var(--g-100);
+  --muted-foreground: var(--g-600);
+  --accent: var(--g-200);
+  --accent-foreground: var(--g-900);
+  --destructive: var(--color-red-700);
+  --border: var(--g-300);
+  --input: var(--g-500);
+  --ring: var(--g-500);
+  --chart-1: var(--g-900);
+  --chart-2: var(--g-500);
+  --chart-3: var(--g-700);
+  --chart-4: var(--g-400);
+  --chart-5: var(--g-600);
+  --status-normal: var(--color-green-700);
+  --status-attention: var(--color-yellow-700);
+  --status-escalate: var(--color-red-700);
+  --sidebar: var(--g-100);
+  --sidebar-foreground: var(--g-950);
+  --sidebar-primary: var(--g-900);
+  --sidebar-primary-foreground: var(--g-50);
+  --sidebar-accent: var(--g-200);
+  --sidebar-accent-foreground: var(--g-900);
+  --sidebar-border: var(--g-300);
+  --sidebar-ring: var(--g-500);
+}
+[data-contrast='high'] {
+  --background: white;
+  --foreground: black;
+  --card-foreground: black;
+  --popover-foreground: black;
+  --primary: black;
+  --primary-foreground: white;
+  --secondary-foreground: black;
+  --muted-foreground: var(--g-700);
+  --accent-foreground: black;
+  --destructive: var(--color-red-800);
+  --border: var(--g-600);
+  --input: var(--g-800);
+  --ring: black;
+  --status-normal: var(--color-green-800);
+  --status-attention: var(--color-yellow-800);
+  --status-escalate: var(--color-red-800);
+}
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: var(--g-950);
+  --foreground: var(--g-50);
+  --card: var(--g-900);
+  --card-foreground: var(--g-50);
+  --popover: var(--g-900);
+  --popover-foreground: var(--g-50);
+  --primary: var(--g-100);
+  --primary-foreground: var(--g-900);
+  --secondary: var(--g-800);
+  --secondary-foreground: var(--g-50);
+  --muted: var(--g-800);
+  --muted-foreground: var(--g-300);
+  --accent: var(--g-700);
+  --accent-foreground: var(--g-50);
+  --destructive: var(--color-red-400);
+  --border: var(--g-700);
+  --input: var(--g-400);
+  --ring: var(--g-400);
+  --chart-1: var(--g-100);
+  --chart-2: var(--g-400);
+  --chart-3: var(--g-300);
+  --chart-4: var(--g-500);
+  --chart-5: var(--g-200);
+  --status-normal: var(--color-green-400);
+  --status-attention: var(--color-yellow-400);
+  --status-escalate: var(--color-red-400);
+  --sidebar: var(--g-900);
+  --sidebar-foreground: var(--g-50);
+  --sidebar-primary: var(--g-100);
+  --sidebar-primary-foreground: var(--g-900);
+  --sidebar-accent: var(--g-800);
+  --sidebar-accent-foreground: var(--g-50);
+  --sidebar-border: var(--g-700);
+  --sidebar-ring: var(--g-400);
+}
+.dark[data-contrast='high'] {
+  --background: black;
+  --foreground: white;
+  --card: var(--g-950);
+  --card-foreground: white;
+  --popover: var(--g-950);
+  --popover-foreground: white;
+  --primary: white;
+  --primary-foreground: black;
+  --secondary-foreground: white;
+  --muted-foreground: var(--g-200);
+  --accent-foreground: white;
+  --destructive: var(--color-red-300);
+  --border: var(--g-400);
+  --input: var(--g-200);
+  --ring: white;
+  --status-normal: var(--color-green-300);
+  --status-attention: var(--color-yellow-300);
+  --status-escalate: var(--color-red-300);
+}
+
+/* 3. Base font size. */
+html[data-font-size='small'] {
+  font-size: 87.5%;
+}
+html[data-font-size='large'] {
+  font-size: 125%;
+}
+
+/* 4. Status surfaces. Colour-blind mode adds a pattern per status (never colour alone). */
+[data-status='normal'] {
+  --status-color: var(--status-normal);
+}
+[data-status='attention'] {
+  --status-color: var(--status-attention);
+}
+[data-status='escalate'] {
+  --status-color: var(--status-escalate);
+}
+.status-surface {
+  border-color: var(--status-color, var(--border));
+  background-color: color-mix(in oklab, var(--status-color, transparent) 10%, var(--card));
+}
+/* The pattern sits in a strip at the leading edge, so it never runs under text. */
+[data-colorblind='true'] .status-surface[data-status] {
+  padding-left: 1.25rem;
+  background-repeat: no-repeat;
+  background-size: 0.875rem 100%;
+  background-image: linear-gradient(var(--status-color), var(--status-color));
+}
+[data-colorblind='true'] .status-surface[data-status='attention'] {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 3px,
+    var(--status-color) 3px 5px
+  );
+}
+[data-colorblind='true'] .status-surface[data-status='escalate'] {
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 3px, var(--status-color) 3px 5px),
+    repeating-linear-gradient(-45deg, transparent 0 3px, var(--status-color) 3px 5px);
 }
 
 @layer base {
@@ -139,5 +281,11 @@
   }
   html {
     @apply font-sans;
+  }
+  /* Numbers use the monospaced font everywhere. */
+  .num,
+  input[inputmode='decimal'],
+  input[inputmode='numeric'] {
+    @apply font-mono tabular-nums;
   }
 }

@@ -3,14 +3,17 @@
 **Responsibility:** Current status only. Read this first in every session. Keep it short: replace stale entries instead of appending history.
 
 **Last updated:** 2026-11-14
-**Current phase:** A — Foundation complete (**Checkpoint A**). Next: Phase B, waiting for the first feature spec.
+**Current phase:** B — Features, working from the owner's brainstorm (Sections 13–15).
 **Build status:** Passing. Repository https://github.com/shahyari/haoma (public). Production https://haoma-mu.vercel.app.
 
 ## Completed
 
-- Preparation: documentation, evidence base (RULE-01–RULE-30 `Approved`), workflow, environment.
-- Phase A, steps A1–A11 (`implementation.md`): public repo with Apache-2.0 license; Vite + React + TypeScript scaffold; Tailwind + shadcn/ui (12 base components incl. chart/Recharts); neutral placeholder tokens; router and responsive shell with skip link and three temporary placeholder pages; indicator models, mission phase, parameters P-1–P-8; structural validation; versioned localStorage store with memory fallback; error boundary and empty/loading/error states; scripts; Vercel project connected to GitHub. Structure and commands: `architecture.md`.
-- Not built, by design: product screens, navigation/IA, branding, any rule or interpretation logic, demo data.
+- Phase A foundation (Checkpoint A).
+- Display settings, Section 14 (`design.md` → "Display settings"): four zone themes, three modes, two contrast levels, three font sizes, monospaced numbers, colour-blind patterns.
+- Rule evaluation for RULE-01–RULE-30 (`src/rules/`), with approved wording, evidence labels, and REF IDs.
+- Home, Section 13 structure: indicator list with latest value and status, entry dialog for all six indicators (with symptoms, PHQ-2, and RULE-24), expandable Attention/Escalate banners, RULE-30 reminder; placeholders for the figure, profile, and tasks.
+- Settings page: display settings, mission phase, "Clear my data".
+- Feature state per brainstorm item: `product.md` → "Owner brainstorm".
 
 ## Decisions made
 
@@ -36,19 +39,44 @@
 | 2026-11-14 | Evidence policy: source hierarchy (1 / 2a / 2b / 3), Mayo Clinic approved as a 2b source, population and limitations required per source; OD-10 (Mayo 20 mmHg as RULE-26 explanation only) | `science.md`, `references.md` |
 | 2026-11-14 | OD-11: MedlinePlus approved as a 2b source (REF-50, temperature); REF-46 primary for fasting glucose; Kroenke 2003 (REF-51) for PHQ-2, with score 2 as a team decision | `scientific-foundations.md`, `references.md`, `science.md` |
 | 2026-11-14 | OD-12: low glucose is symptom-gated (Endocrine Society guideline, REF-53); the OSDR search found no human glucose thresholds (OSD-370 recorded as REF-52, context only) | `scientific-foundations.md`, `references.md` |
+| 2026-11-14 | Owner brainstorm Sections 13–15 received; Section 14 and the decided parts of Section 13 implemented | `product.md`, `design.md` |
 | 2026-11-14 | Kickoff received 09:00 CET; repo created and Phase A executed | `implementation.md` |
 | 2026-11-14 | OD-13: OSDR cross-check applied (C-5 to C-8); REF-54 Polaris Dawn, REF-55 OSD-575 added as `Unverified`; no rule changed | `scientific-foundations.md`, `references.md` |
 
 ## Outstanding decisions (owner)
 
-1. Feature specs for Phase B (`docs/specs/`); F-01 is the natural first one. Phase B is blocked until one arrives.
-2. Visual direction and design-token values, and whether to keep the `design.md` token names (`--color-*` overlaps Tailwind's namespace; see the note in `design.md`).
-3. Feature-freeze time (proposal: Sun 18:00 CET freeze, Sun 22:00 CET submission target).
-4. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13; REF-54, REF-55) and the optional items (`scientific-foundations.md` → "Still open").
-5. Berlin Local Event name and local judging times (ask the Local Lead).
-6. Symptom catalog (IDs and wording per indicator) for the `symptoms` field: needed by the F-01/F-05 specs.
-7. Numeric plausibility bounds for inputs (e.g., a maximum for sleep hours): none are encoded; they need a spec or an `Approved` source.
-8. Engineering notes to confirm: linter is oxlint (the Vite template no longer ships ESLint); shadcn style `radix-nova` with system fonts as the neutral placeholder; Vercel assigned the URL `haoma-mu.vercel.app`.
+**Conflicts with approved documents (not built)**
+
+1. Section 15, Admin edits Normal/Attention/Escalate ranges and wording: `science.md` allows only `Approved` rules with cited evidence to drive behavior. Decide whether admin edits are out of scope, shown as a non-functional demo, or allowed as labeled "Team design decision" overrides.
+2. Section 15, roles, reports, and real-time escalation to admins: `architecture.md` is browser-only with no accounts or backend. Only a simulated role switch inside one browser is possible.
+3. Crew comparison on Home vs. Section 15 (only admins see other crew members' detail): decide what a User may see (for example, anonymous crew averages only).
+4. Zone-based values (space, moon, mars): no `Approved` source gives indicator ranges per zone; `scientific-foundations.md` calls lunar/Mars use unvalidated.
+
+**Definitions needed before building**
+
+5. Health score: formula and evidence label. None exists in `scientific-foundations.md`.
+6. XP and levels: what earns XP and the level steps.
+7. Body figure: artwork (an AI-drawn figure would need a visible watermark, E-R18; a 3D model needs a new major dependency), whether two figures by biological sex are required, the indicator → body part mapping, and the "function" text per part with sources.
+8. Fictional crew: names, roles, mission, Earth baseline values, and simulated history (F-06).
+9. Assessment schedule for the tasks card (only the PHQ-2 14-day cadence is defined).
+10. "Average status per indicator" and "trend" on Home: what exactly to show.
+11. Sensors and wearables: simulated import only, or leave out.
+12. Auto mode source (LED lighting; the link is incomplete), the zone source, and how the app knows the astronaut's condition for suggestions.
+
+**Gaps in the approved rules (the app shows a neutral "no status" for these)**
+
+13. Sleep: a single night of 6 h or less without the 3-of-7 pattern has no tier (RULE-19 covers only more than 6 and under 7).
+14. Temperature: 38.0–39.3 °C within 0.5 °C of the baseline and without symptoms has no tier; so does a reading below 37.5 °C that is more than 0.5 °C above the baseline. RULE-16 does not list its symptoms (one generic "Other symptoms" flag is used). The 37.5 °C limit is stated for oral readings and is applied to forehead readings too.
+15. Heart rate: "regularly above 100" (RULE-08) is undefined and not evaluated. P-1 "similar time of day" is undefined and not applied.
+16. Blood pressure: "below 90/60" is implemented as systolic below 90 **or** diastolic below 60. Confirm.
+17. RULE-28 (short night before an EVA) needs the schedule; not evaluated.
+
+**Other**
+
+18. Feature-freeze time (proposal: Sun 18:00 CET freeze, Sun 22:00 CET submission target).
+19. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
+20. Berlin Local Event name and local judging times.
+21. Settings and About are provisional pages; their place in the navigation is undecided.
 
 ## Environment status (2026-11-14)
 
@@ -60,11 +88,10 @@ SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (
 
 ## Verification
 
-- Target: `verify foundation`, 2026-11-14.
-- Commands: `npm run lint` → 0 problems; `npm run typecheck` → exit 0; `npm test` → 4 files, 40 tests passed; `npm run build` → exit 0.
-- Checked: 320 px and 1280 px renders; anonymous access to the production URL (`/`, `/foundation`, `/about`, deep link); no secrets tracked; no health thresholds in code.
-- Result: PASS.
+- 2026-11-14: `npm run lint` → 0 problems; `npm run typecheck` → exit 0; `npm test` → 7 files, 106 tests passed; `npm run build` → exit 0.
+- Checked in headless Chrome: Home at 320, 500, and 1280 px; Earth, Moon, and Mars themes; dark mode; high contrast; big text; colour-blind patterns.
+- Not checked: measured contrast ratios per combination; manual keyboard pass; screen reader.
 
 ## Next action
 
-Wait for the owner's first feature spec (`docs/specs/F-NN-*.md`, `Status: Approved`), then run the Phase B feature loop (`implementation.md`). Remove `FoundationPage` and the temporary routes when real screens replace them.
+Owner answers to the outstanding decisions above. Buildable next without further decisions: per-indicator history view with a chart and data table (personal values and the approved ranges only).

@@ -24,8 +24,7 @@ describe('App shell', () => {
     expect(screen.getByRole('contentinfo').textContent).toContain(DISCLAIMER)
   })
 
-  it('lists the six indicators on the foundation preview', () => {
-    window.history.pushState({}, '', '/foundation')
+  it('lists the six indicators on Home, without readings or a status at first', () => {
     render(<App />)
     for (const label of [
       'Blood pressure',
@@ -35,7 +34,9 @@ describe('App shell', () => {
       'Sleep',
       'Mood',
     ]) {
-      expect(screen.getByText(label)).toBeTruthy()
+      expect(screen.getByRole('button', { name: new RegExp(label) }).textContent).toContain(
+        'No reading yet',
+      )
     }
   })
 

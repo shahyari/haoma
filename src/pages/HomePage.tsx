@@ -1,14 +1,167 @@
-import { EmptyState } from '@/components/states/StatePanel'
+import { ChevronRight, Info } from 'lucide-react'
+import { useMemo, useState } from 'react'
 
-/** Placeholder. The real entry screen is defined by an owner feature spec (Phase B). */
+import { EmptyState } from '@/components/states/StatePanel'
+import { StatusBadge } from '@/components/StatusBadge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useHealthData } from '@/data/HealthDataProvider'
+import { formatContext, formatValue } from '@/domain/format'
+import { INDICATORS, type IndicatorId } from '@/domain/indicators'
+import { EntryDialog } from '@/features/entry/EntryDialog'
+import { StatusBanner } from '@/features/home/StatusBanner'
+import { entriesOf, evaluateAll } from '@/rules/evaluate'
+import { PRE_LANDING_REMINDER } from '@/rules/rules'
+
+const dateTime = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' })
+
 export function HomePage() {
+  const { data, persistent } = useHealthData()
+  const [editing, setEditing] = useState<IndicatorId | null>(null)
+
+  const assessments = useMemo(
+    () => evaluateAll(data.entries, { missionPhase: data.missionPhase }),
+    [data.entries, data.missionPhase],
+  )
+  const rows = assessments.map((assessment) => ({
+    assessment,
+    latest: entriesOf(data.entries, assessment.indicator).at(-1),
+  }))
+  const alerts = rows
+    .filter((r) => r.assessment.status === 'escalate' || r.assessment.status === 'attention')
+    .sort(
+      (a, b) =>
+        Number(b.assessment.status === 'escalate') - Number(a.assessment.status === 'escalate'),
+    )
+
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Astronaut health self-assessment</h1>
-      <EmptyState
-        title="Placeholder"
-        description="The technical foundation is in place. Product screens are added once they are specified."
-      />
+      <h1 className="sr-only">Home</h1>
+      {!persistent ? (
+        <p role="status" className="rounded-md border p-3 text-sm">
+          Storage is unavailable in this browser, so entries last only until you close this page.
+        </p>
+      ) : null}
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,1fr)]">
+        <section aria-labelledby="indicators-heading">
+          <Card>
+            <CardHeader>
+              <CardTitle id="indicators-heading">Indicators</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="-mx-2 divide-y">
+                {rows.map(({ assessment, latest }) => {
+                  const { indicator, status } = assessment
+                  const context = latest ? formatContext(latest) : undefined
+                  return (
+                    <li key={indicator}>
+                      <button
+                        type="button"
+                        onClick={() => setEditing(indicator)}
+                        className="flex w-full items-center gap-2 rounded-md px-2 py-3 text-left outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <span className="min-w-0 flex-1 space-y-1">
+                          <span className="block font-medium">{INDICATORS[indicator].label}</span>
+                          {latest ? (
+                            <>
+                              <span className="num block text-lg">{formatValue(latest)}</span>
+                              <span className="block text-sm text-muted-foreground">
+                                {context ? `${context} · ` : ''}
+                                <span className="num">
+                                  {dateTime.format(new Date(latest.recordedAt))}
+                                </span>
+                                {latest.origin === 'simulated' ? ' · Simulated' : ''}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="block text-sm text-muted-foreground">
+                              No reading yet. Add one.
+                            </span>
+                          )}
+                          {status === 'none' ? (
+                            <span className="block text-sm text-muted-foreground">
+                              {assessment.note}
+                            </span>
+                          ) : null}
+                        </span>
+                        {status === 'normal' || status === 'attention' || status === 'escalate' ? (
+                          <StatusBadge status={status} />
+                        ) : null}
+                        <ChevronRight
+                          aria-hidden="true"
+                          className="size-4 shrink-0 text-muted-foreground"
+                        />
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            </CardContent>
+          </Card>
+        </section>
+
+        <section aria-labelledby="status-heading" className="space-y-3">
+          <h2 id="status-heading" className="sr-only">
+            Health status
+          </h2>
+          {data.missionPhase === 'approachingLanding' ? (
+            <p role="status" className="flex gap-2 rounded-lg border bg-card p-3 text-sm">
+              <Info aria-hidden="true" className="size-5 shrink-0" />
+              <span>
+                {PRE_LANDING_REMINDER}{' '}
+                <span className="text-muted-foreground">Team design decision · RULE-30</span>
+              </span>
+            </p>
+          ) : null}
+          {alerts.map(({ assessment, latest }) =>
+            latest ? (
+              <StatusBanner key={assessment.indicator} assessment={assessment} latest={latest} />
+            ) : null,
+          )}
+          <EmptyState
+            title="Body figure"
+            description="Placeholder. Needs the figure artwork and the mapping of indicators to body parts."
+            className="min-h-64 justify-center"
+          />
+        </section>
+
+        <div className="space-y-4">
+          <section aria-labelledby="profile-heading">
+            <Card>
+              <CardHeader>
+                <CardTitle id="profile-heading">Profile</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EmptyState
+                  title="Placeholder"
+                  description="Needs the demo astronaut profile and the definitions of XP, level, and health score."
+                />
+              </CardContent>
+            </Card>
+          </section>
+          <section aria-labelledby="tasks-heading">
+            <Card>
+              <CardHeader>
+                <CardTitle id="tasks-heading">Tasks</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EmptyState title="Placeholder" description="Needs the assessment schedule." />
+              </CardContent>
+            </Card>
+          </section>
+        </div>
+      </div>
+
+      {editing ? (
+        <EntryDialog
+          key={editing}
+          indicator={editing}
+          open
+          onOpenChange={(open) => {
+            if (!open) setEditing(null)
+          }}
+        />
+      ) : null}
     </div>
   )
 }

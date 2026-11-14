@@ -11,20 +11,22 @@
 
 TODO: screens / navigation hierarchy (screens are listed in `product.md`)
 
-## Design tokens
+## Display settings (owner brainstorm, Section 14, 2026-11-14)
 
-The owner defines the values (visual direction). During Phase A, Claude implements these tokens as CSS variables with **neutral placeholder values**, to be replaced when the owner specifies them. Placeholders are not design decisions.
+This replaces the earlier placeholder token table. Implemented in `src/index.css` and `src/settings/`.
 
-| Token | Value | Usage |
-|---|---|---|
-| `--color-bg` | TODO: hex | Page background |
-| `--color-text` | TODO: hex | Primary text |
-| `--color-accent` | TODO: hex | Interactive accent |
-| `--space-1` | TODO: value | Spacing scale |
-| `--radius-md` | TODO: value | Cards and controls |
-| `--font-body` | TODO: font stack | Main text |
+| Setting | Options | Default | Implementation |
+|---|---|---|---|
+| Theme | Earth = Tailwind mist; Space = Tailwind slate; Moon = Tailwind zinc; Mars = neutral with a small orange hue. Auto-selected from the zone, also selectable manually | Auto | `data-theme` on `<html>`; each theme supplies the gray scale `--g-50`…`--g-950`. Mars uses Tailwind neutral lightness steps with chroma 0.004–0.022 at hue 50 |
+| Mode | Dark, Light, Auto | Auto | `.dark` class. TODO: Auto should follow the habitat LED lighting system, not the clock; the link in the brainstorm is incomplete and no data source is defined. Until then Auto follows the device light/dark preference |
+| Contrast | Normal (WCAG AA), High (WCAG AAA) | Normal | `data-contrast`; picks different steps of the gray scale and darker/lighter status colours. High contrast is suggested when the device reports `prefers-contrast: more`. TODO: measure contrast ratios for every theme × mode × contrast combination (`design-decisions.md`) |
+| Base font size | Small, Medium, Big | Medium | `data-font-size`: 87.5% / 100% / 125% root size |
+| Numbers | Monospaced font for all numbers | — | `.num` class and numeric inputs; system monospace stack |
+| Colour-blind mode | Off / On; patterns alongside the three status colours | Off | `data-colorblind`; solid, diagonal-stripe, and cross-hatch strips for Normal, Attention, Escalate |
 
-**Phase A implementation (2026-11-14).** `--color-bg`, `--color-text`, `--color-accent`, `--space-1`, and `--font-body` are defined in `src/index.css` with neutral placeholder values (white, near-black, near-black, 0.25rem, system font stack), and the shadcn/ui variables derive from them (`--background`, `--foreground`, `--primary`, Tailwind spacing, `--font-sans`). `--radius-md` is produced by the shadcn scale as `--radius` × 0.8, so change `--radius` (placeholder 0.625rem). Naming note: Tailwind reserves the `--color-*` namespace and shadcn already uses `--accent` for hover surfaces. The current names work, but TODO: owner to confirm the token names or adopt the shadcn names when the visual direction is set.
+Status colours (green, yellow, red) are the tokens `--status-normal`, `--status-attention`, `--status-escalate`. Status is always shown with an icon and a text label as well.
+
+TODO (owner): how the app learns the astronaut's condition for the "suggested" options (big text, colour-blind mode, high contrast). Today only the device contrast preference is used. TODO: where the zone comes from (now a manual setting, default Space).
 
 ## Components
 

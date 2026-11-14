@@ -57,6 +57,24 @@ Priorities were set by the owner on 2026-11-13 and are subject to refinement. A 
 | F-07 | Mission routine reminders | P2 | O-02 | TODO | F-01 |
 | F-08 | Gamification | P2 | O-03 | TODO | F-01 |
 
+## Owner brainstorm, 2026-11-14 (Sections 13–15)
+
+Source: the owner's brainstorm file. This table tracks what is built; details that are still undecided are listed in `progress.md`.
+
+| Item | Feature | State |
+|---|---|---|
+| Home: three areas (indicators; body figure with status banners; profile card and tasks card) | F-02 | Built, with placeholders for the figure, profile, and tasks |
+| Six indicators with latest value and status; open an indicator to enter a value | F-01, F-02 | Built |
+| Yellow/red banner with icon and wording, expandable to instructions and actions | F-05 | Built (RULE-01–RULE-30, evidence labels, REF IDs). Pointing at a body part waits for the figure |
+| Average status, trend, and charts per indicator (Earth values, mission average, crew average, standard range, zone-based values) | F-03 | Not built |
+| Comparison with other crew members (same time window and total average) | F-03, F-06 | Not built; needs fictional crew data |
+| Clickable human figure, colour-coded per body part | F-04 | Not built; needs artwork and a body-part mapping |
+| Profile card (avatar, XP and level, name, role, mission, health score) | F-06, F-08 | Not built; needs definitions |
+| Tasks card (assessments due from the schedule) | F-07 | Not built; needs the schedule |
+| Reading external sensors and wearables | — | Not built; simulation only is possible in this prototype |
+| Display settings (Section 14) | — | Built (`design.md` → "Display settings") |
+| Roles: Director, Admin, User (Section 15) | — | Not built; conflicts with approved documents (`progress.md`) |
+
 ## Explicitly out of scope
 
 - Unvalidated diagnostic conclusions and treatment instructions without `Approved` evidence (guidance policy in `science.md`)

@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 
 import { AboutPage } from '@/pages/AboutPage'
-import { FoundationPage } from '@/pages/FoundationPage'
 import { HomePage } from '@/pages/HomePage'
+import { SettingsPage } from '@/pages/SettingsPage'
 
 export interface AppRoute {
   path: string
@@ -11,12 +11,9 @@ export interface AppRoute {
   element: ReactNode
 }
 
-/**
- * TEMPORARY placeholder routes for the Phase A foundation. The real
- * navigation and information architecture are owner decisions (docs/design.md).
- */
+/** Home is owner-specified (brainstorm Section 13). Settings and About are provisional locations. */
 export const APP_ROUTES: AppRoute[] = [
   { path: '/', label: 'Home', element: <HomePage /> },
-  { path: '/foundation', label: 'Foundation preview', element: <FoundationPage /> },
+  { path: '/settings', label: 'Settings', element: <SettingsPage /> },
   { path: '/about', label: 'About', element: <AboutPage /> },
 ]
