@@ -15,6 +15,8 @@
 
 One provisional fictional profile (owner decision 2026-11-14): **Alex Morgan**, Flight Engineer, **Aster-1 Lunar Transit Mission**, Mission Day 42. The person and mission are invented; Home labels the profile "Fictional profile" and states that all demo health measurements are simulated. The mission day is a fixed display value, not derived from the data. Additional crew members are deferred. No real private health records.
 
+**Edited entries:** an edited entry keeps its measurement time, gets `editedAt`, and is labeled "Manual entry (edited)", including a simulated entry that was edited, because the person set the new values.
+
 ## Simulated history generation
 
 Generated in the browser by `createDemoEntries` (`src/demo/demo.ts`, written with AI assistance) when the user chooses "Load simulated demo history":

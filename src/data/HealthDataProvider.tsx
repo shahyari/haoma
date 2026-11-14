@@ -16,6 +16,8 @@ interface HealthDataValue {
   persistent: boolean
   loadStatus: LoadStatus
   addEntry: (entry: HealthEntry) => void
+  /** Replaces the stored entry with the same id. */
+  updateEntry: (entry: HealthEntry) => void
   /** Replaces all entries, e.g. when loading the simulated demo history. */
   replaceEntries: (entries: HealthEntry[]) => void
   setMissionPhase: (phase: MissionPhase) => void
@@ -46,6 +48,11 @@ export function HealthDataProvider({ children, store }: { children: ReactNode; s
       persistent: appStore.persistent,
       loadStatus: loaded.status,
       addEntry: (entry) => change((d) => ({ ...d, entries: [...d.entries, entry] })),
+      updateEntry: (entry) =>
+        change((d) => ({
+          ...d,
+          entries: d.entries.map((x) => (x.id === entry.id ? entry : x)),
+        })),
       replaceEntries: (entries) => change((d) => ({ ...d, entries })),
       setMissionPhase: (missionPhase) => change((d) => ({ ...d, missionPhase })),
       clearAll: () => {

@@ -124,6 +124,7 @@ export function validateEntry(input: unknown): ValidationResult<HealthEntry> {
   const recordedAt = c.dateTime('recordedAt')
   const origin = c.oneOf('origin', ENTRY_ORIGINS)
   const symptoms = c.optionalStringList('symptoms')
+  const editedAt = input.editedAt !== undefined ? c.dateTime('editedAt') : undefined
   const indicator = c.oneOf('indicator', INDICATOR_IDS)
 
   let fields: Record<string, unknown> | undefined
@@ -176,6 +177,7 @@ export function validateEntry(input: unknown): ValidationResult<HealthEntry> {
     id,
     recordedAt,
     origin,
+    ...(editedAt ? { editedAt } : {}),
     ...(symptoms ? { symptoms } : {}),
     indicator,
     ...fields,

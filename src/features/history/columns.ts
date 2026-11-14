@@ -15,6 +15,11 @@ export const ORIGIN_LABELS: Record<EntryOrigin, string> = {
   simulated: 'Simulated',
 }
 
+/** Provenance with the edit marker, e.g. "Manual entry (edited)". */
+export function provenanceLabel(entry: HealthEntry): string {
+  return entry.editedAt ? `${ORIGIN_LABELS[entry.origin]} (edited)` : ORIGIN_LABELS[entry.origin]
+}
+
 export interface Column {
   header: string
   numeric?: boolean
@@ -42,7 +47,7 @@ const symptoms: Column = {
   header: 'Symptoms reported',
   cell: (e) => (e.symptoms ?? []).map((id) => SYMPTOMS[id as SymptomId] ?? id).join(', ') || 'None',
 }
-const provenance: Column = { header: 'Provenance', cell: (e) => ORIGIN_LABELS[e.origin] }
+const provenance: Column = { header: 'Provenance', cell: provenanceLabel }
 
 type E<I extends IndicatorId> = Extract<HealthEntry, { indicator: I }>
 

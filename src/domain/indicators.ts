@@ -64,6 +64,8 @@ interface EntryBase {
   /** ISO 8601 date-time of the measurement. */
   recordedAt: string
   origin: EntryOrigin
+  /** ISO 8601 date-time of the last edit, if the entry was changed after it was recorded. */
+  editedAt?: string
   /**
    * Optional symptom flags reported with this entry.
    * TODO: the symptom catalog (IDs and wording) comes from the F-01/F-05 specs.

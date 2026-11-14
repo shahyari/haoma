@@ -1,4 +1,4 @@
-import { ArrowLeft, Plus } from 'lucide-react'
+import { ArrowLeft, Pencil, Plus } from 'lucide-react'
 import { lazy, Suspense, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
@@ -11,7 +11,7 @@ import { formatContext, formatValue, temperatureMethodLabel } from '@/domain/for
 import { INDICATOR_IDS, INDICATORS, type HealthEntry, type IndicatorId } from '@/domain/indicators'
 import { phq2Schedule } from '@/features/checkin/checkin'
 import { EntryDialog } from '@/features/entry/EntryDialog'
-import { HISTORY_VIEWS, ORIGIN_LABELS, type HistoryView } from '@/features/history/columns'
+import { HISTORY_VIEWS, provenanceLabel, type HistoryView } from '@/features/history/columns'
 import type { ChartPoint } from '@/features/history/HistoryChart'
 import { FindingList, REFERENCES_URL, RuleEvidence } from '@/features/home/StatusBanner'
 import { NotFoundPage } from '@/pages/NotFoundPage'
@@ -41,12 +41,14 @@ function HistorySection({
   baseline,
   baselineLabel,
   label,
+  onEdit,
 }: {
   view: HistoryView
   entries: HealthEntry[]
   baseline?: number
   baselineLabel?: string
   label: string
+  onEdit: (entry: HealthEntry) => void
 }) {
   const rows = view.filter ? entries.filter(view.filter) : entries
   // Only series with readings get a line and a legend entry.
@@ -115,6 +117,9 @@ function HistorySection({
                       {column.header}
                     </th>
                   ))}
+                  <th scope="col" className="px-3 py-2 font-medium whitespace-nowrap">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -131,6 +136,17 @@ function HistorySection({
                         {column.cell(entry)}
                       </td>
                     ))}
+                    <td className="px-3 py-1 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Edit reading from ${formatDateTime(entry.recordedAt)}`}
+                        onClick={() => onEdit(entry)}
+                      >
+                        <Pencil aria-hidden="true" />
+                        Edit
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -146,6 +162,8 @@ export function IndicatorPage() {
   const { indicatorId } = useParams()
   const { data } = useHealthData()
   const [adding, setAdding] = useState(false)
+  // The entry being edited; undefined when the dialog adds a new entry.
+  const [editing, setEditing] = useState<HealthEntry | undefined>(undefined)
   // A new key per opening gives each entry a fresh form; the dialog stays mounted so it can close properly.
   const [opened, setOpened] = useState(0)
   const [now] = useState(() => new Date())
@@ -205,6 +223,7 @@ export function IndicatorPage() {
           <h1 className="text-2xl font-semibold">{label}</h1>
           <Button
             onClick={() => {
+              setEditing(undefined)
               setOpened((n) => n + 1)
               setAdding(true)
             }}
@@ -225,7 +244,7 @@ export function IndicatorPage() {
               <p className="num text-3xl">{formatValue(latest)}</p>
               <p className="text-sm text-muted-foreground">
                 <span className="num">{formatDateTime(latest.recordedAt)}</span>
-                {context ? ` · ${context}` : ''} · {ORIGIN_LABELS[latest.origin]}
+                {context ? ` · ${context}` : ''} · {provenanceLabel(latest)}
               </p>
             </>
           ) : (
@@ -391,6 +410,11 @@ export function IndicatorPage() {
             baseline={baseline?.value}
             baselineLabel={baselineMethod ? `Personal baseline (${baselineMethod})` : undefined}
             label={label}
+            onEdit={(entry) => {
+              setEditing(entry)
+              setOpened((n) => n + 1)
+              setAdding(true)
+            }}
           />
         ))}
       </section>
@@ -426,7 +450,13 @@ export function IndicatorPage() {
       </section>
 
       {opened > 0 ? (
-        <EntryDialog key={opened} indicator={indicator} open={adding} onOpenChange={setAdding} />
+        <EntryDialog
+          key={opened}
+          indicator={indicator}
+          entry={editing}
+          open={adding}
+          onOpenChange={setAdding}
+        />
       ) : null}
     </div>
   )

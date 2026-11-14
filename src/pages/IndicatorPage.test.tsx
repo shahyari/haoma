@@ -83,6 +83,7 @@ describe('IndicatorPage', () => {
       'Diastolic (mmHg)',
       'Symptoms reported',
       'Provenance',
+      'Actions',
     ])
     const rows = t.getAllByRole('row').slice(1)
     expect(
@@ -92,8 +93,8 @@ describe('IndicatorPage', () => {
           .map((c) => c.textContent),
       ),
     ).toEqual([
-      ['118', '74', 'None', 'Manual entry'],
-      ['112', '70', 'None', 'Simulated'],
+      ['118', '74', 'None', 'Manual entry', 'Edit'],
+      ['112', '70', 'None', 'Simulated', 'Edit'],
     ])
     expect(t.getAllByRole('rowheader').length).toBe(2)
     expect(screen.getByRole('region', { name: /table of readings/ }).tabIndex).toBe(0)
@@ -188,6 +189,59 @@ describe('IndicatorPage', () => {
     expect(
       latest().getByText(/Symptoms reported with this reading: Chest pain\./).textContent,
     ).toContain('no approved rule assesses these symptoms on their own')
+  })
+
+  it('edits a history entry: keeps its time, re-evaluates, and marks it as an edited manual entry', () => {
+    const store = renderApp('/indicators/bloodPressure', [
+      { ...daysAgo(1), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
+    ])
+    const before = store.load().data.entries[0]
+    expect(latest().getByText('Escalate')).toBeTruthy()
+    const edit = screen.getByRole('button', { name: /^Edit reading from/ })
+    fireEvent.click(edit)
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.getByRole('heading', { name: 'Edit blood pressure reading' })).toBeTruthy()
+    expect((dialog.getByLabelText('Systolic (mmHg)') as HTMLInputElement).value).toBe('150')
+    fireEvent.change(dialog.getByLabelText('Systolic (mmHg)'), { target: { value: '115' } })
+    fireEvent.change(dialog.getByLabelText('Diastolic (mmHg)'), { target: { value: '75' } })
+    fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    const entries = store.load().data.entries
+    expect(entries.length).toBe(1)
+    expect(entries[0]).toMatchObject({
+      id: before.id,
+      recordedAt: before.recordedAt,
+      systolicMmHg: 115,
+      origin: 'userEntered',
+    })
+    expect(entries[0].editedAt).toBeTruthy()
+    expect(latest().getByText('Normal')).toBeTruthy()
+    expect(latest().getByText(/Manual entry \(edited\)/)).toBeTruthy()
+  })
+
+  it('validates an edit and keeps the stored entry when it is invalid', () => {
+    const store = renderApp('/indicators/heartRate', [
+      { ...daysAgo(1), indicator: 'heartRate', bpm: 64, activity: 'rest' },
+    ])
+    fireEvent.click(screen.getByRole('button', { name: /^Edit reading from/ }))
+    const dialog = within(screen.getByRole('dialog'))
+    fireEvent.change(dialog.getByLabelText('Heart rate (bpm)'), { target: { value: 'x' } })
+    fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
+    expect(dialog.getByText('Enter a number.')).toBeTruthy()
+    expect(store.load().data.entries[0]).toMatchObject({ bpm: 64 })
+  })
+
+  it('edits a PHQ-2 by answering both items again, whatever the schedule', () => {
+    const store = renderApp('/indicators/mood', [
+      { ...daysAgo(2), indicator: 'mood', kind: 'phq2', score: 1 },
+    ])
+    fireEvent.click(screen.getByRole('button', { name: /^Edit reading from/ }))
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.queryByLabelText('Daily mood rating')).toBeNull()
+    fireEvent.click(dialog.getAllByLabelText('Nearly every day')[0])
+    fireEvent.click(dialog.getAllByLabelText('Not at all')[1])
+    fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
+    expect(store.load().data.entries[0]).toMatchObject({ kind: 'phq2', score: 3 })
   })
 
   it('has no baseline section for indicators whose rules do not use one', () => {

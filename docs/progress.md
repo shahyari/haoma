@@ -10,7 +10,8 @@
 
 - Phase A foundation (Checkpoint A). Display settings (`design.md` → "Display settings").
 - Rule evaluation RULE-01–RULE-30 (`src/rules/`) with three distinct neutral states: **No measurement**, **Not evaluated**, **Normal**.
-- Home (Section 16): logo links Home; avatar card with the fictional profile Alex Morgan, indicators to review, demo-data notice, Settings and About; "Demo data" chip; six separate indicator cards (check-in state merged in; PHQ-2 state on Mood); green tier labeled "Normal"; full-width layout; body-figure placeholder unchanged.
+- Home (Section 16): logo links Home; avatar card with the fictional profile Alex Morgan, indicators to review, demo-data notice, Settings and About; "Demo data" chip; six separate indicator cards (check-in state merged in; PHQ-2 state on Mood; standard left-aligned badge); green tier labeled "Normal"; banners in a right column; full-width layout except Settings (fixed width); body-figure placeholder unchanged.
+- History entries are editable (Edit per row; time kept; marked "Manual entry (edited)"; re-evaluated).
 - Per-indicator history view (`/indicators/:id`): latest value, unit, time, provenance; status with rule, action, evidence labels, REF IDs; personal baseline; chart plus accessible table; approved rules listed separately. Chart library lazy-loaded (main bundle 780 → 423 kB).
 - OD-14 applied (owner decisions on the audit, `scientific-foundations.md`): AU-1 sleep label; AU-3 heart-rate rest state, rest-only rules and baseline, descriptive count of readings above 100; AU-4 systolic < 90 OR diastolic < 60; AU-5 PHQ-2 current for 14 days, with the owner's four labels; AU-6 timestamps and separate check-in completeness; AU-7 time-of-day clause removed. Tests added for each.
 - OD-15 applied: temperature method required for new entries; RULE-14–RULE-17 for oral readings only; forehead and legacy readings ("Method not recorded") shown with trend and same-method baseline difference, unclassified; one chart line per method; "keeps rising" trigger removed. PHQ-2 single cutoff 3 (score 2 alone no longer Attention; REF-56 documents the ≥ 2 alternative). Heart rate: rate rules resting-only, RULE-08 symptom-based escalation for any reading.
@@ -59,7 +60,7 @@
 3. REF-57, REF-58 (NHLBI): approve. AHA warning-signs page: PDF export needed (automated access blocked).
 4. Body figure spec and remaining UX decisions (owner preparing).
 5. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
-6. Auto-mode source (LED lighting), zone source, condition-based suggestions. Indicator icons (Claude's choice, `design.md`) to confirm.
+6. Auto-mode source (LED lighting), zone source, condition-based suggestions.
 7. Berlin Local Event name and local judging times.
 
 ## Environment status (2026-11-14)
@@ -73,7 +74,7 @@ SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (
 
 ## Verification
 
-- 2026-11-14 (after OD-16): `npm run format:check` clean; `npm run lint` 0 problems; `npm run typecheck` exit 0; `npm test` 12 files, 231 tests passed; `npm run build` exit 0, no chunk-size warning.
+- 2026-11-14 (after OD-16): `npm run format:check` clean; `npm run lint` 0 problems; `npm run typecheck` exit 0; `npm test` 12 files, 239 tests passed; `npm run build` exit 0, no chunk-size warning.
 - Covers: rule boundaries, overlaps, precedence; temperature methods and legacy records; heart-rate rest state and symptom-based escalation; PHQ-2 single cutoff and 14-day validity; a sweep that no reading without an applicable rule is shown as Normal; temperature tier never drops as the value rises (36.0–42.0 °C); symptom-only scenarios; demo scenario snapshot (all six Normal); keyboard (jsdom); token contrast; persistence.
 - Not done: manual keyboard pass in a real browser, screen reader, true 320 px render of seeded pages. No WCAG conformance is claimed.
 

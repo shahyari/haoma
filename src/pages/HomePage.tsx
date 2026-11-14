@@ -71,7 +71,7 @@ export function HomePage() {
         </p>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(15rem,22rem)_minmax(0,1fr)]">
+      <div className="grid gap-4 lg:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)] xl:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)_minmax(16rem,22rem)]">
         <section aria-labelledby="indicators-heading">
           <h2 id="indicators-heading" className="sr-only">
             Indicators
@@ -132,7 +132,7 @@ export function HomePage() {
                     <StatusBadge
                       status={assessment.status}
                       label={assessment.label}
-                      className="mt-auto w-full justify-center py-1.5"
+                      className="self-start"
                     />
                   </Link>
                 </li>
@@ -141,7 +141,18 @@ export function HomePage() {
           </ul>
         </section>
 
-        <section aria-labelledby="status-heading" className="flex flex-col gap-3">
+        <section aria-labelledby="figure-heading" className="flex flex-col">
+          <h2 id="figure-heading" className="sr-only">
+            Body figure
+          </h2>
+          <EmptyState
+            title="Body figure"
+            description="Placeholder. The interactive 2D figure is added once its specification is ready."
+            className="min-h-96 flex-1 justify-center"
+          />
+        </section>
+
+        <section aria-labelledby="status-heading" className="space-y-3 lg:col-span-2 xl:col-span-1">
           <h2 id="status-heading" className="sr-only">
             Health status
           </h2>
@@ -160,11 +171,6 @@ export function HomePage() {
               <StatusBanner key={assessment.indicator} assessment={assessment} latest={latest} />
             ) : null
           })}
-          <EmptyState
-            title="Body figure"
-            description="Placeholder. The interactive 2D figure is added once its specification is ready."
-            className="min-h-96 flex-1 justify-center"
-          />
         </section>
       </div>
     </div>

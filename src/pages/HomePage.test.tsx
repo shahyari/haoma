@@ -86,11 +86,23 @@ describe('HomePage (owner brainstorm Section 16)', () => {
     )
   })
 
-  it('keeps the body-figure placeholder next to the cards', () => {
-    renderApp()
-    expect(
-      within(screen.getByRole('region', { name: 'Health status' })).getByText('Body figure'),
-    ).toBeTruthy()
+  it('keeps the body-figure placeholder, with the banners in their own column on the right', () => {
+    renderApp('/', [
+      { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
+    ])
+    const figure = screen.getByRole('region', { name: 'Body figure' })
+    const status = screen.getByRole('region', { name: 'Health status' })
+    expect(within(figure).getByText(/Placeholder/)).toBeTruthy()
+    expect(within(status).getByText('Report at next flight-surgeon contact.')).toBeTruthy()
+    // Document order: cards, figure, banners (left to right on wide screens).
+    expect(figure.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('uses the standard status badge, left-aligned at its normal size', () => {
+    renderApp('/', [{ ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' }])
+    const badge = within(card('Heart rate')).getByText('Normal')
+    expect(badge.className).toContain('self-start')
+    expect(badge.className).not.toMatch(/w-full|justify-center/)
   })
 
   it('replaces the demo disclaimer on the main screen with a "Demo data" chip', () => {

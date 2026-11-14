@@ -21,9 +21,9 @@ import {
   SLEEP_SOURCE_LABELS,
   TEMPERATURE_METHOD_LABELS,
 } from '@/domain/format'
-import { INDICATORS, type IndicatorId } from '@/domain/indicators'
+import { INDICATORS, type HealthEntry, type IndicatorId } from '@/domain/indicators'
 import { SYMPTOMS, SYMPTOMS_BY_INDICATOR } from '@/domain/symptoms'
-import { formatDate } from '@/domain/dates'
+import { formatDate, formatDateTime } from '@/domain/dates'
 import { phq2Schedule } from '@/features/checkin/checkin'
 import { validateEntry, type ValidationIssue } from '@/domain/validation'
 import { MOOD_SAFETY_MESSAGE } from '@/rules/rules'
@@ -83,15 +83,55 @@ function toNumber(text: string | undefined): number | undefined {
   return Number.isNaN(value) ? Number.NaN : value
 }
 
+/** Form values of an existing entry. PHQ-2 item answers are not stored, so they start empty. */
+function valuesOf(entry: HealthEntry): Values {
+  const v: Values = {}
+  const set = (name: string, value: unknown) => {
+    if (value !== undefined) v[name] = String(value)
+  }
+  switch (entry.indicator) {
+    case 'bloodPressure':
+      set('systolicMmHg', entry.systolicMmHg)
+      set('diastolicMmHg', entry.diastolicMmHg)
+      break
+    case 'heartRate':
+      set('bpm', entry.bpm)
+      set('activity', entry.activity)
+      break
+    case 'bloodGlucose':
+      set('mgDl', entry.mgDl)
+      set('context', entry.context)
+      set('device', entry.device)
+      break
+    case 'bodyTemperature':
+      set('celsius', entry.celsius)
+      set('method', entry.method)
+      set('exercisedLast30Min', entry.exercisedLast30Min)
+      break
+    case 'sleep':
+      set('hours', entry.hours)
+      set('source', entry.source)
+      break
+    case 'mood':
+      set('kind', entry.kind)
+      if (entry.kind === 'dailyRating') set('rating', entry.rating)
+      break
+  }
+  return v
+}
+
 function buildEntry(
   indicator: IndicatorId,
   v: Values,
   symptoms: string[],
+  existing?: HealthEntry,
 ): Record<string, unknown> {
   const raw: Record<string, unknown> = {
-    id: crypto.randomUUID(),
-    recordedAt: new Date().toISOString(),
+    // An edit keeps the id and the time of the measurement; the person set the new values.
+    id: existing?.id ?? crypto.randomUUID(),
+    recordedAt: existing?.recordedAt ?? new Date().toISOString(),
     origin: 'userEntered',
+    ...(existing ? { editedAt: new Date().toISOString() } : {}),
     indicator,
     ...(symptoms.length > 0 ? { symptoms } : {}),
   }
@@ -160,18 +200,24 @@ interface Props {
   indicator: IndicatorId
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** The entry to edit; omitted when adding a new one. */
+  entry?: HealthEntry
 }
 
-export function EntryDialog({ indicator, open, onOpenChange }: Props) {
-  const { addEntry, data } = useHealthData()
+export function EntryDialog({ indicator, open, onOpenChange, entry }: Props) {
+  const { addEntry, updateEntry, data } = useHealthData()
   const [now] = useState(() => new Date())
   // The dialog has no Radix trigger, so remember what opened it and return focus there on close.
   const [opener] = useState(() =>
     typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null),
   )
   const phq2 = phq2Schedule(data.entries, now)
-  const [values, setValues] = useState<Values>({ kind: 'dailyRating' })
-  const [symptoms, setSymptoms] = useState<string[]>([])
+  const [values, setValues] = useState<Values>(() =>
+    entry ? valuesOf(entry) : { kind: 'dailyRating' },
+  )
+  const [symptoms, setSymptoms] = useState<string[]>(() => entry?.symptoms ?? [])
+  // When editing, the PHQ-2 is answered again (only the total is stored), whatever the schedule.
+  const phq2Open = entry ? values.kind === 'phq2' : phq2.due
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const set = (name: string, value: string) => setValues((v) => ({ ...v, [name]: value }))
@@ -179,7 +225,7 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    const result = validateEntry(buildEntry(indicator, values, symptoms))
+    const result = validateEntry(buildEntry(indicator, values, symptoms, entry))
     // The model accepts these fields missing on old stored entries; new entries must record them.
     const missingActivity = indicator === 'heartRate' && !values.activity
     const missingMethod = indicator === 'bodyTemperature' && !values.method
@@ -195,7 +241,8 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
       setErrors(next)
       return
     }
-    addEntry(result.value)
+    if (entry) updateEntry(result.value)
+    else addEntry(result.value)
     onOpenChange(false)
   }
 
@@ -267,7 +314,7 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
   } else if (indicator === 'mood') {
     extra = (
       <>
-        {phq2.due ? (
+        {entry ? null : phq2.due ? (
           <Choice
             name="kind"
             legend="Assessment"
@@ -284,7 +331,7 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
             <span className="num">{formatDate(phq2.nextDue!)}</span>.
           </p>
         )}
-        {values.kind === 'phq2' && phq2.due ? (
+        {values.kind === 'phq2' && phq2Open ? (
           <>
             <p className="text-sm">
               Over the last 2 weeks, how often have you been bothered by the following problems?
@@ -333,8 +380,16 @@ export function EntryDialog({ indicator, open, onOpenChange }: Props) {
       >
         <form onSubmit={submit} noValidate className="space-y-4">
           <DialogHeader>
-            <DialogTitle>{INDICATORS[indicator].label}</DialogTitle>
-            <DialogDescription>{HINTS[indicator] ?? 'Add a new entry.'}</DialogDescription>
+            <DialogTitle>
+              {entry
+                ? `Edit ${INDICATORS[indicator].label.toLowerCase()} reading`
+                : INDICATORS[indicator].label}
+            </DialogTitle>
+            <DialogDescription>
+              {entry
+                ? `Reading from ${formatDateTime(entry.recordedAt)}. The date and time stay the same; the reading will be marked as edited.`
+                : (HINTS[indicator] ?? 'Add a new entry.')}
+            </DialogDescription>
           </DialogHeader>
 
           {NUMBER_FIELDS[indicator].map((field) => (
