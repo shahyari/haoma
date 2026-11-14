@@ -1,6 +1,6 @@
 # haoma — Astronaut Health Self-Assessment
 
-> **Status: preparation phase.** This repository contains planning documentation only. No application code has been written. Development begins at the NASA Space Apps Challenge 2026 hackathon (November 14–15, 2026), in line with the event rule that teams may not begin working on challenges before the hackathon.
+> **Status: in development** during the NASA Space Apps Challenge 2026 hackathon (November 14–15, 2026). The technical foundation is in place; product screens are not built yet. Development started at the event start, in line with the rule that teams may not begin working on challenges before the hackathon.
 
 **Challenge:** [Create Health Monitoring Software for Astronauts on Space Missions](https://www.spaceappschallenge.org/2026/challenges/health-monitoring-software/)
 **Team:** haoma
@@ -81,7 +81,14 @@ TODO: Describe user-entered inputs, simulated historical records, thresholds, an
 
 ## Run locally
 
-TODO: insert verified installation and run commands after implementation.
+Requires Node.js 26.
+
+```sh
+npm install
+npm run dev
+```
+
+Other commands (tests, lint, build) are listed in [`docs/architecture.md`](docs/architecture.md) → Commands.
 
 ## Technology
 
@@ -93,4 +100,4 @@ TODO: Link to [`docs/references.md`](docs/references.md). List third-party code,
 
 ## License
 
-Original project code will be licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). TODO: add the LICENSE file when the repository is created. Third-party components keep their own licenses (see [`docs/references.md`](docs/references.md)).
+Original project code is licensed under the [Apache License 2.0](LICENSE). Third-party components keep their own licenses (see [`docs/references.md`](docs/references.md)).

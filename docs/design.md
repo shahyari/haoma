@@ -24,6 +24,8 @@ The owner defines the values (visual direction). During Phase A, Claude implemen
 | `--radius-md` | TODO: value | Cards and controls |
 | `--font-body` | TODO: font stack | Main text |
 
+**Phase A implementation (2026-11-14).** `--color-bg`, `--color-text`, `--color-accent`, `--space-1`, and `--font-body` are defined in `src/index.css` with neutral placeholder values (white, near-black, near-black, 0.25rem, system font stack), and the shadcn/ui variables derive from them (`--background`, `--foreground`, `--primary`, Tailwind spacing, `--font-sans`). `--radius-md` is produced by the shadcn scale as `--radius` × 0.8, so change `--radius` (placeholder 0.625rem). Naming note: Tailwind reserves the `--color-*` namespace and shadcn already uses `--accent` for hover surfaces. The current names work, but TODO: owner to confirm the token names or adopt the shadcn names when the visual direction is set.
+
 ## Components
 
 | Component | States | Interaction | Accessibility |

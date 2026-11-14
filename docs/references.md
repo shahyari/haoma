@@ -137,7 +137,23 @@ E-R7, E-R8, and E-R15 in `challenge.md` require these to be freely available or 
 
 | ID | Dependency / asset | Author | URL | Use | License | Accessed |
 |---|---|---|---|---|---|---|
-| TODO: TP-NN | TODO | TODO | TODO | TODO | TODO | TODO |
+| TP-01 | react, react-dom 19.3.1 | Meta and contributors | https://react.dev | UI framework | MIT | 2026-11-14 |
+| TP-02 | react-router 8.5.1 | Remix Software / Shopify | https://reactrouter.com | Client-side routing | MIT | 2026-11-14 |
+| TP-03 | tailwindcss, @tailwindcss/vite 4.3.5 | Tailwind Labs | https://tailwindcss.com | Styling | MIT | 2026-11-14 |
+| TP-04 | shadcn 4.23.0 (CLI, generated components in `src/components/ui/`), cn 0.5.2 | shadcn | https://ui.shadcn.com | Component library | MIT | 2026-11-14 |
+| TP-05 | radix-ui 1.8.1 | WorkOS | https://www.radix-ui.com | Accessible primitives used by shadcn/ui | MIT | 2026-11-14 |
+| TP-06 | class-variance-authority 0.7.1 | Joe Bell | https://cva.style | Component variants (shadcn/ui) | Apache-2.0 | 2026-11-14 |
+| TP-07 | tw-animate-css 1.4.0 | Luca Bosin (Wombosvideo) | https://github.com/Wombosvideo/tw-animate-css | Animation utilities (shadcn/ui) | MIT | 2026-11-14 |
+| TP-08 | lucide-react 1.73.0 | Lucide contributors | https://lucide.dev | Icons (the only icon library) | ISC | 2026-11-14 |
+| TP-09 | recharts 3.8.0 | Recharts Group | https://recharts.org | Charts (via the shadcn chart component) | MIT | 2026-11-14 |
+| TP-10 | vite 8.3.8, @vitejs/plugin-react 6.3.0 | VoidZero and contributors | https://vite.dev | Build tool (dev-only) | MIT | 2026-11-14 |
+| TP-11 | typescript 7.0.2 | Microsoft | https://www.typescriptlang.org | Language (dev-only) | Apache-2.0 | 2026-11-14 |
+| TP-12 | vitest 5.1.0, jsdom 31.0.1, @testing-library/react 16.3.3 | VoidZero; jsdom contributors; Testing Library contributors | https://vitest.dev | Tests (dev-only) | MIT | 2026-11-14 |
+| TP-13 | oxlint 1.93.0, prettier 3.10.1 | VoidZero; Prettier contributors | https://oxc.rs, https://prettier.io | Linting and formatting (dev-only) | MIT | 2026-11-14 |
+| TP-14 | @types/react, @types/react-dom, @types/node | DefinitelyTyped contributors | https://github.com/DefinitelyTyped/DefinitelyTyped | Type definitions (dev-only) | MIT | 2026-11-14 |
+| TP-15 | Apache License 2.0 text (`LICENSE`) | Apache Software Foundation | https://www.apache.org/licenses/LICENSE-2.0.txt | Project license | Apache-2.0 | 2026-11-14 |
+
+Versions and licenses were read from the installed `node_modules` on 2026-11-14. Transitive dependencies (from `package-lock.json`) are licensed MIT, ISC, Apache-2.0, BSD-2-Clause, BSD-3-Clause, 0BSD, BlueOak-1.0.0, MPL-2.0, and CC-BY-4.0 (one data package). TODO: before submission, re-run the license summary and name the MPL-2.0 and CC-BY-4.0 packages.
 
 ## AI assistance
 
@@ -146,7 +162,8 @@ This section is required (`challenge.md` E-R6, E-R17, E-R18).
 - The pre-event preparation documentation (templates, rule capture, consolidation) was drafted with Claude Code on 2026-11-12 and 2026-11-13. Product concept and scope decisions (primary user, indicators, features) were made by the team. Claude Code proposed the wording of the guidance-policy reconciliation (Q-01), which the owner reviewed and approved. The indicator research table and the decisions OD-1 to OD-7 were compiled by the owner **with assistance from Claude** (chat). Claude Code imported them, link-checked the sources, verified the ADA Table 2.2 wording, and added source-quality notes (N-1 to N-4).
 - Code and data: AI generation must be acknowledged "in descriptive text and metadata". Planned approach: a statement in README and the submission, plus `Co-Authored-By` trailers on AI-assisted commits.
 - Images and video: AI-generated visuals must carry a visible watermark.
-- TODO: Describe how Claude Code and any other AI tools were used during development.
+- Development (from 2026-11-14 09:00 CET): the Phase A technical foundation (project setup, shell, data models, validation, storage, tests) was written by Claude Code under the owner's direction. AI-assisted commits carry a `Co-Authored-By` trailer, and `package.json` and `index.html` carry a note in their metadata.
+- TODO: Describe how Claude Code and any other AI tools were used for the Phase B features.
 
 ## Originality and pre-existing work
 

@@ -6,7 +6,7 @@ Build **haoma**, a web-based astronaut health self-assessment prototype for the 
 
 ## Phase gate
 
-**Current phase: PREPARATION.** Do not create the repository, initialize the app, install project dependencies, write application code, or deploy. The official rules say "Teams are not allowed to begin working on the challenges prior to the hackathon" (`docs/challenge.md` E-R2).
+**Current phase: A — FOUNDATION** (kickoff received Sat 2026-11-14 09:00 CET). Product screens and rule logic wait for Phase B specs.
 
 | Phase | Starts when | Allowed |
 |---|---|---|
