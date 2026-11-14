@@ -90,35 +90,55 @@ export function validatePainLog(input: unknown): PainLog | undefined {
   }
 }
 
-/** A saved report: a snapshot of one or more pain logs (owner decision 2026-11-14). */
+/** A saved report: one or more pain logs, removed from the pain log when saved (owner decisions 2026-11-14). */
 export interface PainReport {
   id: string
   /** ISO 8601 date-time when the report was saved. */
   createdAt: string
+  /** Name of the (fictional) astronaut at the time of saving. */
+  astronaut?: string
   logs: PainLog[]
 }
 
-export function validatePainReport(input: unknown): PainReport | undefined {
-  if (!isRecord(input)) return undefined
-  if (typeof input.id !== 'string' || input.id === '' || !isDateTime(input.createdAt))
-    return undefined
-  if (!Array.isArray(input.logs) || input.logs.length === 0) return undefined
+export const PAIN_REPORT_SCHEMA = 'haoma.painReport.v1'
+/** Largest JSON file accepted for import (1 MB). */
+export const PAIN_REPORT_MAX_BYTES = 1_000_000
+
+function validateLogs(raw: unknown): PainLog[] | undefined {
+  if (!Array.isArray(raw) || raw.length === 0) return undefined
   const logs: PainLog[] = []
-  for (const item of input.logs) {
+  for (const item of raw) {
     const log = validatePainLog(item)
     if (!log) return undefined
     logs.push(log)
   }
-  return { id: input.id, createdAt: input.createdAt as string, logs }
+  return logs
 }
 
-/** The downloadable JSON of a report. Self-reported data with its disclaimer. */
+export function validatePainReport(input: unknown): PainReport | undefined {
+  if (!isRecord(input)) return undefined
+  if (typeof input.id !== 'string' || input.id === '' || !isDateTime(input.createdAt)) {
+    return undefined
+  }
+  if (input.astronaut !== undefined && typeof input.astronaut !== 'string') return undefined
+  const logs = validateLogs(input.logs)
+  if (!logs) return undefined
+  return {
+    id: input.id,
+    createdAt: input.createdAt as string,
+    ...(input.astronaut ? { astronaut: input.astronaut as string } : {}),
+    logs,
+  }
+}
+
+/** The JSON file of a report: astronaut name, save date, and the logs, with a disclaimer. */
 export function painReportJson(report: PainReport): string {
   return JSON.stringify(
     {
-      schema: 'haoma.painReport.v1',
+      schema: PAIN_REPORT_SCHEMA,
       id: report.id,
-      createdAt: report.createdAt,
+      astronaut: report.astronaut ?? null,
+      savedAt: report.createdAt,
       note: 'Self-reported pain logs from the haoma body map. Not a diagnosis. Hackathon prototype; not a medical device.',
       logs: report.logs,
     },
@@ -126,3 +146,49 @@ export function painReportJson(report: PainReport): string {
     2,
   )
 }
+
+export type ImportResult = { ok: true; report: PainReport } | { ok: false; error: string }
+
+/**
+ * Reads a report file written by `painReportJson`. Every log is validated; nothing is
+ * imported when anything is invalid. A report id that already exists gets a new id.
+ */
+export function parsePainReportJson(
+  text: string,
+  existingIds: ReadonlySet<string>,
+  newId: () => string,
+): ImportResult {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    return { ok: false, error: 'The file is not valid JSON.' }
+  }
+  if (!isRecord(parsed) || parsed.schema !== PAIN_REPORT_SCHEMA) {
+    return { ok: false, error: 'The file is not a haoma pain report.' }
+  }
+  const savedAt = parsed.savedAt ?? parsed.createdAt
+  if (!isDateTime(savedAt)) return { ok: false, error: 'The report has no valid save date.' }
+  if (parsed.astronaut != null && typeof parsed.astronaut !== 'string') {
+    return { ok: false, error: 'The astronaut name in the report is not valid.' }
+  }
+  const logs = validateLogs(parsed.logs)
+  if (!logs) return { ok: false, error: 'The report has no pain logs, or a pain log is not valid.' }
+  const id =
+    typeof parsed.id === 'string' && parsed.id !== '' && !existingIds.has(parsed.id)
+      ? parsed.id
+      : newId()
+  return {
+    ok: true,
+    report: {
+      id,
+      createdAt: new Date(savedAt as string).toISOString(),
+      ...(parsed.astronaut ? { astronaut: parsed.astronaut as string } : {}),
+      logs,
+    },
+  }
+}
+
+/** Mean intensity of a report's logs, one decimal (shown as "average intensity", owner decision). */
+export const averageIntensity = (report: PainReport) =>
+  (report.logs.reduce((s, l) => s + l.intensity, 0) / report.logs.length).toFixed(1)

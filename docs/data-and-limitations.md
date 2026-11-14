@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | Indicator entries typed by the user | The person using the app | User-entered (labeled "Manual entry") | Entry form; structural validation only | N/A | Stored only in this browser |
 | Pain logs (body map) | The person using the app | Self-reported (the app adds no data) | Body map: location on the model (region or organ name, position, surface normal, 3D or 2D view), date and time of the pain (default now, no future times), intensity 1–10, optional character, optional note (max 240 characters) | N/A | Stored only in this browser; never interpreted, classified, or used by any rule |
-| Pain reports | The person using the app | Self-reported | "Save report": a snapshot of chosen pain logs | N/A | Stored only in this browser; downloaded as a JSON file only when the person asks |
+| Pain reports | The person using the app, or an imported report file | Self-reported | "Save report" moves the chosen pain logs into a report with the astronaut name (the fictional demo profile) and the save date; "Import JSON" adds a report file after validation | N/A | Stored only in this browser; opened or downloaded as a JSON file only when the person asks; an imported file is read locally and never uploaded |
 | Demo history | `src/demo/demo.ts` | Simulated (labeled "Simulated") | Deterministic generator (see below) | N/A (Simulated demo logic) | Not real astronaut data |
 | Demo profile "Alex Morgan" | `src/demo/demo.ts` | Fictional (labeled "Fictional profile") | Provisional profile set by the owner 2026-11-14 | N/A | — |
 | Rule thresholds and wording | `scientific-foundations.md` | Reference information | Copied from the approved rules | REF IDs per rule | General-population references, not astronaut-specific |

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { AboutPage } from '@/pages/AboutPage'
 import { HomePage } from '@/pages/HomePage'
 import { IndicatorPage } from '@/pages/IndicatorPage'
+import { ReportPage } from '@/pages/ReportPage'
 import { ReportsPage } from '@/pages/ReportsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 
@@ -25,6 +26,7 @@ export const APP_ROUTES: AppRoute[] = [
     hidden: true,
   },
   { path: '/reports', label: 'Reports', element: <ReportsPage /> },
+  { path: '/reports/:reportId', label: 'Report', element: <ReportPage />, hidden: true },
   { path: '/settings', label: 'Settings', element: <SettingsPage /> },
   { path: '/about', label: 'About', element: <AboutPage /> },
 ]

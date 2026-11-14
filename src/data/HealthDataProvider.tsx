@@ -26,7 +26,10 @@ interface HealthDataValue {
   savePainLog: (report: PainLog) => void
   deletePainLog: (id: string) => void
   clearPainLogs: () => void
+  /** Saves the report and removes its logs from the pain log (owner decision 2026-11-14). */
   savePainReport: (report: PainReport) => void
+  /** Adds an imported report; the pain log is not changed. */
+  importPainReport: (report: PainReport) => void
   deletePainReport: (id: string) => void
   clearAll: () => void
 }
@@ -72,7 +75,16 @@ export function HealthDataProvider({ children, store }: { children: ReactNode; s
       deletePainLog: (id) =>
         change((d) => ({ ...d, painLogs: d.painLogs.filter((r) => r.id !== id) })),
       clearPainLogs: () => change((d) => ({ ...d, painLogs: [] })),
-      savePainReport: (report) => change((d) => ({ ...d, reports: [...d.reports, report] })),
+      savePainReport: (report) =>
+        change((d) => {
+          const saved = new Set(report.logs.map((l) => l.id))
+          return {
+            ...d,
+            reports: [...d.reports, report],
+            painLogs: d.painLogs.filter((l) => !saved.has(l.id)),
+          }
+        }),
+      importPainReport: (report) => change((d) => ({ ...d, reports: [...d.reports, report] })),
       deletePainReport: (id) =>
         change((d) => ({ ...d, reports: d.reports.filter((r) => r.id !== id) })),
       clearAll: () => {

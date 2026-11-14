@@ -974,10 +974,17 @@ function cssColorToRgb(css: string, fallback: V3): V3 {
 const NS = 'http://www.w3.org/2000/svg'
 let instances = 0
 
+export interface BodyMapOptions {
+  /** Shows marks only (a saved report): no picking, regions are not interactive. */
+  readOnly?: boolean
+}
+
 export function createBodyMap(
   els: BodyMapElements,
-  onPick: (info: PickInfo) => void,
+  onPickInfo: (info: PickInfo) => void,
+  { readOnly = false }: BodyMapOptions = {},
 ): BodyMapController {
+  const onPick = readOnly ? () => {} : onPickInfo
   const { stage, canvas, overlay: ov, svg2d: svg2, tip, readoutLeft: roL, readoutRight: roR } = els
   const { parts, zones, raycast } = getModel()
   const clipId = `bodymap-clip-${++instances}`
@@ -1570,7 +1577,9 @@ export function createBodyMap(
           class: 'zone',
           'data-k': it.k,
         }
-        if (i === 0) Object.assign(attrs, { tabindex: 0, role: 'button', 'aria-label': z.name })
+        if (i === 0 && !readOnly) {
+          Object.assign(attrs, { tabindex: 0, role: 'button', 'aria-label': z.name })
+        }
         it.els.push(el('path', attrs, gz))
       })
     }
@@ -1588,9 +1597,7 @@ export function createBodyMap(
               d: o.d,
               class: 'organ',
               'data-k': it.k,
-              tabindex: 0,
-              role: 'button',
-              'aria-label': o.name,
+              ...(readOnly ? {} : { tabindex: 0, role: 'button', 'aria-label': o.name }),
             },
             go,
           ),

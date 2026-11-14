@@ -17,3 +17,12 @@ export function reportFilename(createdAt: string): string {
   const p2 = (n: number) => String(n).padStart(2, '0')
   return `haoma-pain-report-${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}.json`
 }
+
+/** Opens text as a file in a new browser tab (e.g. to read a report's JSON). */
+export function openFile(text: string, type = 'application/json') {
+  if (typeof URL.createObjectURL !== 'function') return
+  const url = URL.createObjectURL(new Blob([text], { type }))
+  window.open(url, '_blank', 'noopener')
+  // Keep the URL alive long enough for the new tab to load it.
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
+}

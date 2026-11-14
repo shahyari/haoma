@@ -167,7 +167,7 @@ describe('Body map: owner changes of 2026-11-14', () => {
     )
   })
 
-  it('saves a report with the chosen logs, lists it on the Reports page, and downloads it', async () => {
+  it('saving a report moves the chosen logs into it, shows a banner, and opens the report', async () => {
     const { store, map, dialog } = await addAt('Neck')
     fireEvent.click(dialog.getByRole('button', { name: 'Save' }))
     fireEvent.keyDown(within(map).getByRole('button', { name: 'Heart' }), { key: 'Enter' })
@@ -181,27 +181,57 @@ describe('Body map: owner changes of 2026-11-14', () => {
     fireEvent.click(save.getByRole('checkbox', { name: /Neck/ }))
     fireEvent.click(save.getByRole('button', { name: 'Save report (1)' }))
 
+    // The saved log leaves the pain log; the unticked one stays.
     const { reports, painLogs } = store.load().data
-    expect(painLogs.length).toBe(2)
+    expect(painLogs.map((l) => l.region)).toEqual(['Neck'])
     expect(reports.length).toBe(1)
-    expect(reports[0].logs.map((l) => l.region)).toEqual(['Heart'])
-    expect(screen.getByText('Report saved.', { exact: false })).toBeTruthy()
+    expect(reports[0]).toMatchObject({ astronaut: 'Alex Morgan', logs: [{ region: 'Heart' }] })
+    expect(screen.getByText(/Report saved with/).textContent).toContain('1 pain log')
 
+    fireEvent.click(screen.getByRole('link', { name: 'View report' }))
+    expect(screen.getByRole('heading', { level: 1, name: /^Pain report/ })).toBeTruthy()
+    expect(screen.getByRole('main').textContent).toMatch(/Alex Morgan · 1 log · average intensity/)
+    // The report's logs on the body map, read-only.
+    const reportMap = await screen.findByRole('group', { name: /pain logs of this report/ })
+    expect(within(reportMap).queryAllByRole('button')).toEqual([])
+    const log = within(screen.getByRole('complementary', { name: 'Pain log' }))
+    expect(log.getByText('Heart')).toBeTruthy()
+    expect(log.queryByRole('button', { name: /Edit point/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Save report' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Clear all' })).toBeNull()
+  })
+
+  it('downloads and opens the report JSON with the astronaut name and save date', async () => {
+    const { dialog } = await addAt('Neck')
+    fireEvent.click(dialog.getByRole('button', { name: 'Save' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save report' }))
+    fireEvent.click(
+      within(screen.getByRole('dialog', { name: 'Save report' })).getByRole('button', {
+        name: 'Save report (1)',
+      }),
+    )
     const created: Blob[] = []
     URL.createObjectURL = (blob: Blob) => (created.push(blob), 'blob:test')
     URL.revokeObjectURL = () => {}
+    const opened: string[] = []
+    window.open = ((url: string) => (opened.push(url), null)) as typeof window.open
+
     fireEvent.click(screen.getByRole('link', { name: 'Reports' }))
-    expect(screen.getByRole('heading', { level: 1, name: 'Reports' })).toBeTruthy()
     const report = within(screen.getByRole('article', { name: /^Pain report/ }))
-    expect(report.getByText('Heart')).toBeTruthy()
     fireEvent.click(report.getByRole('button', { name: 'Download JSON' }))
     const json = JSON.parse(await created[0].text())
-    expect(json).toMatchObject({ schema: 'haoma.painReport.v1', logs: [{ region: 'Heart' }] })
+    expect(json).toMatchObject({
+      schema: 'haoma.painReport.v1',
+      astronaut: 'Alex Morgan',
+      logs: [{ region: 'Neck' }],
+    })
+    expect(Number.isNaN(Date.parse(json.savedAt))).toBe(false)
     expect(json.note).toMatch(/Not a diagnosis/)
+    fireEvent.click(report.getByRole('button', { name: 'Open JSON' }))
+    expect(opened).toEqual(['blob:test'])
 
     fireEvent.click(report.getByRole('button', { name: 'Delete' }))
     fireEvent.click(report.getByRole('button', { name: 'Confirm delete' }))
-    expect(store.load().data.reports).toEqual([])
     expect(screen.getByText('No saved reports')).toBeTruthy()
   })
 })

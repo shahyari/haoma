@@ -1,4 +1,4 @@
-import { Crosshair, FileText, Pencil, Save, Trash2 } from 'lucide-react'
+import { CircleCheck, Crosshair, FileText, Pencil, Save, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { Link } from 'react-router'
 
@@ -22,9 +22,11 @@ import {
   validatePainLog,
   type PainCharacter,
   type PainLog,
+  type PainReport,
   type Vec3,
 } from '@/domain/pain'
 import { INDICATORS } from '@/domain/indicators'
+import { DEMO_PROFILE } from '@/demo/demo'
 import { cn } from '@/lib/utils'
 
 import {
@@ -91,9 +93,11 @@ const surfaceOf = (r: PainLog) => (r.organ ? 'Organ' : r.position[2] >= 0 ? 'Fro
  * Body map and pain log (owner prototype "body-map.html", 2026-11-14).
  * Self-reported data only: nothing here is interpreted or classified.
  */
-export function BodyMap() {
+export function BodyMap({ report }: { report?: PainReport } = {}) {
+  // With a report, the map shows its saved logs read-only (owner decision 2026-11-14).
+  const readOnly = report !== undefined
   const { data, savePainLog, deletePainLog, clearPainLogs, savePainReport } = useHealthData()
-  const logs = data.painLogs
+  const logs = report?.logs ?? data.painLogs
 
   const stageRef = useRef<HTMLElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -112,7 +116,7 @@ export function BodyMap() {
   const [confirmClear, setConfirmClear] = useState(false)
   const [whenError, setWhenError] = useState<string | null>(null)
   const [saving, setSaving] = useState<Set<string> | null>(null)
-  const [savedNotice, setSavedNotice] = useState(false)
+  const [saved, setSaved] = useState<{ id: string; count: number } | null>(null)
 
   useEffect(() => {
     const c = createBodyMap(
@@ -125,10 +129,12 @@ export function BodyMap() {
         readoutLeft: roLeftRef.current!,
         readoutRight: roRightRef.current!,
       },
+      // Picks only when editable; createBodyMap ignores them in read-only mode.
       (pick) =>
         setDraft(
           (current) => current ?? { pick, intensity: 5, note: '', when: toLocalInput(new Date()) },
         ),
+      { readOnly },
     )
     controller.current = c
     // oxlint-disable-next-line react-hooks-js/set-state-in-effect -- WebGL support is known only after mounting.
@@ -145,7 +151,7 @@ export function BodyMap() {
       c.destroy()
       controller.current = null
     }
-  }, [])
+  }, [readOnly])
 
   useEffect(() => {
     const marks: Mark[] = logs.map((r, i) => ({
@@ -245,14 +251,17 @@ export function BodyMap() {
 
   function saveReport() {
     if (!saving || saving.size === 0) return
+    const id = crypto.randomUUID()
+    // Saving moves the chosen logs from the pain log into the report (owner decision 2026-11-14).
     savePainReport({
-      id: crypto.randomUUID(),
+      id,
       createdAt: new Date().toISOString(),
+      astronaut: DEMO_PROFILE.name,
       logs: logs.filter((l) => saving.has(l.id)),
     })
+    setSaved({ id, count: saving.size })
     setSaving(null)
-    setSavedNotice(true)
-    window.setTimeout(() => setSavedNotice(false), 4000)
+    window.setTimeout(() => setSaved((s) => (s?.id === id ? null : s)), 8000)
   }
 
   function onDialogKey(e: KeyboardEvent) {
@@ -271,19 +280,22 @@ export function BodyMap() {
       <div className="flex flex-wrap items-center gap-3 border-b px-4 py-3">
         <div>
           <h2 id="bodymap-heading" className="font-medium">
-            Body map
+            {readOnly ? 'Pain logs on the body map' : 'Body map'}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Pain log · self-reported, not a diagnostic tool
+            {readOnly ? 'Saved report, read-only' : 'Pain log'} · self-reported, not a diagnostic
+            tool
           </p>
         </div>
-        <Button asChild variant="outline" size="sm" className="ml-auto">
-          <Link to="/reports">
-            <FileText aria-hidden="true" />
-            Reports
-          </Link>
-        </Button>
-        <div role="group" aria-label="View mode" className="seg">
+        {readOnly ? null : (
+          <Button asChild variant="outline" size="sm" className="ml-auto">
+            <Link to="/reports">
+              <FileText aria-hidden="true" />
+              Reports
+            </Link>
+          </Button>
+        )}
+        <div role="group" aria-label="View mode" className={cn('seg', readOnly && 'ml-auto')}>
           <button
             type="button"
             aria-pressed={mode === '3d'}
@@ -298,6 +310,21 @@ export function BodyMap() {
         </div>
       </div>
 
+      {saved ? (
+        <div
+          role="status"
+          className="flex flex-wrap items-center gap-3 border-b bg-muted px-4 py-2 text-sm"
+        >
+          <CircleCheck aria-hidden="true" className="size-4 shrink-0" />
+          <span className="flex-1">
+            Report saved with <span className="num">{saved.count}</span>{' '}
+            {saved.count === 1 ? 'pain log' : 'pain logs'}. The pain log is cleared.
+          </span>
+          <Button asChild size="sm">
+            <Link to={`/reports/${saved.id}`}>View report</Link>
+          </Button>
+        </div>
+      ) : null}
       <div className="grid min-h-0 flex-1 lg:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] @3xl:grid-cols-[minmax(0,1fr)_19rem] @3xl:grid-rows-1">
         <section
           ref={stageRef}
@@ -314,7 +341,11 @@ export function BodyMap() {
             ref={svg2dRef}
             className="v2d"
             role="group"
-            aria-label="2D body map. Choose a body region or organ to add a pain point."
+            aria-label={
+              readOnly
+                ? '2D body map with the pain logs of this report.'
+                : '2D body map. Choose a body region or organ to add a pain point.'
+            }
           />
           <div className="corner a" aria-hidden="true" />
           <div className="corner b" aria-hidden="true" />
@@ -468,79 +499,81 @@ export function BodyMap() {
                     >
                       <Crosshair aria-hidden="true" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={`Edit point ${i + 1}`}
-                      onClick={() =>
-                        setDraft({
-                          editingId: r.id,
-                          intensity: r.intensity,
-                          character: r.character,
-                          note: r.note ?? '',
-                          when: toLocalInput(new Date(r.recordedAt)),
-                        })
-                      }
-                    >
-                      <Pencil aria-hidden="true" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={`Delete point ${i + 1}`}
-                      onClick={() => deletePainLog(r.id)}
-                    >
-                      <Trash2 aria-hidden="true" />
-                    </Button>
+                    {readOnly ? null : (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Edit point ${i + 1}`}
+                          onClick={() =>
+                            setDraft({
+                              editingId: r.id,
+                              intensity: r.intensity,
+                              character: r.character,
+                              note: r.note ?? '',
+                              when: toLocalInput(new Date(r.recordedAt)),
+                            })
+                          }
+                        >
+                          <Pencil aria-hidden="true" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Delete point ${i + 1}`}
+                          onClick={() => deletePainLog(r.id)}
+                        >
+                          <Trash2 aria-hidden="true" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </li>
               ))}
             </ol>
           )}
-          <div className="mt-auto flex gap-2 border-t px-4 py-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              disabled={!logs.length}
-              onClick={() => setSaving(new Set(logs.map((l) => l.id)))}
-            >
-              <Save aria-hidden="true" />
-              Save report
-            </Button>
-            <Button
-              variant={confirmClear ? 'destructive' : 'outline'}
-              size="sm"
-              className="flex-1"
-              disabled={!logs.length}
-              onClick={() => {
-                if (!confirmClear) {
-                  setConfirmClear(true)
-                  window.setTimeout(() => setConfirmClear(false), 3000)
-                  return
-                }
-                setConfirmClear(false)
-                clearPainLogs()
-              }}
-            >
-              {confirmClear ? 'Confirm clear' : 'Clear all'}
-            </Button>
-          </div>
-          {savedNotice ? (
-            <p role="status" className="border-t px-4 py-2 text-sm">
-              Report saved.{' '}
-              <Link to="/reports" className="underline underline-offset-2">
-                Open reports
-              </Link>
-            </p>
-          ) : null}
+          {readOnly ? null : (
+            <div className="mt-auto flex gap-2 border-t px-4 py-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                disabled={!logs.length}
+                onClick={() => setSaving(new Set(logs.map((l) => l.id)))}
+              >
+                <Save aria-hidden="true" />
+                Save report
+              </Button>
+              <Button
+                variant={confirmClear ? 'destructive' : 'outline'}
+                size="sm"
+                className="flex-1"
+                disabled={!logs.length}
+                onClick={() => {
+                  if (!confirmClear) {
+                    setConfirmClear(true)
+                    window.setTimeout(() => setConfirmClear(false), 3000)
+                    return
+                  }
+                  setConfirmClear(false)
+                  clearPainLogs()
+                }}
+              >
+                {confirmClear ? 'Confirm clear' : 'Clear all'}
+              </Button>
+            </div>
+          )}
         </aside>
       </div>
 
       <p className="border-t px-4 py-2 text-xs text-muted-foreground">
-        {mode === '3d'
-          ? 'Drag to rotate · Shift- or right-drag to pan · Scroll to zoom · Click to add a pain point'
-          : 'Click a region or organ, or move to it with Tab and press Enter · Drag to pan · Scroll to zoom'}
+        {readOnly
+          ? mode === '3d'
+            ? 'Drag to rotate · Shift- or right-drag to pan · Scroll to zoom'
+            : 'Drag to pan · Scroll to zoom'
+          : mode === '3d'
+            ? 'Drag to rotate · Shift- or right-drag to pan · Scroll to zoom · Click to add a pain point'
+            : 'Click a region or organ, or move to it with Tab and press Enter · Drag to pan · Scroll to zoom'}
       </p>
 
       <Dialog open={draft !== null} onOpenChange={(open) => (open ? null : closeDraft())}>
@@ -688,8 +721,8 @@ export function BodyMap() {
             <DialogHeader>
               <DialogTitle>Save report</DialogTitle>
               <DialogDescription>
-                Choose the pain logs to include. The report is kept on the Reports page, where it
-                can be downloaded as a JSON file. The pain log stays as it is.
+                Choose the pain logs to include. They move from the pain log into the report, which
+                is kept on the Reports page and can be opened or downloaded as a JSON file.
               </DialogDescription>
             </DialogHeader>
             <fieldset className="max-h-72 space-y-1 overflow-auto">
