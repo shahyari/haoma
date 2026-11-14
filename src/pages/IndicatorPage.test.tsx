@@ -159,6 +159,37 @@ describe('IndicatorPage', () => {
     expect(store.load().data.entries.at(-1)).toMatchObject({ method: 'forehead' })
   })
 
+  it('explains why a forehead reading is not evaluated, and shows reported symptoms', () => {
+    renderApp('/indicators/bodyTemperature', [
+      {
+        ...daysAgo(0),
+        indicator: 'bodyTemperature',
+        celsius: 39.8,
+        method: 'forehead',
+        exercisedLast30Min: false,
+        symptoms: ['otherSymptoms'],
+      },
+    ])
+    expect(latest().getByText('Not evaluated')).toBeTruthy()
+    expect(
+      latest().getByText('No approved interpretation rule exists for forehead readings.'),
+    ).toBeTruthy()
+    expect(latest().getByText('“Not evaluated” does not mean normal.')).toBeTruthy()
+    expect(
+      latest().getByText(/unexpectedly high, verify it with a repeat measurement/),
+    ).toBeTruthy()
+    expect(latest().getByText(/Symptoms reported with this reading: Other symptoms\./)).toBeTruthy()
+  })
+
+  it('shows chest pain next to a heart rate inside 60–100 instead of hiding it', () => {
+    renderApp('/indicators/heartRate', [
+      { ...daysAgo(0), indicator: 'heartRate', bpm: 80, activity: 'rest', symptoms: ['chestPain'] },
+    ])
+    expect(
+      latest().getByText(/Symptoms reported with this reading: Chest pain\./).textContent,
+    ).toContain('no approved rule assesses these symptoms on their own')
+  })
+
   it('has no baseline section for indicators whose rules do not use one', () => {
     renderApp('/indicators/sleep')
     expect(screen.queryByRole('region', { name: 'Personal baseline' })).toBeNull()

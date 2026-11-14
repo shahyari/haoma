@@ -246,8 +246,8 @@ function bodyTemperature(
       'bodyTemperature',
       [],
       e.method === 'forehead'
-        ? 'No approved rule gives a level for forehead readings, so it is not classified. Compare it with your trend and your forehead baseline.'
-        : 'The measurement method was not recorded, so no rule applies. Compare it with your trend.',
+        ? 'No approved rule interprets forehead readings. Not evaluated does not mean normal.'
+        : 'The measurement method was not recorded, so no rule applies. Not evaluated does not mean normal.',
     )
   }
 
@@ -255,12 +255,16 @@ function bodyTemperature(
   const aboveBaseline = usual !== undefined && e.celsius > usual + p.temperatureShiftCelsius
   const findings: Finding[] = []
 
-  // RULE-17's "a fever that keeps rising" has no evidence-backed definition and is not evaluated (OD-15).
-  if (e.celsius >= 39.4) findings.push(finding(RULES['RULE-17']))
+  // OD-16: RULE-17 = a single reading ≥ 40.6 °C (REF-50's single-reading level); RULE-31 =
+  // measurement review for 39.4 ≤ x < 40.6. No persistence trigger (no approved time window).
+  // RULE-16 (≥ 38.0 °C, no upper bound) keeps applying below 40.6, so a higher reading never
+  // gets a lower tier than a lower one.
+  if (e.celsius >= 40.6) findings.push(finding(RULES['RULE-17']))
   else if (e.celsius >= 38.0) {
     if (usual === undefined || aboveBaseline || (e.symptoms?.length ?? 0) > 0) {
       findings.push(finding(RULES['RULE-16']))
     }
+    if (e.celsius >= 39.4) findings.push(finding(RULES['RULE-31']))
   } else if (e.celsius >= 37.5) findings.push(finding(RULES['RULE-15']))
   else if (!aboveBaseline) findings.push(finding(RULES['RULE-14']))
 

@@ -4,7 +4,13 @@ import type { HealthEntry } from '@/domain/indicators'
 import type { MissionPhase } from '@/domain/mission'
 import type { SymptomId } from '@/domain/symptoms'
 
-import { evaluateIndicator, personalBaseline, phq2Screening, restingAbove100 } from './evaluate'
+import {
+  evaluateAll,
+  evaluateIndicator,
+  personalBaseline,
+  phq2Screening,
+  restingAbove100,
+} from './evaluate'
 
 let n = 0
 /** Day `day` of a fictional timeline, at 07:00. */
@@ -188,7 +194,8 @@ describe('body temperature (RULE-14–17)', () => {
     [37.5, 'attention RULE-15'],
     [37.9, 'attention RULE-15'],
     [38.0, 'escalate RULE-16'],
-    [39.4, 'escalate RULE-17'],
+    [39.4, 'escalate RULE-16 RULE-31'],
+    [40.6, 'escalate RULE-17'],
   ])('%f °C without a baseline → %s', (celsius, expected) => {
     expect(run([temp(celsius)])).toBe(expected)
   })
@@ -202,8 +209,8 @@ describe('body temperature (RULE-14–17)', () => {
     )
     expect(run([...steady(37.0), temp(38.2, { day: 6 })])).toBe('escalate RULE-16')
   })
-  it('keeps the 39.4 ceiling regardless of the baseline', () => {
-    expect(run([...steady(39.2), temp(39.4, { day: 6 })])).toBe('escalate RULE-17')
+  it('keeps the 40.6 ceiling regardless of the baseline (OD-16)', () => {
+    expect(run([...steady(40.4), temp(40.6, { day: 6 })])).toBe('escalate RULE-17')
   })
   it('is not Normal below 37.5 when more than 0.5 above the baseline', () => {
     expect(run([...steady(36.4), temp(37.0, { day: 6 })])).toBe('none')
@@ -320,8 +327,8 @@ describe('audit: overlaps and precedence', () => {
   it('glucose: a low fasting reading uses the any-context low rules, not RULE-09', () => {
     expect(run([glucose(60, 'fasting')])).toBe('attention RULE-11')
   })
-  it('temperature: the 39.4 ceiling wins over every other condition', () => {
-    expect(run([temp(39.4, { symptoms: ['otherSymptoms'] })])).toBe('escalate RULE-17')
+  it('temperature: the 40.6 ceiling wins over every other condition', () => {
+    expect(run([temp(40.6, { symptoms: ['otherSymptoms'] })])).toBe('escalate RULE-17')
   })
   it('sleep: the 3-of-7 pattern wins over a single good night', () => {
     expect(run([sleep(5, 1), sleep(5, 2), sleep(5, 3), sleep(8, 4)])).toBe('escalate RULE-20')
@@ -478,7 +485,7 @@ describe('OD-15 temperature: method-specific rules', () => {
   })
 
   it.each([37.4, 37.5, 38.0, 39.4, 40.6])(
-    'a forehead reading of %f °C is never classified, not even by the 39.4 °C rule',
+    'a forehead reading of %f °C is never classified, not even by the oral 39.4 / 40.6 °C levels',
     (celsius) => {
       const result = evaluate([temp(celsius, { method: 'forehead', symptoms: ['otherSymptoms'] })])
       expect(result.status).toBe('none')
@@ -490,7 +497,8 @@ describe('OD-15 temperature: method-specific rules', () => {
     expect(run([temp(37.5)])).toBe('attention RULE-15')
     expect(run([temp(38.0)])).toBe('escalate RULE-16')
     expect(run([temp(39.39)])).toBe('escalate RULE-16')
-    expect(run([temp(39.4)])).toBe('escalate RULE-17')
+    expect(run([temp(39.4)])).toBe('escalate RULE-16 RULE-31')
+    expect(run([temp(40.6)])).toBe('escalate RULE-17')
   })
   it('a legacy reading without a method is "not recorded", never assumed oral', () => {
     const result = evaluate([legacy(39.5, 1)])
@@ -559,5 +567,72 @@ describe('no reading without an applicable rule is classified as Within referenc
   it.each(cases)('%s', (_label, entries) => {
     const now = _label.startsWith('PHQ-2') ? new Date(Date.UTC(2026, 0, 20)) : NOW
     expect(evaluate(entries, 'inFlight', now).status).toBe('none')
+  })
+})
+
+describe('OD-16 temperature: single-reading review vs. urgent review', () => {
+  // A baseline close to the reading and no symptoms isolate RULE-31 from RULE-16.
+  const near = (value: number) => [1, 2, 3, 4, 5].map((day) => temp(value, { day }))
+  it.each([
+    [39.39, 'none'], // 38.0–39.3 °C near the baseline without symptoms: documented gap (AU-2a)
+    [39.4, 'attention RULE-31'],
+    [40.0, 'attention RULE-31'],
+    [40.59, 'attention RULE-31'],
+    [40.6, 'escalate RULE-17'],
+    [41.2, 'escalate RULE-17'],
+  ])('%f °C, near the baseline, no symptoms → %s', (celsius, expected) => {
+    const base = celsius < 39.4 ? near(38.9) : near(celsius - 0.2)
+    expect(run([...base, temp(celsius, { day: 6 })])).toBe(expected)
+  })
+  it('a single 39.4–40.5 °C reading is a measurement review, never RULE-17', () => {
+    const result = evaluate([...near(39.6), temp(39.8, { day: 6 })])
+    expect(result.status).toBe('attention')
+    expect(result.findings[0].message).toBe('Re-measure and compare with the trend.')
+  })
+  it('RULE-16 still applies below 40.6, so a higher reading never gets a lower tier', () => {
+    expect(run([temp(39.6)])).toBe('escalate RULE-16 RULE-31')
+    expect(run([temp(39.6, { symptoms: ['otherSymptoms'] })])).toBe('escalate RULE-16 RULE-31')
+    const severity = { none: -1, missing: -1, normal: 0, attention: 1, escalate: 2 }
+    let previous = -1
+    for (let tenths = 360; tenths <= 420; tenths++) {
+      const status = evaluate([temp(tenths / 10)]).status
+      expect(severity[status]).toBeGreaterThanOrEqual(previous)
+      previous = severity[status]
+    }
+  })
+  it('the oral levels never apply to forehead or method-unknown readings', () => {
+    expect(run([temp(41.0, { method: 'forehead' })])).toBe('none')
+  })
+})
+
+describe('OD-16 heart rate: symptom-only scenarios (no new rule until approved)', () => {
+  it('a rate inside 60–100 with chest pain, fainting or breathlessness stays rate-only for now', () => {
+    for (const symptom of ['chestPain', 'fainting', 'breathlessness'] as const) {
+      expect(run([hr(80, [symptom])])).toBe('normal RULE-06')
+    }
+  })
+  it('an irregular heartbeat is reported for medical review at any rate and context', () => {
+    expect(run([hr(72, ['irregularRhythm'])])).toBe('escalate RULE-08')
+    expect(run([hr(72, ['irregularRhythm'], 1, 'afterActivity')])).toBe('escalate RULE-08')
+  })
+})
+
+describe('demo scenario under the current rules', () => {
+  it('gives every indicator an in-reference status (all values are calm, simulated)', async () => {
+    const { createDemoEntries } = await import('@/demo/demo')
+    const now = new Date(2026, 10, 14, 12)
+    const statuses = evaluateAll(createDemoEntries(now), { missionPhase: 'inFlight', now }).map(
+      (a) => `${a.indicator}:${a.status}:${a.findings.map((f) => f.rule.id).join('+')}`,
+    )
+    expect(statuses).toMatchInlineSnapshot(`
+      [
+        "bloodPressure:normal:RULE-01",
+        "heartRate:normal:RULE-06",
+        "bloodGlucose:normal:RULE-09",
+        "bodyTemperature:normal:RULE-14",
+        "sleep:normal:RULE-18",
+        "mood:normal:RULE-21",
+      ]
+    `)
   })
 })

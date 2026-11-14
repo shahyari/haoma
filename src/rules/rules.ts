@@ -227,9 +227,19 @@ export const RULES = {
     'escalate',
     ['GCR'],
     ['TDD'],
-    ['REF-50', 'REF-31'],
-    'Oral readings only: 39.4 °C (103 °F) or higher. Fixed safety ceiling; the baseline never overrides it.',
+    ['REF-50'],
+    'Oral readings only: a single reading of 40.6 °C (105 °F) or higher (MedlinePlus: contact a provider right away). General adult reference, not validated for astronauts. The baseline never overrides it (OD-16).',
     'Contact flight surgeon promptly.',
+  ),
+  'RULE-31': rule(
+    'RULE-31',
+    'bodyTemperature',
+    'attention',
+    ['GCR', 'TDD'],
+    ['TDD'],
+    ['REF-50'],
+    'Oral readings only: a single reading from 39.4 °C up to, but not including, 40.6 °C. Measurement review, not an emergency classification; one reading does not show a persistent fever. General adult reference, not validated for astronauts (OD-16).',
+    'Re-measure and compare with the trend.',
   ),
   // Sleep
   'RULE-18': rule(

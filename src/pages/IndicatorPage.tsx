@@ -24,6 +24,7 @@ import {
   phq2Screening,
   restingAbove100,
 } from '@/rules/evaluate'
+import { SYMPTOMS, type SymptomId } from '@/domain/symptoms'
 import { MOOD_SAFETY_MESSAGE, RULES } from '@/rules/rules'
 import type { RuleDefinition } from '@/rules/types'
 
@@ -163,6 +164,14 @@ export function IndicatorPage() {
     now,
   })
   const baseline = personalBaseline(indicator, data.entries)
+  const unclassifiedTemperature =
+    latest?.indicator === 'bodyTemperature' &&
+    latest.method !== 'oral' &&
+    !latest.exercisedLast30Min &&
+    assessment.status === 'none'
+  const reportedSymptoms = latest?.symptoms?.length
+    ? latest.symptoms.map((id) => SYMPTOMS[id as SymptomId] ?? id).join(', ')
+    : undefined
   const baselineMethod =
     baseline?.method && baseline.method !== 'unknown'
       ? temperatureMethodLabel(baseline.method)
@@ -233,6 +242,35 @@ export function IndicatorPage() {
               findings={assessment.findings}
               className="space-y-3 border-t pt-3 text-sm"
             />
+          ) : null}
+          {unclassifiedTemperature ? (
+            <div className="space-y-1 border-t pt-3 text-sm">
+              <p className="font-medium">Why this reading is not evaluated</p>
+              <ul className="list-disc space-y-1 pl-5">
+                <li>
+                  {latest?.indicator === 'bodyTemperature' && latest.method === 'forehead'
+                    ? 'No approved interpretation rule exists for forehead readings.'
+                    : 'The measurement method was not recorded, so no interpretation rule applies.'}
+                </li>
+                <li>“Not evaluated” does not mean normal.</li>
+                <li>
+                  The measurement method matters: the app’s temperature levels come from general
+                  guidance for oral readings and are not used for other methods.
+                </li>
+                <li>
+                  If a reading is unexpectedly high, verify it with a repeat measurement and seek
+                  medical review.
+                </li>
+              </ul>
+            </div>
+          ) : null}
+          {reportedSymptoms ? (
+            <p className="border-t pt-3 text-sm">
+              Symptoms reported with this reading: {reportedSymptoms}.
+              {assessment.status === 'normal' || assessment.status === 'none'
+                ? ' The status above describes the measured value; no approved rule assesses these symptoms on their own.'
+                : ''}
+            </p>
           ) : null}
           {assessment.status === 'normal' || assessment.status === 'none' ? (
             <p className="text-sm text-muted-foreground">
