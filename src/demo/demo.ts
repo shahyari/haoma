@@ -7,6 +7,7 @@
  */
 import { addDays } from '@/domain/dates'
 import type { HealthEntry } from '@/domain/indicators'
+import type { PainLog, Vec3 } from '@/domain/pain'
 
 /** Provisional fictional profile (owner decision 2026-11-14). Not a real person or mission. */
 export const DEMO_PROFILE = {
@@ -141,4 +142,76 @@ export function refreshDemoEntries(entries: HealthEntry[], now: Date): HealthEnt
   const startOfToday = new Date(now)
   startOfToday.setHours(0, 0, 0, 0)
   return newest < startOfToday.getTime() ? createDemoEntries(now) : undefined
+}
+
+/**
+ * Three simulated pain logs on the body map, so it is not empty on the first visit (owner
+ * request 2026-11-15). Positions and normals are points on the 3D model's surface (ray-cast on
+ * the mesh). Like all pain logs, they are never interpreted or used by any rule.
+ */
+const DEMO_PAIN = [
+  {
+    region: 'Head',
+    position: [0.03, 1.75, 0.0682],
+    normal: [0.4876, 0.5078, 0.7102],
+    intensity: 3,
+    character: 'Pressure',
+    daysAgo: 0,
+    hour: 7,
+  },
+  {
+    region: 'Left lower back',
+    position: [0.05, 1.0, -0.1047],
+    normal: [0.1126, 0.2633, -0.9581],
+    intensity: 4,
+    character: 'Aching',
+    daysAgo: 1,
+    hour: 21,
+  },
+  {
+    region: 'Left knee',
+    position: [0.1, 0.52, 0.0459],
+    normal: [-0.2999, -0.1589, 0.9407],
+    intensity: 2,
+    character: 'Aching',
+    daysAgo: 2,
+    hour: 18,
+  },
+] as const satisfies readonly (Pick<PainLog, 'region' | 'intensity' | 'character'> & {
+  position: readonly number[]
+  normal: readonly number[]
+  daysAgo: number
+  hour: number
+})[]
+
+export const DEMO_PAIN_NOTE = 'Simulated demo entry.'
+
+/** The demo pain logs, dated relative to `now` (today's never later than `now`). */
+export function createDemoPainLogs(now: Date): PainLog[] {
+  return DEMO_PAIN.map((p, i) => {
+    const at = addDays(now, -p.daysAgo)
+    at.setHours(p.hour, 10, 0, 0)
+    const recordedAt = at > now ? thisMorning(now) : at
+    return {
+      id: `demo-pain-${i + 1}`,
+      recordedAt: recordedAt.toISOString(),
+      region: p.region,
+      organ: null,
+      zone: null,
+      position: [...p.position] as Vec3,
+      normal: [...p.normal] as Vec3,
+      view: '3D',
+      intensity: p.intensity,
+      character: p.character,
+      note: DEMO_PAIN_NOTE,
+    }
+  })
+}
+
+/** True when the pain logs are exactly the untouched demo logs. */
+export function isUntouchedDemoPain(logs: PainLog[]): boolean {
+  return (
+    logs.length === DEMO_PAIN.length &&
+    logs.every((l) => l.id.startsWith('demo-pain-') && l.editedAt === undefined)
+  )
 }

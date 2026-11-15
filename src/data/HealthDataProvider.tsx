@@ -1,6 +1,11 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 
-import { createDemoEntries, refreshDemoEntries } from '@/demo/demo'
+import {
+  createDemoEntries,
+  createDemoPainLogs,
+  isUntouchedDemoPain,
+  refreshDemoEntries,
+} from '@/demo/demo'
 import type { HealthEntry } from '@/domain/indicators'
 import type { MissionPhase } from '@/domain/mission'
 import type { Sex } from '@/domain/sex'
@@ -44,7 +49,7 @@ const HealthDataContext = createContext<HealthDataValue | null>(null)
 
 /**
  * Loads the simulated demo history when nothing is stored yet (first visit), so first-time
- * visitors see a populated Home. Stored demo data that nobody has added to or edited is
+ * visitors see a populated Home, with three simulated pain logs on the body map. Stored demo data that nobody has added to or edited is
  * regenerated when it is from an earlier day, so its latest readings are always from this
  * morning (owner usability review, 2026-11-15). Corrupt data is left untouched, and
  * "Clear data" stores an empty dataset, so clearing is not undone on the next visit.
@@ -52,14 +57,21 @@ const HealthDataContext = createContext<HealthDataValue | null>(null)
 function firstVisitData(appStore: AppStore, loaded: LoadResult): AppData {
   const now = new Date()
   if (loaded.status === 'empty') {
-    const seeded = { ...loaded.data, entries: createDemoEntries(now) }
+    const seeded = {
+      ...loaded.data,
+      entries: createDemoEntries(now),
+      painLogs: createDemoPainLogs(now),
+    }
     appStore.save(seeded)
     return seeded
   }
   if (loaded.status !== 'ok') return loaded.data
   const refreshed = refreshDemoEntries(loaded.data.entries, now)
   if (!refreshed) return loaded.data
-  const next = { ...loaded.data, entries: refreshed }
+  const painLogs = isUntouchedDemoPain(loaded.data.painLogs)
+    ? createDemoPainLogs(now)
+    : loaded.data.painLogs
+  const next = { ...loaded.data, entries: refreshed, painLogs }
   appStore.save(next)
   return next
 }
