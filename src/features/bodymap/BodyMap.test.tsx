@@ -103,6 +103,11 @@ describe('Body map (owner prototype, 2026-11-14)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete point 1' }))
     expect(store.load().data.painLogs).toEqual([])
     expect(screen.getByText('No pain points logged.')).toBeTruthy()
+    expect(
+      screen.getByText(
+        /Select anywhere on the body, or in the 2D view to choose a region or organ and add one\./,
+      ),
+    ).toBeTruthy()
   })
 
   it('asks for confirmation before clearing all points', async () => {

@@ -444,9 +444,9 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
           </div>
           {logs.length === 0 ? (
             <p className="px-4 py-6 text-sm text-muted-foreground">
-              <strong className="font-medium text-foreground">No pain points logged.</strong> Click
-              anywhere on the body, or in the 2D view choose a region or organ (also with Tab and
-              Enter), to add one.
+              <strong className="block font-medium text-foreground">No pain points logged.</strong>
+              Select anywhere on the body, or in the 2D view to choose a region or organ and add
+              one.
             </p>
           ) : (
             <ol className="min-h-0 flex-1 overflow-auto" onPointerLeave={() => setHighlight(null)}>
