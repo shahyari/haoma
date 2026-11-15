@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { HealthEntry } from '@/domain/indicators'
 import { DEFAULT_FORMATS, setFormats } from '@/domain/units'
 import { SETTINGS_KEY } from '@/settings/settings'
-import { daysAgo, renderApp } from '@/test/render'
+import { daysAgo, fullText, renderApp } from '@/test/render'
 
 afterEach(cleanup)
 
@@ -42,7 +42,7 @@ describe('IndicatorPage', () => {
     const store = renderApp('/indicators/bloodPressure')
     enter({ 'Systolic (mmHg)': '150', 'Diastolic (mmHg)': '95' })
     expect(screen.queryByRole('dialog')).toBeNull()
-    expect(latest().getByText('150/95 mmHg')).toBeTruthy()
+    expect(latest().getByText(fullText('150/95 mmHg'))).toBeTruthy()
     expect(latest().getByText(/Manual entry/)).toBeTruthy()
     expect(latest().getByText('Escalate')).toBeTruthy()
     expect(latest().getByText('Report at next flight-surgeon contact.')).toBeTruthy()
@@ -360,7 +360,7 @@ describe('Units chosen in Settings (display only)', () => {
     const store = renderApp('/indicators/bodyTemperature')
     enter({ 'Temperature (°F)': '99.5' }, ['Oral'])
     expect(store.load().data.entries[0]).toMatchObject({ celsius: 37.5 })
-    expect(latest().getByText('99.5 °F')).toBeTruthy()
+    expect(latest().getByText(fullText('99.5 °F'))).toBeTruthy()
     expect(latest().getByText('Attention')).toBeTruthy()
     expect(latest().getByText(/RULE-15/)).toBeTruthy()
     expect(screen.getByText(/Rule levels are stated in the units of their sources/)).toBeTruthy()
@@ -372,7 +372,7 @@ describe('Units chosen in Settings (display only)', () => {
     const store = renderApp('/indicators/bloodGlucose')
     enter({ 'Glucose (mmol/L)': '7.0' }, ['Fasting', 'Fingerstick'])
     expect(store.load().data.entries[0]).toMatchObject({ mgDl: 126.1 })
-    expect(latest().getByText('7 mmol/L')).toBeTruthy()
+    expect(latest().getByText(fullText('7 mmol/L'))).toBeTruthy()
     expect(latest().getByText('Escalate')).toBeTruthy()
   })
 })

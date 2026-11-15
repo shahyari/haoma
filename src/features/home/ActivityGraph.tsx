@@ -75,7 +75,7 @@ export function ActivityGraph({ entries, now }: { entries: HealthEntry[]; now: D
           days logged
         </span>
       </figcaption>
-      <div className="flex gap-1.5">
+      <div className="flex max-w-80 gap-1.5">
         <div
           aria-hidden="true"
           className="grid grid-rows-7 gap-[3px] text-[0.625rem] leading-none text-muted-foreground"

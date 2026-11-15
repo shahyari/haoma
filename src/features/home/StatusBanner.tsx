@@ -1,7 +1,7 @@
 import { ChevronDown } from 'lucide-react'
 
 import { STATUS_ICONS } from '@/components/StatusBadge'
-import { formatValue } from '@/domain/format'
+import { Measurement } from '@/components/Measurement'
 import { INDICATORS, type HealthEntry } from '@/domain/indicators'
 import {
   EVIDENCE_LABELS,
@@ -69,9 +69,7 @@ export function StatusBanner({
           <span className="font-medium">
             {STATUS_LABELS[status]}: {INDICATORS[assessment.indicator].label}
           </span>{' '}
-          {assessment.indicator === 'mood' ? null : (
-            <span className="num">{formatValue(latest)}</span>
-          )}
+          {assessment.indicator === 'mood' ? null : <Measurement entry={latest} />}
           {assessment.label ? <span className="block text-sm">{assessment.label}</span> : null}
         </span>
         <ChevronDown

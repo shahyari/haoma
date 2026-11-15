@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import App from '@/App'
 import { STORAGE_KEY } from '@/storage/storage'
+import { fullText } from '@/test/render'
 import { SETTINGS_KEY } from '@/settings/settings'
 
 beforeEach(() => localStorage.clear())
@@ -34,7 +35,9 @@ describe('browser persistence (localStorage)', () => {
 
     reload('/indicators/sleep')
     expect(
-      within(await screen.findByRole('region', { name: 'Latest measurement' })).getByText('7.5 h'),
+      within(await screen.findByRole('region', { name: 'Latest measurement' })).getByText(
+        fullText('7.5 h'),
+      ),
     ).toBeTruthy()
   })
 

@@ -45,3 +45,7 @@ export function daysAgo(days: number) {
   date.setDate(date.getDate() - days)
   return { id: `t${counter++}`, recordedAt: date.toISOString(), origin: 'simulated' as const }
 }
+
+/** Matches an element whose whole text is `text`, even when split into spans (number and unit). */
+export const fullText = (text: string) => (_: string, el: Element | null) =>
+  el?.textContent === text && ![...(el?.children ?? [])].some((c) => c.textContent === text)

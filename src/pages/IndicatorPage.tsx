@@ -8,7 +8,8 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { useHealthData } from '@/data/HealthDataProvider'
 import { formatDate, formatDateTime } from '@/domain/dates'
-import { formatContext, formatValue, temperatureMethodLabel } from '@/domain/format'
+import { Measurement } from '@/components/Measurement'
+import { formatContext, temperatureMethodLabel } from '@/domain/format'
 import {
   displayTemperature,
   displayTemperatureDelta,
@@ -253,7 +254,7 @@ export function IndicatorPage() {
         <div className="space-y-2 rounded-lg border bg-card p-4">
           {latest ? (
             <>
-              <p className="num text-3xl">{formatValue(latest)}</p>
+              <Measurement entry={latest} className="block text-3xl" />
               <p className="text-sm text-muted-foreground">
                 <span className="num">{formatDateTime(latest.recordedAt)}</span>
                 {context ? ` · ${context}` : ''} · {provenanceLabel(latest)}

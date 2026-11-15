@@ -16,7 +16,8 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { useHealthData } from '@/data/HealthDataProvider'
 import { calendarDaysBetween, formatDateTime, formatDaysAgo, formatTimeAgo } from '@/domain/dates'
-import { formatContext, formatValue } from '@/domain/format'
+import { Measurement } from '@/components/Measurement'
+import { formatContext } from '@/domain/format'
 import { INDICATORS, type IndicatorId } from '@/domain/indicators'
 import { dailyCheckIn } from '@/features/checkin/checkin'
 import { LogEntryDialog } from '@/features/entry/LogEntryDialog'
@@ -148,9 +149,7 @@ export function HomePage() {
                       <StatusBadge status={assessment.status} />
                     </span>
                     {latest ? (
-                      <span className="num block text-3xl font-semibold">
-                        {formatValue(latest)}
-                      </span>
+                      <Measurement entry={latest} className="block text-3xl font-semibold" />
                     ) : null}
                     {assessment.label && indicator !== 'mood' ? (
                       <span className="block text-sm font-medium">{assessment.label}</span>

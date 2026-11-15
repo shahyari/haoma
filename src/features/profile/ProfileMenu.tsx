@@ -2,6 +2,7 @@ import { FileText, Info, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 
+import { Badge } from '@/components/ui/badge'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useHealthData } from '@/data/HealthDataProvider'
 import { DEMO_PROFILE } from '@/demo/demo'
@@ -13,6 +14,43 @@ const initials = DEMO_PROFILE.name
 
 const linkClass =
   'flex min-h-10 items-center gap-2 rounded-md px-2 text-sm outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring'
+
+/** The demo notice, shown in the avatar card and from the "Demo data" chip. */
+function DemoNotice() {
+  return (
+    <>
+      <p className="font-medium">Demo data and fictional person</p>
+      <p className="mt-1 text-muted-foreground">
+        All health measurements in the demo are simulated.
+      </p>
+    </>
+  )
+}
+
+/** "Demo data" chip (owner consistency review, 2026-11-15): a secondary badge that opens the demo notice. */
+function DemoDataChip() {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Badge asChild variant="secondary">
+          <button type="button" className="cursor-pointer" aria-label="Demo data: show notice">
+            Demo data
+          </button>
+        </Badge>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-72 text-sm" aria-label="Demo notice">
+        <DemoNotice />
+        <p className="mt-2 text-muted-foreground">
+          Load or clear the demo data in{' '}
+          <Link to="/settings" className="underline underline-offset-2">
+            Settings
+          </Link>
+          .
+        </p>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 /**
  * Avatar card (owner brainstorm Sections 16 and 17): the fictional profile, links to
@@ -26,9 +64,7 @@ export function ProfileMenu() {
 
   return (
     <div className="flex items-center gap-2">
-      {hasSimulated ? (
-        <span className="rounded-md border border-dashed px-2 py-0.5 text-sm">Demo data</span>
-      ) : null}
+      {hasSimulated ? <DemoDataChip /> : null}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
@@ -68,10 +104,7 @@ export function ProfileMenu() {
 
           <div className="p-4">
             <div className="rounded-md border border-dashed p-3 text-sm">
-              <p className="font-medium">Demo data and fictional person</p>
-              <p className="mt-1 text-muted-foreground">
-                All health measurements in the demo are simulated.
-              </p>
+              <DemoNotice />
             </div>
           </div>
         </PopoverContent>

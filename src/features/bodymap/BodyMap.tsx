@@ -307,11 +307,13 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
         )}
       </div>
 
-      <div className="grid min-h-0 flex-1 lg:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] @3xl:grid-cols-[minmax(0,1fr)_19rem] @3xl:grid-rows-1">
+      {/* Stacked (narrow) layout: figure and pain log scroll inside the card, so they never run
+          into the hint row when the card has a fixed height. Wide layout: side by side. */}
+      <div className="grid min-h-0 flex-1 overflow-y-auto @3xl:grid-cols-[minmax(0,1fr)_19rem] @3xl:grid-rows-1 @3xl:overflow-hidden">
         <section
           ref={stageRef}
           aria-label="Body model"
-          className="stage relative h-[min(72vh,640px)] min-h-[360px] overflow-hidden select-none lg:h-auto"
+          className="stage relative h-[min(72vh,640px)] min-h-[360px] overflow-hidden select-none @3xl:h-auto"
         >
           <canvas
             ref={canvasRef}

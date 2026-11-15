@@ -19,21 +19,37 @@ export function temperatureMethodLabel(method: keyof typeof TEMPERATURE_METHOD_L
 }
 
 /** The reading with its unit, e.g. "118/76 mmHg". */
-export function formatValue(entry: HealthEntry): string {
+export interface ValueParts {
+  /** Word before the number, e.g. "Rating". */
+  prefix?: string
+  /** The number itself, e.g. "128/82". */
+  value: string
+  unit?: string
+}
+
+/** The latest value split into number and unit, so they can be typeset differently. */
+export function formatValueParts(entry: HealthEntry): ValueParts {
   switch (entry.indicator) {
     case 'bloodPressure':
-      return `${entry.systolicMmHg}/${entry.diastolicMmHg} mmHg`
+      return { value: `${entry.systolicMmHg}/${entry.diastolicMmHg}`, unit: 'mmHg' }
     case 'heartRate':
-      return `${entry.bpm} bpm`
+      return { value: String(entry.bpm), unit: 'bpm' }
     case 'bloodGlucose':
-      return `${displayGlucose(entry.mgDl)} ${glucoseUnitLabel()}`
+      return { value: String(displayGlucose(entry.mgDl)), unit: glucoseUnitLabel() }
     case 'bodyTemperature':
-      return `${displayTemperature(entry.celsius)} ${temperatureUnitLabel()}`
+      return { value: String(displayTemperature(entry.celsius)), unit: temperatureUnitLabel() }
     case 'sleep':
-      return `${entry.hours} h`
+      return { value: String(entry.hours), unit: 'h' }
     case 'mood':
-      return entry.kind === 'phq2' ? `PHQ-2 ${entry.score}/6` : `Rating ${entry.rating}/5`
+      return entry.kind === 'phq2'
+        ? { prefix: 'PHQ-2', value: `${entry.score}/6` }
+        : { prefix: 'Rating', value: `${entry.rating}/5` }
   }
+}
+
+export function formatValue(entry: HealthEntry): string {
+  const { prefix, value, unit } = formatValueParts(entry)
+  return [prefix, value, unit].filter(Boolean).join(' ')
 }
 
 /** Input context of the reading, e.g. "Fasting · Fingerstick". */

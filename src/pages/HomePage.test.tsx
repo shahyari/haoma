@@ -297,3 +297,25 @@ describe('Usability review 2026-11-15', () => {
     expect(screen.getByRole('alert').textContent).toBe('Enter at least one reading.')
   })
 })
+
+describe('Consistency review 2026-11-15', () => {
+  it('sets the number in the monospaced font and the unit in the normal font', () => {
+    renderApp('/', [{ ...daysAgo(0), indicator: 'heartRate', bpm: 66, activity: 'rest' }])
+    const number = within(card('Heart rate')).getByText('66')
+    const unit = within(card('Heart rate')).getByText('bpm')
+    expect(unit.parentElement?.textContent).toBe('66 bpm')
+    expect(number.className).toContain('num')
+    expect(unit.className).not.toContain('num')
+    expect(unit.className).toContain('font-sans')
+  })
+
+  it('makes the "Demo data" chip a secondary badge that opens the demo notice', async () => {
+    const user = userEvent.setup()
+    renderApp('/', [{ ...daysAgo(0), indicator: 'heartRate', bpm: 66, activity: 'rest' }])
+    const chip = screen.getByRole('button', { name: 'Demo data: show notice' })
+    expect(chip.dataset.variant).toBe('secondary')
+    await user.click(chip)
+    const notice = within(screen.getByRole('dialog', { name: 'Demo notice' }))
+    expect(notice.getByText('All health measurements in the demo are simulated.')).toBeTruthy()
+  })
+})
