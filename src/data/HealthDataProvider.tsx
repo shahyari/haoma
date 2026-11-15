@@ -21,6 +21,8 @@ interface HealthDataValue {
   addEntry: (entry: HealthEntry) => void
   /** Replaces the stored entry with the same id. */
   updateEntry: (entry: HealthEntry) => void
+  /** Removes the entry with this id. */
+  deleteEntry: (id: string) => void
   /** Replaces all entries, e.g. when loading the simulated demo history. */
   replaceEntries: (entries: HealthEntry[]) => void
   setMissionPhase: (phase: MissionPhase) => void
@@ -98,6 +100,7 @@ export function HealthDataProvider({
           ...d,
           entries: d.entries.map((x) => (x.id === entry.id ? entry : x)),
         })),
+      deleteEntry: (id) => change((d) => ({ ...d, entries: d.entries.filter((x) => x.id !== id) })),
       replaceEntries: (entries) => change((d) => ({ ...d, entries })),
       setMissionPhase: (missionPhase) => change((d) => ({ ...d, missionPhase })),
       savePainLog: (report) =>

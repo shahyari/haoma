@@ -96,6 +96,8 @@ describe('demo history', () => {
     expect(refreshDemoEntries(entries, tomorrow)).toEqual(createDemoEntries(tomorrow))
     expect(refreshDemoEntries([...entries, hr(at(2026, 10, 13))], tomorrow)).toBeUndefined()
     expect(refreshDemoEntries([], tomorrow)).toBeUndefined()
+    // A deleted demo reading is not brought back by the daily refresh.
+    expect(refreshDemoEntries(entries.slice(1), tomorrow)).toBeUndefined()
   })
   it('contains no Escalate reading', () => {
     const statuses = evaluateAll(entries, { missionPhase: 'inFlight', now }).map((a) => a.status)

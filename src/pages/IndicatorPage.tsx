@@ -1,4 +1,4 @@
-import { Pencil, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
 import { lazy, Suspense, useMemo, useState } from 'react'
 import { useParams } from 'react-router'
 
@@ -23,6 +23,21 @@ import { crewAverageFor, type CrewResult } from '@/crew/compare'
 import { simulatedCrewSource } from '@/crew/simulated'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { HISTORY_VIEWS, provenanceLabel, type HistoryView } from '@/features/history/columns'
 import { CrewComparison, displayCrewValue } from '@/features/history/CrewComparison'
 import { crewCountKey } from '@/features/history/chartKeys'
@@ -43,6 +58,7 @@ import { MOOD_SAFETY_MESSAGE, RULES } from '@/rules/rules'
 import type { RuleDefinition } from '@/rules/types'
 
 const sectionHeading = 'text-lg font-medium'
+const PAGE_SIZES = [10, 25, 50] as const
 
 // The chart library is loaded only when a history chart is shown, to keep it out of the main bundle.
 const HistoryChart = lazy(() =>
@@ -56,6 +72,7 @@ function HistorySection({
   baselineLabel,
   label,
   onEdit,
+  onDelete,
   crew,
 }: {
   view: HistoryView
@@ -64,6 +81,7 @@ function HistorySection({
   baselineLabel?: string
   label: string
   onEdit: (entry: HealthEntry) => void
+  onDelete: (entry: HealthEntry) => void
   /** Crew average per entry id; omitted when the crew average is hidden. */
   crew?: Map<string, CrewResult>
 }) {
@@ -98,6 +116,15 @@ function HistorySection({
     return point
   })
   const comparable = crew !== undefined && series.some((s) => s.crew)
+  // Pagination of the table (owner, 2026-11-15): newest first, 10 rows by default.
+  const [pageSize, setPageSize] = useState<number>(PAGE_SIZES[0])
+  const [page, setPage] = useState(0)
+  const newestFirst = [...rows].reverse()
+  const pageCount = Math.max(1, Math.ceil(newestFirst.length / pageSize))
+  // A delete can shorten the list; stay on the last page that still exists.
+  const current = Math.min(page, pageCount - 1)
+  const first = current * pageSize
+  const visible = newestFirst.slice(first, first + pageSize)
   const name = view.title ?? label
 
   return (
@@ -142,7 +169,9 @@ function HistorySection({
             aria-label={`${name}: table of readings`}
           >
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">{name}: all readings, newest first</caption>
+              <caption className="sr-only">
+                {name}: readings, newest first, page {current + 1} of {pageCount}
+              </caption>
               <thead>
                 <tr className="border-b">
                   <th scope="col" className="px-3 py-2 font-medium whitespace-nowrap">
@@ -173,7 +202,7 @@ function HistorySection({
                 </tr>
               </thead>
               <tbody>
-                {[...rows].reverse().map((entry) => (
+                {visible.map((entry) => (
                   <tr key={entry.id} className="border-b last:border-b-0">
                     <th scope="row" className="num px-3 py-2 font-normal whitespace-nowrap">
                       {formatDateTime(entry.recordedAt)}
@@ -204,15 +233,24 @@ function HistorySection({
                           )
                         })()
                       : null}
-                    <td className="px-3 py-1 text-right">
+                    <td className="px-3 py-1 text-right whitespace-nowrap">
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon-sm"
+                        title="Edit"
                         aria-label={`Edit reading from ${formatDateTime(entry.recordedAt)}`}
                         onClick={() => onEdit(entry)}
                       >
                         <Pencil aria-hidden="true" />
-                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        title="Delete"
+                        aria-label={`Delete reading from ${formatDateTime(entry.recordedAt)}`}
+                        onClick={() => onDelete(entry)}
+                      >
+                        <Trash2 aria-hidden="true" />
                       </Button>
                     </td>
                   </tr>
@@ -220,6 +258,58 @@ function HistorySection({
               </tbody>
             </table>
           </div>
+          <nav
+            aria-label={`${name}: table pages`}
+            className="flex flex-wrap items-center justify-end gap-x-6 gap-y-2 text-sm"
+          >
+            <div className="flex items-center gap-2">
+              <Label id={`${view.id}-rows-label`}>Rows per page</Label>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => {
+                  setPageSize(Number(value))
+                  setPage(0)
+                }}
+              >
+                <SelectTrigger aria-labelledby={`${view.id}-rows-label`} className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZES.map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <p aria-live="polite" className="text-muted-foreground">
+              <span className="num">
+                {first + 1}–{first + visible.length}
+              </span>{' '}
+              of <span className="num">{newestFirst.length}</span>
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={current === 0}
+                onClick={() => setPage(current - 1)}
+              >
+                <ChevronLeft aria-hidden="true" />
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={current >= pageCount - 1}
+                onClick={() => setPage(current + 1)}
+              >
+                Next
+                <ChevronRight aria-hidden="true" />
+              </Button>
+            </div>
+          </nav>
         </>
       )}
     </div>
@@ -228,7 +318,9 @@ function HistorySection({
 
 export function IndicatorPage() {
   const { indicatorId } = useParams()
-  const { data } = useHealthData()
+  const { data, deleteEntry } = useHealthData()
+  // The reading waiting for delete confirmation.
+  const [deleting, setDeleting] = useState<HealthEntry | undefined>(undefined)
   const [adding, setAdding] = useState(false)
   // The entry being edited; undefined when the dialog adds a new entry.
   const [editing, setEditing] = useState<HealthEntry | undefined>(undefined)
@@ -503,6 +595,7 @@ export function IndicatorPage() {
               setOpened((n) => n + 1)
               setAdding(true)
             }}
+            onDelete={setDeleting}
           />
         ))}
       </section>
@@ -546,6 +639,40 @@ export function IndicatorPage() {
           ))}
         </ul>
       </section>
+
+      <Dialog
+        open={deleting !== undefined}
+        onOpenChange={(open) => (open ? null : setDeleting(undefined))}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this reading?</DialogTitle>
+            <DialogDescription>
+              {deleting ? (
+                <>
+                  {label}, <span className="num">{formatDateTime(deleting.recordedAt)}</span>:{' '}
+                  <Measurement entry={deleting} />. This cannot be undone. The status, baseline, and
+                  history are recalculated without it.
+                </>
+              ) : null}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleting(undefined)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (deleting) deleteEntry(deleting.id)
+                setDeleting(undefined)
+              }}
+            >
+              Delete reading
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {opened > 0 ? (
         <EntryDialog

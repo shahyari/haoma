@@ -118,13 +118,16 @@ export function createDemoEntries(now: Date): HealthEntry[] {
   return entries
 }
 
+/** Number of entries in a freshly generated demo history. */
+const DEMO_ENTRY_COUNT = DEMO_DAYS * 6 + 1 + Object.keys(DEMO_TODAY).length
+
 /**
  * True when every stored entry is untouched demo data, so the demo can be regenerated
- * relative to today without losing anything the person entered or edited.
+ * relative to today without losing anything the person entered, edited, or deleted.
  */
 export function isUntouchedDemo(entries: HealthEntry[]): boolean {
   return (
-    entries.length > 0 &&
+    entries.length === DEMO_ENTRY_COUNT &&
     entries.every(
       (e) => e.origin === 'simulated' && e.editedAt === undefined && e.id.startsWith('demo-'),
     )

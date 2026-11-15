@@ -100,9 +100,12 @@ describe('IndicatorPage', () => {
           .filter((_, i) => i < 4 || i === 6),
       ),
     ).toEqual([
-      ['118', '74', 'None', 'Manual entry', 'Edit'],
-      ['112', '70', 'None', 'Simulated', 'Edit'],
+      ['118', '74', 'None', 'Manual entry', ''],
+      ['112', '70', 'None', 'Simulated', ''],
     ])
+    // Edit and Delete are icon buttons with full accessible names.
+    expect(t.getAllByRole('button', { name: /^Edit reading from/ })).toHaveLength(2)
+    expect(t.getAllByRole('button', { name: /^Delete reading from/ })).toHaveLength(2)
     expect(t.getAllByRole('rowheader').length).toBe(2)
     expect(screen.getByRole('region', { name: /table of readings/ }).tabIndex).toBe(0)
   })
@@ -472,5 +475,64 @@ describe('Crew Average Comparison (owner spec 2026-11-15)', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Show crew average (simulated)' }))
     expect(headers()).not.toContain('Crew members')
     expect(status()).toBeTruthy()
+  })
+})
+
+describe('History table pagination and delete (owner, 2026-11-15)', () => {
+  const sleepHistory = (count: number): HealthEntry[] =>
+    Array.from({ length: count }, (_, i) => ({
+      ...daysAgo(count - 1 - i),
+      indicator: 'sleep' as const,
+      hours: 6 + (i % 3),
+      source: 'selfReport' as const,
+    }))
+  const bodyRows = () =>
+    within(table(/table of readings/))
+      .getAllByRole('row')
+      .slice(1)
+  const pager = () => within(screen.getByRole('navigation', { name: /table pages/ }))
+
+  it('shows 10 rows per page, newest first, with Previous and Next', async () => {
+    const user = userEvent.setup()
+    renderApp('/indicators/sleep', sleepHistory(15))
+    expect(bodyRows()).toHaveLength(10)
+    expect(pager().getByText(/of/).textContent).toBe('1–10 of 15')
+    expect(pager().getByRole('button', { name: 'Previous' })).toHaveProperty('disabled', true)
+    await user.click(pager().getByRole('button', { name: 'Next' }))
+    expect(bodyRows()).toHaveLength(5)
+    expect(pager().getByText(/of/).textContent).toBe('11–15 of 15')
+    expect(pager().getByRole('button', { name: 'Next' })).toHaveProperty('disabled', true)
+  })
+
+  it('changes the number of visible rows', async () => {
+    const user = userEvent.setup()
+    renderApp('/indicators/sleep', sleepHistory(15))
+    await user.click(pager().getByRole('combobox', { name: 'Rows per page' }))
+    await user.click(screen.getByRole('option', { name: '25' }))
+    expect(bodyRows()).toHaveLength(15)
+    expect(pager().getByText(/of/).textContent).toBe('1–15 of 15')
+  })
+
+  it('deletes a reading only after confirmation, and re-evaluates the status', async () => {
+    const user = userEvent.setup()
+    const store = renderApp('/indicators/sleep', [
+      { ...daysAgo(1), indicator: 'sleep', hours: 7.5, source: 'selfReport' },
+      { ...daysAgo(0), indicator: 'sleep', hours: 5, source: 'selfReport' },
+    ])
+    expect(latest().getByText('Attention')).toBeTruthy()
+    const [newest] = within(table(/table of readings/)).getAllByRole('button', {
+      name: /^Delete reading from/,
+    })
+    await user.click(newest)
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.getByText('Delete this reading?')).toBeTruthy()
+    await user.click(dialog.getByRole('button', { name: 'Cancel' }))
+    expect(store.load().data.entries).toHaveLength(2)
+    await user.click(newest)
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete reading' }),
+    )
+    expect(store.load().data.entries).toHaveLength(1)
+    expect(latest().getByText('Normal')).toBeTruthy()
   })
 })
