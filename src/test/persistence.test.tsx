@@ -82,8 +82,14 @@ describe('browser persistence (localStorage)', () => {
     reload('/settings')
     const card = within(screen.getByRole('region', { name: 'Demo controls' }))
     fireEvent.click(card.getByRole('button', { name: 'Clear data' }))
-    expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull()
-    fireEvent.click(card.getByRole('button', { name: 'Confirm: delete all data' }))
+    // A confirmation dialog says what is deleted and what is kept; Cancel deletes nothing.
+    const dialog = within(screen.getByRole('dialog', { name: 'Delete all data?' }))
+    expect(dialog.getByText(/permanently deletes everything stored in this browser/)).toBeTruthy()
+    expect(dialog.getByText(/Display settings are kept/)).toBeTruthy()
+    fireEvent.click(dialog.getByRole('button', { name: 'Cancel' }))
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries).toHaveLength(1)
+    fireEvent.click(card.getByRole('button', { name: 'Clear data' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Delete all data' }))
     // An empty dataset is stored, so the demo history is not loaded again on the next visit.
     expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries).toEqual([])
     reload('/')

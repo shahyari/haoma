@@ -235,7 +235,10 @@ describe('Demo controls in Settings (usability review 2026-11-15)', () => {
     ])
     fireEvent.click(screen.getByRole('button', { name: 'Load demo data' }))
     expect(store.load().data.entries.length).toBe(1)
-    fireEvent.click(screen.getByRole('button', { name: 'Replace entries with demo data' }))
+    expect(
+      screen.getByRole('dialog', { name: 'Replace your entries with demo data?' }),
+    ).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Replace with demo data' }))
     expect(store.load().data.entries.length).toBe(DEMO_COUNT)
   })
 })
