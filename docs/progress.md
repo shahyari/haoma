@@ -89,12 +89,12 @@
 1. Crew comparison parameters P-9 (minimum cohort 3), P-10 (same mission day), P-11 ("close to" = within 0.5 crew SD): confirm (`scientific-foundations.md` → "Crew comparison parameters").
 2. RULE-16 precedence: a single oral 39.4–40.5 °C reading still escalates through RULE-16 when there is no baseline yet, the reading is more than 0.5 °C above the baseline, or symptoms are reported. Keep, or cap RULE-16 below 39.4 °C (`scientific-foundations.md` → "OD-16 implementation and verification").
 3. Proposals P16-1 to P16-4 (`scientific-foundations.md` → "OD-16 proposals"): symptom-only heart-rate rule (RULE-32), RULE-08 split and wording, RULE-17/RULE-31 wording, temperature symptom list.
-4. REF-57, REF-58 (NHLBI): approve. AHA warning-signs page: PDF export needed (automated access blocked).
+4. REF-57, REF-58 approved 2026-11-15. AHA warning-signs page: PDF export needed (automated access blocked).
 5. Body map: confirm the region → indicator links (`design.md` → "Body map").
 6. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
 7. Auto-mode source (LED lighting), zone source, condition-based suggestions.
 8. Berlin Local Event name and local judging times.
-9. SN-01 wording and status, REF-59–REF-62 (`scientific-foundations.md` → "Sex as an optional profile attribute"); placement of the Sex control.
+9. SN-01 wording and status (REF-59–REF-62 approved 2026-11-15; `scientific-foundations.md` → "Sex as an optional profile attribute"); placement of the Sex control.
 
 ## Environment status (2026-11-14)
 
