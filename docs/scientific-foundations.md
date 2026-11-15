@@ -278,9 +278,9 @@ Evidence checked against the approved sources (the basis of OD-15):
 
 **Display rule:** a note is shown only when its status is `Approved` (`science.md`), and only on its indicator page, for the matching sex and mission phase. Until approved, nothing is shown.
 
-| Note | Indicator | Sex | Mission phase | Proposed wording (Claude draft; owner to approve) | Evidence | Status |
+| Note | Indicator | Sex | Mission phase | Wording (Claude draft; approved by the owner 2026-11-15) | Evidence | Status |
 |---|---|---|---|---|---|---|
-| SN-01 | Blood pressure | Female | Approaching landing, Post-landing | "After landing, lightheadedness or fainting on standing has been reported more often in female astronauts than in male astronauts. The rules and thresholds here are the same for everyone, and differences between individuals are often larger than differences between sexes." | REF-59, REF-60, REF-61 (context REF-47, REF-62) | Unverified |
+| SN-01 | Blood pressure | Female | Approaching landing, Post-landing | "After landing, lightheadedness or fainting on standing has been reported more often in female astronauts than in male astronauts. The rules and thresholds here are the same for everyone, and differences between individuals are often larger than differences between sexes." | REF-59, REF-60, REF-61 (context REF-47, REF-62) | Approved (owner, 2026-11-15) |
 
 Not proposed: a UTI note (no matching indicator in the MVP).
 

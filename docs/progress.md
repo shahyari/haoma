@@ -14,7 +14,7 @@
 
 ## Completed
 
-- Sex as an optional profile attribute (owner 2026-11-15): `sex` in stored data (default Not set; older data reads as Not set), control in Settings → Demo controls, evidence note SN-01 on the blood pressure page shown only once `Approved`; no rule, threshold, or status changed. REF-59–REF-62 added `Unverified`. Tests in `src/domain/sex.test.ts`.
+- Sex as an optional profile attribute (owner 2026-11-15): `sex` in stored data (default Not set; older data reads as Not set), control in Settings → Demo controls, evidence note SN-01 on the blood pressure page approved by the owner 2026-11-15 and shown for Female in Approaching landing and Post-landing; no rule, threshold, or status changed. REF-59–REF-62 approved. Tests in `src/domain/sex.test.ts`.
 - UX copy review applied (owner, 2026-11-15; OD-17 for rule wording): action first with a "Why?" layer, no OD-/P- codes on screen, one form for contacting the flight surgeon, "Log reading", "Last measured …", "Check-ins", clearer errors; badges stay Normal / Attention / Escalate.
 - Settings → Appearance: Contrast labels "Normal" / "High" (no WCAG levels); "Monospaced numbers" option (on by default) between Text size and Assistive patterns, replacing the footer note (owner, 2026-11-15).
 - Clear data and Load demo data confirm in a dialog that states what is deleted and kept (owner, 2026-11-15).
@@ -94,7 +94,7 @@
 6. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
 7. Auto-mode source (LED lighting), zone source, condition-based suggestions.
 8. Berlin Local Event name and local judging times.
-9. SN-01 wording and status (REF-59–REF-62 approved 2026-11-15; `scientific-foundations.md` → "Sex as an optional profile attribute"); placement of the Sex control.
+9. Placement of the Sex control.
 
 ## Environment status (2026-11-14)
 

@@ -28,7 +28,7 @@ export interface SexNote {
   sex: Exclude<Sex, 'notSet'>
   /** Mission phases in which the note applies. */
   phases: readonly MissionPhase[]
-  /** TODO: owner to approve the wording (copy for health guidance). */
+  /** Wording as approved in scientific-foundations.md (copy for health guidance). */
   text: string
   refs: readonly string[]
   status: EvidenceStatus
@@ -42,7 +42,7 @@ export const SEX_NOTES: readonly SexNote[] = [
     phases: ['approachingLanding', 'postLanding'],
     text: 'After landing, lightheadedness or fainting on standing has been reported more often in female astronauts than in male astronauts. The rules and thresholds here are the same for everyone, and differences between individuals are often larger than differences between sexes.',
     refs: ['REF-59', 'REF-60', 'REF-61'],
-    status: 'Unverified',
+    status: 'Approved', // owner 2026-11-15
   },
 ]
 

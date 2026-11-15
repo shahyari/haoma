@@ -3,6 +3,7 @@ import { createAppStore, createDefaultData, STORAGE_KEY } from '@/storage/storag
 import { SEX_NOTES, sexNotesFor, type SexNote } from './sex'
 
 const approved: SexNote[] = SEX_NOTES.map((n) => ({ ...n, status: 'Approved' }))
+const unverified: SexNote[] = SEX_NOTES.map((n) => ({ ...n, status: 'Unverified' }))
 
 function memoryStorage(): Storage {
   const map = new Map<string, string>()
@@ -20,8 +21,13 @@ function memoryStorage(): Storage {
 
 describe('sex notes', () => {
   it('shows no note while the note is not Approved', () => {
-    expect(SEX_NOTES.every((n) => n.status !== 'Approved')).toBe(true)
-    expect(sexNotesFor('bloodPressure', 'female', 'postLanding')).toEqual([])
+    expect(sexNotesFor('bloodPressure', 'female', 'postLanding', unverified)).toEqual([])
+  })
+
+  it('shows SN-01 (approved by the owner 2026-11-15) for female post-landing', () => {
+    expect(sexNotesFor('bloodPressure', 'female', 'postLanding').map((n) => n.id)).toEqual([
+      'SN-01',
+    ])
   })
 
   it('shows an approved note only for the matching sex, indicator and phase', () => {

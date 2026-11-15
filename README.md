@@ -14,7 +14,7 @@
 - **Live app:** https://haomaho.vercel.app. The fictional demo history loads automatically on the first visit.
 - **Demo deck (official demo, 7 slides, PDF):** [`docs/demo/haoma-space-apps-2026-demo.pdf`](docs/demo/haoma-space-apps-2026-demo.pdf)
 - **Submission checkpoint:** tag [`spaceapps-checkpoint-1`](https://github.com/shahyari/haoma/releases/tag/spaceapps-checkpoint-1) (commit `24c9d95`, verified in production on 2026-11-15)
-- **NASA project page:** TODO: project page URL
+- **NASA project page:** https://www.spaceappschallenge.org/2026/find-a-team/haoma/?tab=project
 
 ## About
 
