@@ -102,14 +102,12 @@ describe('Body map (owner prototype, 2026-11-14)', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Delete point 1' }))
     expect(store.load().data.painLogs).toEqual([])
-    expect(screen.getByText('No pain points logged.')).toBeTruthy()
+    expect(screen.getByText('No pain logged yet.')).toBeTruthy()
     // The empty state has no Save report or Clear all buttons (owner, 2026-11-15).
     expect(screen.queryByRole('button', { name: 'Save report' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Clear all' })).toBeNull()
     expect(
-      screen.getByText(
-        /Select anywhere on the body, or in the 2D view to choose a region or organ and add one\./,
-      ),
+      screen.getByText(/Select a spot on the body to log pain\. In 2D, choose a region or organ\./),
     ).toBeTruthy()
   })
 
@@ -154,7 +152,7 @@ describe('Body map: owner changes of 2026-11-14', () => {
     await openMap()
     const log = within(screen.getByRole('complementary', { name: 'Pain log' }))
     expect(log.getByText('Points')).toBeTruthy()
-    expect(log.getByText('Avg /10')).toBeTruthy()
+    expect(log.getByText('Avg intensity /10')).toBeTruthy()
     expect(log.queryByText('Max /10')).toBeNull()
   })
 

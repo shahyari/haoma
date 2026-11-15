@@ -165,7 +165,7 @@ export function parsePainReportJson(
     return { ok: false, error: 'The file is not valid JSON.' }
   }
   if (!isRecord(parsed) || parsed.schema !== PAIN_REPORT_SCHEMA) {
-    return { ok: false, error: 'The file is not a haoma pain report.' }
+    return { ok: false, error: 'Not a Haoma report. Import a Haoma JSON file.' }
   }
   const savedAt = parsed.savedAt ?? parsed.createdAt
   if (!isDateTime(savedAt)) return { ok: false, error: 'The report has no valid save date.' }

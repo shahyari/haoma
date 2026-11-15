@@ -433,7 +433,7 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
             <dl className="mt-2 grid grid-cols-2 gap-2 text-center">
               {[
                 ['Points', String(logs.length)],
-                ['Avg /10', avg ?? '–'],
+                ['Avg intensity /10', avg ?? '–'],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-md border px-2 py-1.5">
                   <dd className="num text-lg">{value}</dd>
@@ -444,9 +444,8 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
           </div>
           {logs.length === 0 ? (
             <p className="px-4 py-6 text-sm text-muted-foreground">
-              <strong className="block font-medium text-foreground">No pain points logged.</strong>
-              Select anywhere on the body, or in the 2D view to choose a region or organ and add
-              one.
+              <strong className="block font-medium text-foreground">No pain logged yet.</strong>
+              Select a spot on the body to log pain. In 2D, choose a region or organ.
             </p>
           ) : (
             <ol className="min-h-0 flex-1 overflow-auto" onPointerLeave={() => setHighlight(null)}>

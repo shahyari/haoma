@@ -60,7 +60,11 @@ describe('Reports page: import', () => {
 
   it.each([
     ['not JSON', '{nope', 'The file is not valid JSON.'],
-    ['another file type', JSON.stringify({ hello: 1 }), 'The file is not a haoma pain report.'],
+    [
+      'another file type',
+      JSON.stringify({ hello: 1 }),
+      'Not a Haoma report. Import a Haoma JSON file.',
+    ],
     ['no logs', JSON.stringify({ ...file, logs: [] }), 'no pain logs'],
     ['an invalid log', JSON.stringify({ ...file, logs: [{ ...log, intensity: 12 }] }), 'not valid'],
     ['no save date', JSON.stringify({ ...file, savedAt: 'yesterday' }), 'no valid save date'],

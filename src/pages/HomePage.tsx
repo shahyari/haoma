@@ -119,8 +119,8 @@ export function HomePage() {
                       {today
                         ? `Measured ${formatTimeAgo(today.recordedAt, now)}`
                         : latest
-                          ? `Not measured today · last ${formatDaysAgo(latest.recordedAt, now)}`
-                          : 'Not measured today'}
+                          ? `Last measured ${formatDaysAgo(latest.recordedAt, now)}`
+                          : 'No readings yet'}
                       {latest ? (
                         <span className="sr-only">
                           {' '}
@@ -132,7 +132,8 @@ export function HomePage() {
                     </span>
                     {indicator === 'mood' ? (
                       <span className="block text-sm text-muted-foreground">
-                        PHQ-2 screening: {PHQ2_STATE_LABELS[screening.state]}
+                        PHQ-2 check:{' '}
+                        {screening.state === 'due' ? 'due' : PHQ2_STATE_LABELS[screening.state]}
                       </span>
                     ) : null}
                     {assessment.status === 'none' ? (
@@ -172,10 +173,7 @@ export function HomePage() {
               {data.missionPhase === 'approachingLanding' ? (
                 <p role="status" className="flex gap-2 rounded-lg border bg-card p-3 text-sm">
                   <Info aria-hidden="true" className="size-5 shrink-0" />
-                  <span>
-                    {PRE_LANDING_REMINDER}{' '}
-                    <span className="text-muted-foreground">Team design decision · RULE-30</span>
-                  </span>
+                  <span>{PRE_LANDING_REMINDER}</span>
                 </p>
               ) : null}
               {alerts.map((assessment) => {

@@ -17,7 +17,7 @@ export function addDays(date: Date, days: number): Date {
   return next
 }
 
-// Date formats (Settings → Units and Formats). Day month year is the default.
+// Date formats (Settings → Units and formats). Day month year is the default.
 const gb = {
   dateTime: new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' }),
   date: new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium' }),

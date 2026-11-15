@@ -71,7 +71,7 @@ export function EntryDialog({ indicator, open, onOpenChange, entry }: Props) {
             <DialogDescription>
               {entry
                 ? `Reading from ${formatDateTime(entry.recordedAt)}. The date and time stay the same; the reading will be marked as edited.`
-                : (HINTS[indicator] ?? 'Add a new entry.')}
+                : (HINTS[indicator] ?? 'Add a new reading.')}
             </DialogDescription>
           </DialogHeader>
 
@@ -90,7 +90,7 @@ export function EntryDialog({ indicator, open, onOpenChange, entry }: Props) {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Save entry</Button>
+            <Button type="submit">Save reading</Button>
           </DialogFooter>
         </form>
       </DialogContent>

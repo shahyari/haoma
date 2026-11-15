@@ -13,7 +13,7 @@ describe('keyboard', () => {
     renderApp()
     const indicators = within(screen.getByRole('region', { name: 'Indicators' }))
     const first = indicators.getAllByRole('link')[0]
-    // Skip link, logo, avatar and Log entry come first; the first card follows.
+    // Skip link, logo, avatar and Log reading come first; the first card follows.
     for (let i = 0; i < 6 && document.activeElement !== first; i++) await user.tab()
     expect(document.activeElement).toBe(first)
     await user.keyboard('{Enter}')
@@ -23,7 +23,7 @@ describe('keyboard', () => {
   it('adds an entry using only the keyboard; Escape closes the dialog and returns focus', async () => {
     const user = userEvent.setup()
     const store = renderApp('/indicators/sleep')
-    const add = screen.getByRole('button', { name: 'Add entry' })
+    const add = screen.getByRole('button', { name: /^Log reading:/ })
 
     add.focus()
     await user.keyboard('{Enter}')
@@ -60,7 +60,7 @@ describe('keyboard', () => {
   it('selects radio options and checkboxes with the keyboard', async () => {
     const user = userEvent.setup()
     const store = renderApp('/indicators/bodyTemperature')
-    screen.getByRole('button', { name: 'Add entry' }).focus()
+    screen.getByRole('button', { name: /^Log reading:/ }).focus()
     await user.keyboard('{Enter}')
     const dialog = within(screen.getByRole('dialog'))
     await user.type(dialog.getByLabelText('Temperature (°C)'), '36.8')
@@ -71,7 +71,7 @@ describe('keyboard', () => {
     await user.tab()
     expect(document.activeElement).toBe(dialog.getByLabelText('I exercised in the last 30 minutes'))
     await user.keyboard(' ')
-    await user.click(dialog.getByRole('button', { name: 'Save entry' }))
+    await user.click(dialog.getByRole('button', { name: 'Save reading' }))
     expect(store.load().data.entries).toMatchObject([
       { indicator: 'bodyTemperature', celsius: 36.8, method: 'oral', exercisedLast30Min: true },
     ])

@@ -69,7 +69,7 @@ export function ActivityGraph({ entries, now }: { entries: HealthEntry[]; now: D
   return (
     <figure className="space-y-2 rounded-lg border bg-card p-4 text-card-foreground">
       <figcaption className="flex items-baseline justify-between gap-2">
-        <span className="font-medium">Activity</span>
+        <span className="font-medium">Check-ins</span>
         <span className="text-sm text-muted-foreground">
           <span className="num">{activeDays}</span> of <span className="num">{days.length}</span>{' '}
           days logged

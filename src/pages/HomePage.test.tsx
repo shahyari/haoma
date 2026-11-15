@@ -60,7 +60,7 @@ describe('HomePage (owner brainstorm Section 16)', () => {
     expect(card('Blood pressure').textContent).toContain('No measurement')
   })
 
-  it('shows "Measured … ago" for today’s readings and "Not measured today" otherwise', () => {
+  it('shows "Measured … ago" for today’s readings and "Last measured …" otherwise', () => {
     const minutesAgo = (m: number) => ({
       id: `m${m}`,
       recordedAt: new Date(Date.now() - m * 60_000).toISOString(),
@@ -84,13 +84,14 @@ describe('HomePage (owner brainstorm Section 16)', () => {
     expect(card('Heart rate').textContent).toContain('Measured 5 mins ago')
     if (now.getHours() >= 2)
       expect(card('Blood pressure').textContent).toContain('Measured 1 hour ago')
-    expect(card('Sleep').textContent).toContain('Not measured today · last yesterday')
+    expect(card('Sleep').textContent).toContain('Last measured yesterday')
+    expect(card('Sleep').textContent).not.toContain('Not measured today')
     // The full timestamp is kept for screen readers only.
     const visible = card('Sleep').cloneNode(true) as HTMLElement
     visible.querySelectorAll('.sr-only').forEach((n) => n.remove())
     expect(visible.textContent).not.toMatch(/\d{1,2} \w{3} \d{4}/)
-    expect(card('Mood').textContent).toContain('Not measured today')
-    expect(card('Mood').textContent).toContain('PHQ-2 screening: Not assessed')
+    expect(card('Mood').textContent).toContain('No readings yet')
+    expect(card('Mood').textContent).toContain('PHQ-2 check: Not assessed')
     expect(screen.queryByText('Today’s check-in')).toBeNull()
     // One link per indicator: the check-in no longer duplicates the destination.
     const sleepLinks = screen
@@ -104,10 +105,15 @@ describe('HomePage (owner brainstorm Section 16)', () => {
       { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
     ])
     expect(card('Blood pressure').textContent).toContain('Escalate')
-    expect(screen.getByText('Report at next flight-surgeon contact.')).toBeTruthy()
+    // The action comes first; the reason and evidence sit behind "Why?" (UX copy review).
+    const banner = within(screen.getByRole('region', { name: 'Health status' }))
+    expect(banner.getByText('Tell the flight surgeon at your next contact.')).toBeTruthy()
+    const why = banner.getByText('Why?').closest('details')!
+    expect(why.open).toBe(false)
     expect(
-      screen.getByText(/Threshold: General clinical reference\. Action: Team design decision\./),
+      within(why).getByText(/Level: General clinical reference · Advice: Team design decision/),
     ).toBeTruthy()
+    expect(banner.queryByText(/Applies because|Threshold:/)).toBeNull()
     expect(screen.getByText('REF-17').closest('a')?.getAttribute('href')).toContain(
       'docs/references.md',
     )
@@ -119,7 +125,7 @@ describe('HomePage (owner brainstorm Section 16)', () => {
     ])
     const map = await screen.findByRole('region', { name: 'Body map' })
     const status = screen.getByRole('region', { name: 'Health status' })
-    expect(within(status).getByText('Report at next flight-surgeon contact.')).toBeTruthy()
+    expect(within(status).getByText('Tell the flight surgeon at your next contact.')).toBeTruthy()
     // Document order: cards, body map, banners (left to right on wide screens).
     expect(map.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
@@ -260,21 +266,21 @@ describe('Usability review 2026-11-15', () => {
       { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
       { ...daysAgo(0), indicator: 'sleep', hours: 5, source: 'selfReport' },
     ])
-    expect(indicators().queryByText('Activity')).toBeNull()
+    expect(indicators().queryByText('Check-ins')).toBeNull()
     expect(screen.getByLabelText(/^Today: 2 of 6 indicators logged$/)).toBeTruthy()
     // Document order: cards, body map, activity graph, then the banners below it.
     const map = await screen.findByRole('region', { name: 'Body map' })
-    const graph = screen.getByText('Activity')
+    const graph = screen.getByText('Check-ins')
     const status = screen.getByRole('region', { name: 'Health status' })
     expect(map.compareDocumentPosition(graph) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(graph.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(screen.queryByText(/indicators ·/)).toBeNull()
   })
 
-  it('logs several indicators at once from the Log entry dialog', async () => {
+  it('logs several indicators at once from the Log reading dialog', async () => {
     const user = userEvent.setup()
     const store = renderApp('/')
-    await user.click(screen.getByRole('button', { name: 'Log entry' }))
+    await user.click(screen.getByRole('button', { name: 'Log reading' }))
     const dialog = within(screen.getByRole('dialog'))
     expect(dialog.getAllByRole('tab').map((t) => t.textContent)).toEqual(LABELS)
     // Heart rate is first and selected.
@@ -282,12 +288,12 @@ describe('Usability review 2026-11-15', () => {
     await user.click(dialog.getByLabelText('At rest'))
     await user.click(dialog.getByRole('tab', { name: 'Sleep' }))
     await user.type(dialog.getByLabelText('Sleep (hours)'), '7.5')
-    await user.click(dialog.getByRole('button', { name: 'Save 2 entries' }))
+    await user.click(dialog.getByRole('button', { name: 'Save 2 readings' }))
     // The sleep source is missing: nothing is saved, and the error is shown.
     expect(store.load().data.entries).toHaveLength(0)
     expect(dialog.getByRole('alert').textContent).toContain('sleep')
     await user.click(dialog.getByLabelText('Self-report'))
-    await user.click(dialog.getByRole('button', { name: 'Save 2 entries' }))
+    await user.click(dialog.getByRole('button', { name: 'Save 2 readings' }))
     expect(screen.queryByRole('dialog')).toBeNull()
     expect(
       store
@@ -300,8 +306,8 @@ describe('Usability review 2026-11-15', () => {
   it('asks for at least one reading before saving', async () => {
     const user = userEvent.setup()
     renderApp('/')
-    await user.click(screen.getByRole('button', { name: 'Log entry' }))
-    await user.click(screen.getByRole('button', { name: 'Save entries' }))
+    await user.click(screen.getByRole('button', { name: 'Log reading' }))
+    await user.click(screen.getByRole('button', { name: 'Save readings' }))
     expect(screen.getByRole('alert').textContent).toBe('Enter at least one reading.')
   })
 })
@@ -354,20 +360,20 @@ describe('Layout review 2026-11-15', () => {
 })
 
 describe('Header (owner, 2026-11-15)', () => {
-  it('shows "Haoma" with the Demo data chip on the left, and Log entry next to the avatar', () => {
+  it('shows "Haoma" with the Demo data chip on the left, and Log reading next to the avatar', () => {
     renderApp('/', [{ ...daysAgo(0), indicator: 'heartRate', bpm: 66, activity: 'rest' }])
     const header = screen.getByRole('banner')
     expect(within(header).getByText('Haoma')).toBeTruthy()
     const [left, right] = Array.from(header.firstElementChild!.children) as HTMLElement[]
     expect(within(left).getByRole('link', { name: 'Haoma, Home' })).toBeTruthy()
     expect(within(left).getByRole('button', { name: 'Demo data: show notice' })).toBeTruthy()
-    expect(within(right).getByRole('button', { name: 'Log entry' })).toBeTruthy()
+    expect(within(right).getByRole('button', { name: 'Log reading' })).toBeTruthy()
     expect(within(right).getByRole('button', { name: /^Profile: Alex Morgan/ })).toBeTruthy()
   })
 
-  it('offers Log entry on other pages too', () => {
+  it('offers Log reading on other pages too', () => {
     renderApp('/settings')
-    expect(screen.getByRole('button', { name: 'Log entry' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Log reading' })).toBeTruthy()
   })
 })
 
@@ -375,7 +381,7 @@ describe('Monospaced numbers option (owner, 2026-11-15)', () => {
   it('sits between Text size and Assistive patterns, and replaces the footer note', async () => {
     const user = userEvent.setup()
     renderApp('/settings')
-    const appearances = screen.getByRole('region', { name: 'Appearances' })
+    const appearances = screen.getByRole('region', { name: 'Appearance' })
     const order = ['Text size', 'Monospaced numbers', 'Assistive patterns'].map((text) =>
       within(appearances).getByText(text),
     )
@@ -397,5 +403,61 @@ describe('Monospaced numbers option (owner, 2026-11-15)', () => {
     expect(box.getAttribute('aria-checked')).toBe('true')
     await user.click(box)
     expect(document.documentElement.dataset.monoNumbers).toBe('false')
+  })
+})
+
+describe('UX copy review (owner, 2026-11-15)', () => {
+  it('shows no internal decision or parameter codes, and no slashes, in rule text', async () => {
+    const { RULES } = await import('@/rules/rules')
+    for (const rule of Object.values(RULES)) {
+      expect(rule.condition, rule.id).not.toMatch(/\b(OD|P)-\d/)
+      // Word-to-word slashes such as “meals/activity”; values (180/120) and units (mg/dL) are fine.
+      expect(rule.action ?? '', rule.id).not.toMatch(/\b(OD|P)-\d| \/ |[a-z]{3,}\/[a-z]{3,}/i)
+    }
+  })
+
+  it('uses one form for contacting the flight surgeon (OD-17)', async () => {
+    const { RULES } = await import('@/rules/rules')
+    expect(RULES['RULE-03'].action).toBe('Tell the flight surgeon at your next contact.')
+    expect(RULES['RULE-08'].action).toBe('Contact the flight surgeon now.')
+    expect(RULES['RULE-17'].action).toBe('Contact the flight surgeon now.')
+    expect(RULES['RULE-12'].action).toBe(
+      'Eat fast-acting carbs now, then tell the CMO or flight surgeon.',
+    )
+    expect(RULES['RULE-22'].condition).toBe(
+      'Your daily mood ratings have dropped over recent days.',
+    )
+  })
+
+  it('keeps the three status badges as Normal, Attention, Escalate', () => {
+    renderApp('/settings')
+    const preview = screen.getByRole('list', { name: 'Status preview' })
+    expect(
+      within(preview)
+        .getAllByRole('listitem')
+        .map((li) => li.textContent),
+    ).toEqual(['Normal', 'Attention', 'Escalate'])
+  })
+
+  it('shows "PHQ-2 check: due" on the Mood card when the screening is due', () => {
+    renderApp('/', [
+      { ...daysAgo(20), indicator: 'mood', kind: 'phq2', score: 0 },
+      { ...daysAgo(0), indicator: 'mood', kind: 'dailyRating', rating: 4 },
+    ])
+    expect(card('Mood').textContent).toContain('PHQ-2 check: due')
+  })
+
+  it('shows the pre-landing reminder on Home without its code, and RULE-30 on the blood pressure page', async () => {
+    const user = userEvent.setup()
+    renderApp('/settings')
+    await user.click(screen.getByRole('combobox', { name: 'Mission phase' }))
+    await user.click(screen.getByRole('option', { name: 'Approaching landing' }))
+    fireEvent.click(screen.getByRole('link', { name: 'Haoma, Home' }))
+    const status = within(screen.getByRole('region', { name: 'Health status' }))
+    expect(status.getByText(/Landing is within 24 hours/)).toBeTruthy()
+    expect(status.queryByText(/RULE-30/)).toBeNull()
+    cleanup()
+    renderApp('/indicators/bloodPressure')
+    expect(screen.getByText('RULE-30')).toBeTruthy()
   })
 })

@@ -71,7 +71,7 @@ export function LogEntryDialog({ open, onOpenChange, order, initialTab }: Props)
     setErrors(nextErrors)
     if (failed.length > 0) {
       setFormError(
-        `Check ${failed.map((id) => INDICATORS[id].label.toLowerCase()).join(', ')}. Nothing was saved.`,
+        `Nothing saved. Fix the marked ${failed.length === 1 ? 'tab' : 'tabs'}: ${failed.map((id) => INDICATORS[id].label.toLowerCase()).join(', ')}.`,
       )
       setTab(failed.includes(tab) ? tab : failed[0])
       return
@@ -82,8 +82,8 @@ export function LogEntryDialog({ open, onOpenChange, order, initialTab }: Props)
 
   const saveLabel =
     touched.length === 0
-      ? 'Save entries'
-      : `Save ${touched.length} ${touched.length === 1 ? 'entry' : 'entries'}`
+      ? 'Save readings'
+      : `Save ${touched.length} ${touched.length === 1 ? 'reading' : 'readings'}`
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -98,10 +98,10 @@ export function LogEntryDialog({ open, onOpenChange, order, initialTab }: Props)
       >
         <form onSubmit={submit} noValidate className="space-y-4">
           <DialogHeader>
-            <DialogTitle>Log entry</DialogTitle>
+            <DialogTitle>Log reading</DialogTitle>
             <DialogDescription>
-              Fill in one or more indicators and save them together. Each is saved as its own entry
-              with the current time.
+              Fill in one or more indicators and save them together. Each is saved as its own
+              reading with the current time.
             </DialogDescription>
           </DialogHeader>
 

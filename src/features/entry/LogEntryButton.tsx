@@ -10,7 +10,7 @@ import { HOME_ORDER } from '@/features/home/order'
 import { LogEntryDialog } from './LogEntryDialog'
 
 /**
- * "Log entry" in the header, next to the avatar (owner, 2026-11-15). Opens the six-tab dialog
+ * "Log reading" in the header, next to the avatar (owner, 2026-11-15). Opens the six-tab dialog
  * on the first indicator not yet measured today.
  */
 export function LogEntryButton() {
@@ -28,9 +28,9 @@ export function LogEntryButton() {
   return (
     <>
       {/* Icon only below 640 px, so the header fits on a phone; the name stays for screen readers. */}
-      <Button onClick={openDialog} className="max-sm:size-9 max-sm:px-0" title="Log entry">
+      <Button onClick={openDialog} className="max-sm:size-9 max-sm:px-0" title="Log reading">
         <Plus aria-hidden="true" />
-        <span className="max-sm:sr-only">Log entry</span>
+        <span className="max-sm:sr-only">Log reading</span>
       </Button>
       {open ? (
         <LogEntryDialog open onOpenChange={setOpen} order={HOME_ORDER} initialTab={initialTab} />

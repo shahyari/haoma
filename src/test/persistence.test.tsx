@@ -23,11 +23,11 @@ function reload(path = '/') {
 describe('browser persistence (localStorage)', () => {
   it('keeps entries across a reload', async () => {
     reload('/indicators/sleep')
-    fireEvent.click(await screen.findByRole('button', { name: 'Add entry' }))
+    fireEvent.click(await screen.findByRole('button', { name: /^Log reading:/ }))
     const dialog = within(screen.getByRole('dialog'))
     fireEvent.change(dialog.getByLabelText('Sleep (hours)'), { target: { value: '7.5' } })
     fireEvent.click(dialog.getByLabelText('Self-report'))
-    fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
+    fireEvent.click(dialog.getByRole('button', { name: 'Save reading' }))
     const sleep = (
       JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries as { origin: string }[]
     ).filter((e) => e.origin !== 'simulated')

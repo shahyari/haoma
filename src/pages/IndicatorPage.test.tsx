@@ -11,13 +11,13 @@ import { daysAgo, fullText, renderApp } from '@/test/render'
 afterEach(cleanup)
 
 function enter(fields: Record<string, string>, options: string[] = []) {
-  fireEvent.click(screen.getByRole('button', { name: 'Add entry' }))
+  fireEvent.click(screen.getByRole('button', { name: /^Log reading:/ }))
   const dialog = within(screen.getByRole('dialog'))
   for (const [label, value] of Object.entries(fields)) {
     fireEvent.change(dialog.getByLabelText(label), { target: { value } })
   }
   for (const option of options) fireEvent.click(dialog.getByLabelText(option))
-  fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
+  fireEvent.click(dialog.getByRole('button', { name: 'Save reading' }))
 }
 
 const latest = () => within(screen.getByRole('region', { name: 'Latest measurement' }))
@@ -46,7 +46,7 @@ describe('IndicatorPage', () => {
     expect(latest().getByText(fullText('150/95 mmHg'))).toBeTruthy()
     expect(latest().getByText(/Manual entry/)).toBeTruthy()
     expect(latest().getByText('Escalate')).toBeTruthy()
-    expect(latest().getByText('Report at next flight-surgeon contact.')).toBeTruthy()
+    expect(latest().getByText('Tell the flight surgeon at your next contact.')).toBeTruthy()
     expect(store.load().data.entries).toMatchObject([
       { indicator: 'bloodPressure', origin: 'userEntered' },
     ])
@@ -64,7 +64,7 @@ describe('IndicatorPage', () => {
     enter({ 'Glucose (mg/dL)': '65' }, ['Non-fasting', 'Fingerstick', 'Sweating'])
     expect(latest().getByText('Escalate')).toBeTruthy()
     expect(
-      latest().getByText('Treat now and notify crew medical officer / flight surgeon.'),
+      latest().getByText('Eat fast-acting carbs now, then tell the CMO or flight surgeon.'),
     ).toBeTruthy()
   })
 
@@ -131,7 +131,9 @@ describe('IndicatorPage', () => {
     expect(within(screen.getByRole('dialog')).getByText('Choose an option.')).toBeTruthy()
     expect(store.load().data.entries).toEqual([])
     fireEvent.click(within(screen.getByRole('dialog')).getByLabelText('After activity'))
-    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Save entry' }))
+    fireEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Save reading' }),
+    )
     expect(latest().getByText('Not evaluated')).toBeTruthy()
     expect(latest().getByText(/Taken after activity/)).toBeTruthy()
     expect(store.load().data.entries).toMatchObject([{ bpm: 120, activity: 'afterActivity' }])
@@ -159,7 +161,9 @@ describe('IndicatorPage', () => {
     enter({ 'Temperature (°C)': '37.1' })
     expect(within(screen.getByRole('dialog')).getByText('Choose an option.')).toBeTruthy()
     fireEvent.click(within(screen.getByRole('dialog')).getByLabelText('Forehead sensor'))
-    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Save entry' }))
+    fireEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Save reading' }),
+    )
     expect(latest().getByText(/Forehead sensor/)).toBeTruthy()
     expect(latest().getByText('Not evaluated')).toBeTruthy()
     const cells = within(table(/table of readings/))
@@ -214,7 +218,7 @@ describe('IndicatorPage', () => {
     expect((dialog.getByLabelText('Systolic (mmHg)') as HTMLInputElement).value).toBe('150')
     fireEvent.change(dialog.getByLabelText('Systolic (mmHg)'), { target: { value: '115' } })
     fireEvent.change(dialog.getByLabelText('Diastolic (mmHg)'), { target: { value: '75' } })
-    fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
+    fireEvent.click(dialog.getByRole('button', { name: 'Save reading' }))
     expect(screen.queryByRole('dialog')).toBeNull()
     const entries = store.load().data.entries
     expect(entries.length).toBe(1)
@@ -236,7 +240,7 @@ describe('IndicatorPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Edit reading from/ }))
     const dialog = within(screen.getByRole('dialog'))
     fireEvent.change(dialog.getByLabelText('Heart rate (bpm)'), { target: { value: 'x' } })
-    fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
+    fireEvent.click(dialog.getByRole('button', { name: 'Save reading' }))
     expect(dialog.getByText('Enter a number.')).toBeTruthy()
     expect(store.load().data.entries[0]).toMatchObject({ bpm: 64 })
   })
@@ -250,7 +254,7 @@ describe('IndicatorPage', () => {
     expect(dialog.queryByLabelText('Daily mood rating')).toBeNull()
     fireEvent.click(dialog.getAllByLabelText('Nearly every day')[0])
     fireEvent.click(dialog.getAllByLabelText('Not at all')[1])
-    fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
+    fireEvent.click(dialog.getByRole('button', { name: 'Save reading' }))
     expect(store.load().data.entries[0]).toMatchObject({ kind: 'phq2', score: 3 })
   })
 
@@ -309,7 +313,7 @@ describe('Mood: daily rating and PHQ-2 are separate', () => {
 
   it('scores the PHQ-2 from its two answers about the past 2 weeks', () => {
     renderApp('/indicators/mood')
-    fireEvent.click(screen.getByRole('button', { name: 'Add entry' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Log reading:/ }))
     const dialog = within(screen.getByRole('dialog'))
     fireEvent.click(dialog.getByLabelText('PHQ-2 depression screening (every 14 days)'))
     expect(
@@ -319,7 +323,7 @@ describe('Mood: daily rating and PHQ-2 are separate', () => {
     ).toBeTruthy()
     fireEvent.click(dialog.getAllByLabelText('Several days')[0])
     fireEvent.click(dialog.getAllByLabelText('More than half the days')[1])
-    fireEvent.click(dialog.getByRole('button', { name: 'Save entry' }))
+    fireEvent.click(dialog.getByRole('button', { name: 'Save reading' }))
     expect(within(table(/PHQ-2 depression screening: table/)).getByText('3')).toBeTruthy()
     expect(latest().getByText('Escalate')).toBeTruthy()
     expect(screen.getByText(/PHQ-2 screening:/).closest('p')?.textContent).toContain(
@@ -330,13 +334,13 @@ describe('Mood: daily rating and PHQ-2 are separate', () => {
 
   it('offers the PHQ-2 only every 14 days', () => {
     renderApp('/indicators/mood', [{ ...daysAgo(13), indicator: 'mood', kind: 'phq2', score: 1 }])
-    fireEvent.click(screen.getByRole('button', { name: 'Add entry' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Log reading:/ }))
     const dialog = within(screen.getByRole('dialog'))
     expect(dialog.queryByLabelText(/PHQ-2 depression screening/)).toBeNull()
     expect(dialog.getByText(/scheduled every 14 days \(team decision\)\. Next due/)).toBeTruthy()
     cleanup()
     renderApp('/indicators/mood', [{ ...daysAgo(14), indicator: 'mood', kind: 'phq2', score: 1 }])
-    fireEvent.click(screen.getByRole('button', { name: 'Add entry' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Log reading:/ }))
     expect(
       within(screen.getByRole('dialog')).getByLabelText(/PHQ-2 depression screening/),
     ).toBeTruthy()

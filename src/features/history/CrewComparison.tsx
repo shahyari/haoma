@@ -221,7 +221,7 @@ export function CrewComparison({
             </li>
             <li>
               “Close to” means within half the spread (standard deviation) of the crew’s values.
-              These are team-set parameters P-9 to P-11 (Team design decision).
+              These are team design decisions.
             </li>
             <li>
               A crew average does not replace your personal baseline, the approved rules, or a

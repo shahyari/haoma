@@ -54,7 +54,7 @@ import {
   restingAbove100,
 } from '@/rules/evaluate'
 import { SYMPTOMS, type SymptomId } from '@/domain/symptoms'
-import { MOOD_SAFETY_MESSAGE, RULES } from '@/rules/rules'
+import { MOOD_SAFETY_MESSAGE, PRE_LANDING_REMINDER, RULES } from '@/rules/rules'
 import type { RuleDefinition } from '@/rules/types'
 
 const sectionHeading = 'text-lg font-medium'
@@ -395,7 +395,9 @@ export function IndicatorPage() {
           }}
         >
           <Plus aria-hidden="true" />
-          Add entry
+          Log reading
+          {/* The header has a six-tab "Log reading" too; this one is for this indicator. */}
+          <span className="sr-only">: {label}</span>
         </Button>
       }
     >
@@ -561,8 +563,7 @@ export function IndicatorPage() {
             )}
           </p>
           <p className="text-sm text-muted-foreground">
-            Team-set parameters P-1 and P-2 (Team design decision): median of the last 7 valid
-            readings, at least 5 required.
+            Median of your last 7 valid readings; at least 5 needed. Team design decision.
           </p>
         </section>
       ) : null}
@@ -610,9 +611,9 @@ export function IndicatorPage() {
           {customUnits
             ? 'Rule levels are stated in the units of their sources (°C, mg/dL); your readings are shown in the units chosen in Settings. '
             : ''}
-          These are general references and team rules, not your measurements. General clinical
-          references come from general-population guidance and are not validated for astronauts.
-          Sources are listed in the{' '}
+          These are general references and team rules, not your measurements. CMO means crew medical
+          officer. General clinical references come from general-population guidance and are not
+          validated for astronauts. Sources are listed in the{' '}
           <a
             href={REFERENCES_URL}
             target="_blank"
@@ -637,6 +638,18 @@ export function IndicatorPage() {
               <RuleEvidence rule={rule} />
             </li>
           ))}
+          {indicator === 'bloodPressure' ? (
+            // RULE-30 is a reminder, not a detection rule; Home shows it without the label.
+            <li className="space-y-1 p-3">
+              <p>
+                Reminder shown on Home while the mission phase is “Approaching landing”:{' '}
+                {PRE_LANDING_REMINDER}
+              </p>
+              <p className="text-muted-foreground">
+                Team design decision · <span className="num">RULE-30</span>
+              </p>
+            </li>
+          ) : null}
         </ul>
       </section>
 

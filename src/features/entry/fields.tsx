@@ -85,7 +85,7 @@ const ISSUE_MESSAGES: Partial<Record<ValidationIssue['code'], string>> = {
   required: 'This is required.',
   notANumber: 'Enter a number.',
   notFinite: 'Enter a number.',
-  negative: 'Enter a number that is not negative.',
+  negative: 'Enter 0 or more.',
   notAnInteger: 'Choose an answer.',
   outOfScale: 'Choose an answer.',
 }

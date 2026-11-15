@@ -1,7 +1,8 @@
 /**
  * Approved interpretation rules. Source of truth:
  * docs/scientific-foundations.md (RULE-01 to RULE-30, all `Approved` by the
- * owner on 2026-11-14). Wording, labels, and references are copied from there.
+ * owner on 2026-11-14). Wording, labels, and references are copied from there; the
+ * conditions shown in the app leave out internal decision and parameter codes (OD-17).
  * Do not change a value here without changing the document first.
  */
 import type { IndicatorId } from '@/domain/indicators'
@@ -50,7 +51,7 @@ export const RULES = {
     ['TDD'],
     ['REF-17'],
     '140 or higher systolic, or 90 or higher diastolic (AHA “Stage 2”).',
-    'Report at next flight-surgeon contact.',
+    'Tell the flight surgeon at your next contact.',
   ),
   'RULE-04': rule(
     'RULE-04',
@@ -119,8 +120,8 @@ export const RULES = {
     ['TDD'],
     ['TDD'],
     ['REF-22', 'REF-23'],
-    'Symptom-based, for any reading (OD-15): dizziness, fainting, breathlessness or chest pain with a rate outside 60–100, or a felt irregular rhythm. The clause “a rate regularly above 100 at rest” is not evaluated (OD-14).',
-    'Contact flight surgeon.',
+    'Symptom-based, for any reading: dizziness, fainting, breathlessness or chest pain with a rate outside 60–100, or a felt irregular rhythm. A rate regularly above 100 at rest is not evaluated.',
+    'Contact the flight surgeon now.',
   ),
   'RULE-29': rule(
     'RULE-29',
@@ -129,7 +130,7 @@ export const RULES = {
     ['TDD'],
     ['TDD'],
     ['REF-18'],
-    'Resting heart rate differs from the personal baseline by 10 bpm or more, once 5 readings exist (team-set parameters P-2, P-3).',
+    'Resting heart rate differs from the personal baseline by 10 bpm or more, once 5 readings exist (team-set parameters).',
   ),
   // Blood glucose
   'RULE-09': rule(
@@ -149,7 +150,7 @@ export const RULES = {
     ['TDD'],
     ['REF-46', 'REF-24'],
     'Fasting 100–125 mg/dL (ADA impaired-fasting-glucose range).',
-    'Repeat a fasting test and review meals/activity.',
+    'Repeat a fasting test and review meals and activity.',
   ),
   'RULE-11': rule(
     'RULE-11',
@@ -169,7 +170,7 @@ export const RULES = {
     ['TDD'],
     ['REF-25', 'REF-53'],
     'Below 54 mg/dL (ADA Level 2), or below 70 with hypoglycemia symptoms, any context (levels defined for people with diabetes).',
-    'Treat now and notify crew medical officer / flight surgeon.',
+    'Eat fast-acting carbs now, then tell the CMO or flight surgeon.',
   ),
   'RULE-13': rule(
     'RULE-13',
@@ -179,7 +180,7 @@ export const RULES = {
     ['TDD'],
     ['REF-46', 'REF-24'],
     'Fasting 126 mg/dL or higher (ADA threshold; needs a repeat test to confirm).',
-    'Report to flight surgeon.',
+    'Report to the flight surgeon.',
   ),
   'RULE-27': rule(
     'RULE-27',
@@ -199,7 +200,7 @@ export const RULES = {
     ['GCR', 'TDD'],
     [],
     ['REF-50', 'REF-31'],
-    'Oral readings only: below 37.5 °C, and within 0.5 °C of the oral baseline (team-set parameter P-4).',
+    'Oral readings only: below 37.5 °C, and within 0.5 °C of the oral baseline (team-set parameter).',
   ),
   'RULE-15': rule(
     'RULE-15',
@@ -219,7 +220,7 @@ export const RULES = {
     ['TDD'],
     ['REF-30', 'REF-32'],
     'Oral readings only: 38.0 °C or higher and either reported symptoms or a reading more than 0.5 °C above the oral baseline. Until a baseline exists, 38.0 °C or higher alone.',
-    'Report, especially with other symptoms.',
+    'Tell the flight surgeon, especially if unwell.',
   ),
   'RULE-17': rule(
     'RULE-17',
@@ -228,8 +229,8 @@ export const RULES = {
     ['GCR'],
     ['TDD'],
     ['REF-50'],
-    'Oral readings only: a single reading of 40.6 °C (105 °F) or higher (MedlinePlus: contact a provider right away). General adult reference, not validated for astronauts. The baseline never overrides it (OD-16).',
-    'Contact flight surgeon promptly.',
+    'Oral readings only: a single reading of 40.6 °C (105 °F) or higher (MedlinePlus: contact a provider right away). General adult reference, not validated for astronauts. The baseline never overrides it.',
+    'Contact the flight surgeon now.',
   ),
   'RULE-31': rule(
     'RULE-31',
@@ -238,7 +239,7 @@ export const RULES = {
     ['GCR', 'TDD'],
     ['TDD'],
     ['REF-50'],
-    'Oral readings only: a single reading from 39.4 °C up to, but not including, 40.6 °C. Measurement review, not an emergency classification; one reading does not show a persistent fever. General adult reference, not validated for astronauts (OD-16).',
+    'Oral readings only: a single reading from 39.4 °C up to, but not including, 40.6 °C. Measurement review, not an emergency classification; one reading does not show a persistent fever. General adult reference, not validated for astronauts.',
     'Re-measure and compare with the trend.',
   ),
   // Sleep
@@ -271,7 +272,7 @@ export const RULES = {
     ['GCR', 'TDD'],
     ['TDD'],
     ['REF-36'],
-    '6 hours or fewer on 3 or more of the last 7 nights (team-set parameter P-7).',
+    '6 hours or fewer on 3 or more of the last 7 nights (team-set parameter).',
     'Raise at next private medical conference, and before EVAs or critical operations.',
   ),
   // Mood
@@ -294,7 +295,7 @@ export const RULES = {
     ['TDD'],
     ['TDD'],
     ['REF-42'],
-    'A declining daily mood trend (team-set parameter P-5). A PHQ-2 score of 2 alone no longer triggers this rule (OD-15).',
+    'Your daily mood ratings have dropped over recent days.',
     'Check in, use self-care time, talk to crewmates.',
   ),
   'RULE-23': {
@@ -306,7 +307,7 @@ export const RULES = {
       ['TDD'],
       ['REF-51', 'REF-40'],
       'PHQ-2 score 3 or more within the last 14 days (validated cutpoint in primary care and obstetrics-gynecology patients, not in astronauts).',
-      'The flight surgeon or behavioral health team can do a fuller assessment. Arrange a private conference with the flight surgeon / behavioral health.',
+      'The flight surgeon or behavioral health team can do a fuller assessment. Arrange a private conference with the flight surgeon or behavioral health team.',
     ),
     statusLabel: 'Further assessment recommended',
   },

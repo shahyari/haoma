@@ -104,7 +104,7 @@ export function SettingsPage() {
         </Alert>
       ) : null}
 
-      <SettingsCard title="Appearances" id="appearances-heading">
+      <SettingsCard title="Appearance" id="appearances-heading">
         <Choice
           name="theme"
           legend="Theme"
@@ -172,7 +172,7 @@ export function SettingsPage() {
         </div>
       </SettingsCard>
 
-      <SettingsCard title="Units and Formats" id="units-heading">
+      <SettingsCard title="Units and formats" id="units-heading">
         <Choice
           name="temperatureUnit"
           legend="Temperature"

@@ -21,8 +21,8 @@ const labels = (codes: EvidenceLabel[]) => codes.map((c) => EVIDENCE_LABELS[c]).
 export function RuleEvidence({ rule }: { rule: Finding['rule'] }) {
   return (
     <p className="text-muted-foreground">
-      Threshold: {labels(rule.thresholdLabels)}.
-      {rule.actionLabels.length > 0 ? ` Action: ${labels(rule.actionLabels)}.` : ''}{' '}
+      Level: {labels(rule.thresholdLabels)}
+      {rule.actionLabels.length > 0 ? ` · Advice: ${labels(rule.actionLabels)}` : ''} ·{' '}
       <span className="num">{rule.id}</span> ·{' '}
       <a
         href={REFERENCES_URL}
@@ -43,7 +43,7 @@ export function FindingList({ findings, className }: { findings: Finding[]; clas
       {findings.map(({ rule, message, reason }) => (
         <li key={rule.id + (reason ?? '')} className="space-y-1">
           {message ? <p>{message}</p> : null}
-          <p className="text-muted-foreground">Applies because: {reason ?? rule.condition}</p>
+          <p className="text-muted-foreground">Why: {reason ?? rule.condition}</p>
           <RuleEvidence rule={rule} />
         </li>
       ))}
@@ -77,10 +77,31 @@ export function StatusBanner({
           className="size-4 shrink-0 group-open:rotate-180 motion-safe:transition-transform"
         />
       </summary>
-      <FindingList
-        findings={assessment.findings}
-        className="space-y-3 border-t border-(--status-color) bg-card px-3 py-3 text-sm"
-      />
+      {/* What to do first; the reason and evidence behind a "Why?" toggle (UX copy review, 2026-11-15). */}
+      <div className="space-y-3 rounded-b-lg border-t border-(--status-color) bg-card px-3 py-3 text-sm">
+        {assessment.findings.some((f) => f.message) ? (
+          <ul className="space-y-2">
+            {assessment.findings
+              .filter((f) => f.message)
+              .map((f) => (
+                <li key={f.rule.id + (f.reason ?? '')}>{f.message}</li>
+              ))}
+          </ul>
+        ) : null}
+        <details className="group/why">
+          <summary className="w-fit cursor-pointer rounded-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            Why?
+          </summary>
+          <ul className="mt-2 space-y-3">
+            {assessment.findings.map(({ rule, reason }) => (
+              <li key={rule.id + (reason ?? '')} className="space-y-1">
+                <p className="text-muted-foreground">{reason ?? rule.condition}</p>
+                <RuleEvidence rule={rule} />
+              </li>
+            ))}
+          </ul>
+        </details>
+      </div>
     </details>
   )
 }
