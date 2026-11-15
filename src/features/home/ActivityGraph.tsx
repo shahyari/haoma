@@ -5,7 +5,7 @@ import { INDICATOR_IDS, type HealthEntry } from '@/domain/indicators'
 import { cn } from '@/lib/utils'
 
 /** Weeks shown (columns), most recent on the right. */
-const ACTIVITY_WEEKS = 12
+const ACTIVITY_WEEKS = 24
 
 const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
 
