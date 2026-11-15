@@ -63,8 +63,8 @@ TODO: Describe how Claude Code and any other AI tools were used during developme
 TODO: Medical validity, simulated data, non-diagnostic status, unimplemented capabilities, testing limitations.
 
 ## Project links
-- Live demo: TODO: url
-- Source code: TODO: url
+- Live demo: https://haomaho.vercel.app
+- Source code: https://github.com/shahyari/haoma (checkpoint tag `spaceapps-checkpoint-1`)
 - Video: TODO: url
 - Presentation: TODO: url
 - Documentation: TODO: url

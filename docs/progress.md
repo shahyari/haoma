@@ -6,6 +6,12 @@
 **Current phase:** B — Features. Owner review of 2026-11-14 approved the history view and set product decisions (below).
 **Build status:** Passing. Repository https://github.com/shahyari/haoma (public). Production https://haomaho.vercel.app.
 
+## Submission checkpoints
+
+| Tag | Date | Commit | Production | Deployment | Verified |
+|---|---|---|---|---|---|
+| `spaceapps-checkpoint-1` | 2026-11-15 09:19 CET | `24c9d958cd7ad9cab8da13e95c86df2637f28704` | https://haomaho.vercel.app | https://haoma-ask1k2prl-ho-shah.vercel.app (`dpl_5cTyHAefM8Myhxi3AThFHzJUCUnm`, Ready) | format, lint, typecheck, 330 tests, build; live routes 200, latest copy in the live bundle, no runtime errors in Chrome |
+
 ## Completed
 
 - UX copy review applied (owner, 2026-11-15; OD-17 for rule wording): action first with a "Why?" layer, no OD-/P- codes on screen, one form for contacting the flight surgeon, "Log reading", "Last measured …", "Check-ins", clearer errors; badges stay Normal / Attention / Escalate.
