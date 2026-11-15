@@ -85,9 +85,12 @@ export function HomePage() {
         </p>
       ) : null}
 
-      {/* Cards | body map | activity graph with the banners below it (owner, 2026-11-15). */}
-      <div className="grid gap-4 lg:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)] xl:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)_minmax(16rem,22rem)]">
-        <section aria-labelledby="indicators-heading" className="space-y-3">
+      {/* Cards | body map | activity graph with the banners below it (owner, 2026-11-15).
+          Column widths (owner, 2026-11-15): 1 : 2 : 1 from 1280 px, so the side columns are
+          always equal and the body map is twice as wide; 1 : 2 from 1024 px, with the right
+          column moving below; one column on smaller screens. */}
+      <div className="grid gap-4 lg:grid-cols-3 xl:grid-cols-4">
+        <section aria-labelledby="indicators-heading" className="min-w-0 space-y-3">
           <h2 id="indicators-heading" className="sr-only">
             Indicators
           </h2>
@@ -180,7 +183,7 @@ export function HomePage() {
         <section
           aria-labelledby="bodymap-heading"
           // Fills the viewport height below the header (header, page padding) on wide screens.
-          className="flex min-w-0 flex-col lg:sticky lg:top-4 lg:h-[calc(100svh-7rem)] lg:min-h-[560px] lg:self-start"
+          className="flex min-w-0 flex-col lg:col-span-2 lg:sticky lg:top-4 lg:h-[calc(100svh-7rem)] lg:min-h-[560px] lg:self-start"
         >
           <Suspense
             fallback={
@@ -194,7 +197,7 @@ export function HomePage() {
           </Suspense>
         </section>
 
-        <div className="space-y-3 lg:col-span-2 xl:col-span-1">
+        <div className="min-w-0 space-y-3 lg:col-span-3 xl:col-span-1">
           <ActivityGraph entries={data.entries} now={now} />
           {hasBanners ? (
             <section aria-labelledby="status-heading" className="space-y-3">

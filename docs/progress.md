@@ -8,6 +8,7 @@
 
 ## Completed
 
+- Home columns (owner, 2026-11-15): 1 : 2 : 1 from 1280 px (equal side columns), 1 : 2 from 1024 px.
 - Layout review (owner, 2026-11-15): shared `PageLayout` for Settings, About, Reports, Report, indicator and not-found pages (centred, 1024 px, same spacing); consistent Settings row spacing (title, hint, control, 8 px); larger astronaut name in the avatar card.
 - **Crew Average Comparison** (owner spec 2026-11-15) on all six indicator pages, below History; your readings are solid primary lines told apart by markers (filled / outlined circle / outlined square), crew averages dash-dot in the secondary colour; legend and tooltip show the same line samples: summary (latest vs. crew average, signed difference, members, period, neutral wording, unavailable state), optional dash-dot crew line in the chart with n in the tooltip, crew columns in the table; like-with-like matching per indicator, same mission day, viewer excluded, minimum cohort 3, PHQ-2 never compared; simulated crew of five (`src/crew/`). No rule, status, or baseline changed.
 - Home layout (owner, 2026-11-15): activity graph moved to the right column, banners below it, so the cards get more vertical room.
