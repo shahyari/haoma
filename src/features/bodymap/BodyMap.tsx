@@ -537,13 +537,13 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
               ))}
             </ol>
           )}
-          {readOnly ? null : (
+          {/* Only with at least one log, so the empty state stays clean (owner, 2026-11-15). */}
+          {readOnly || logs.length === 0 ? null : (
             <div className="mt-auto flex gap-2 border-t px-4 py-3">
               <Button
                 variant="outline"
                 size="sm"
                 className="flex-1"
-                disabled={!logs.length}
                 onClick={() => setSaving(new Set(logs.map((l) => l.id)))}
               >
                 <Save aria-hidden="true" />
@@ -553,7 +553,6 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
                 variant={confirmClear ? 'destructive' : 'outline'}
                 size="sm"
                 className="flex-1"
-                disabled={!logs.length}
                 onClick={() => {
                   if (!confirmClear) {
                     setConfirmClear(true)
@@ -571,7 +570,11 @@ export function BodyMap({ report }: { report?: PainReport } = {}) {
           {saved ? (
             <div
               role="status"
-              className="flex flex-wrap items-center gap-2 border-t px-4 py-3 text-sm"
+              // Stays at the bottom of the panel when the buttons are hidden (no logs left).
+              className={cn(
+                'flex flex-wrap items-center gap-2 border-t px-4 py-3 text-sm',
+                logs.length === 0 && 'mt-auto',
+              )}
             >
               <CircleCheck aria-hidden="true" className="size-4 shrink-0" />
               <span className="flex-1">
