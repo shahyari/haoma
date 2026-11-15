@@ -42,40 +42,51 @@ const COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)']
 const DASHES = [undefined, '6 4', '1 3']
 const CREW_DASH = '10 4 2 4'
 
+interface LineStyle {
+  key: string
+  label: string
+  dash?: string
+  marker: 'filled' | 'hollow' | 'none'
+}
+
+/** A short sample of a line (pattern and marker), used in the legend and the tooltip. */
+function LineSample({ style }: { style: LineStyle }) {
+  const color = `var(--color-${style.key})`
+  return (
+    <svg width="28" height="10" viewBox="0 0 28 10" aria-hidden="true" className="shrink-0">
+      <line
+        x1="1"
+        y1="5"
+        x2="27"
+        y2="5"
+        stroke={color}
+        strokeWidth="2"
+        strokeDasharray={style.dash}
+      />
+      {style.marker === 'none' ? null : (
+        <circle
+          cx="14"
+          cy="5"
+          r="3"
+          stroke={color}
+          strokeWidth="1.5"
+          fill={style.marker === 'filled' ? color : 'var(--card)'}
+        />
+      )}
+    </svg>
+  )
+}
+
 /**
- * Legend with a sample of each line (pattern and marker), so your readings and the crew
- * average are told apart by line style, not by colour alone.
+ * Legend with a sample of each line, so your readings and the crew average are told apart
+ * by line style, not by colour alone.
  */
-function LineLegend({
-  items,
-}: {
-  items: { key: string; label: string; dash?: string; marker: 'filled' | 'hollow' | 'none' }[]
-}) {
+function LineLegend({ items }: { items: LineStyle[] }) {
   return (
     <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-3 text-xs">
       {items.map((item) => (
         <li key={item.key} className="flex items-center gap-1.5">
-          <svg width="28" height="10" viewBox="0 0 28 10" aria-hidden="true" className="shrink-0">
-            <line
-              x1="1"
-              y1="5"
-              x2="27"
-              y2="5"
-              stroke={`var(--color-${item.key})`}
-              strokeWidth="2"
-              strokeDasharray={item.dash}
-            />
-            {item.marker === 'none' ? null : (
-              <circle
-                cx="14"
-                cy="5"
-                r="3"
-                stroke={`var(--color-${item.key})`}
-                strokeWidth="1.5"
-                fill={item.marker === 'filled' ? `var(--color-${item.key})` : 'var(--card)'}
-              />
-            )}
-          </svg>
+          <LineSample style={item} />
           {item.label}
         </li>
       ))}
@@ -98,6 +109,18 @@ export function HistoryChart({
     const i = own.findIndex((o) => o.key === (s.crewOf ?? s.key))
     return COLORS[i % COLORS.length]
   }
+  const styles: LineStyle[] = [
+    ...own.map((s, i) => ({
+      key: s.key,
+      label: s.label,
+      dash: DASHES[i % DASHES.length],
+      marker: i === 0 ? ('filled' as const) : ('hollow' as const),
+    })),
+    ...series
+      .filter((s) => s.crewOf)
+      .map((s) => ({ key: s.key, label: s.label, dash: CREW_DASH, marker: 'none' as const })),
+  ]
+  const styleOf = (key: string) => styles.find((st) => st.key === key)
   const config: ChartConfig = Object.fromEntries(
     series.map((s) => [s.key, { label: s.label, color: colorOf(s) }]),
   )
@@ -139,11 +162,7 @@ export function HistoryChart({
                 return (
                   <div className="flex w-full items-center justify-between gap-3">
                     <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <span
-                        aria-hidden="true"
-                        className="size-2.5 shrink-0 rounded-[2px]"
-                        style={{ background: `var(--color-${key})` }}
-                      />
+                      {styleOf(key) ? <LineSample style={styleOf(key)!} /> : null}
                       {config[key]?.label}
                     </span>
                     <span className="num font-medium text-foreground">
@@ -208,30 +227,7 @@ export function HistoryChart({
               isAnimationActive={false}
             />
           ))}
-        {series.length > 1 ? (
-          <ChartLegend
-            content={() => (
-              <LineLegend
-                items={[
-                  ...own.map((s, i) => ({
-                    key: s.key,
-                    label: s.label,
-                    dash: DASHES[i % DASHES.length],
-                    marker: i === 0 ? ('filled' as const) : ('hollow' as const),
-                  })),
-                  ...series
-                    .filter((s) => s.crewOf)
-                    .map((s) => ({
-                      key: s.key,
-                      label: s.label,
-                      dash: CREW_DASH,
-                      marker: 'none' as const,
-                    })),
-                ]}
-              />
-            )}
-          />
-        ) : null}
+        {series.length > 1 ? <ChartLegend content={() => <LineLegend items={styles} />} /> : null}
       </LineChart>
     </ChartContainer>
   )
