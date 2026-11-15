@@ -37,7 +37,7 @@ HAOMA is a web prototype that helps astronauts check the six health indicators n
 
 ## Project details (portal text)
 
-Covers the portal's "Project details" field: what it does, benefits, impact, tools, creativity, and factors considered. Drafted with AI assistance from the implemented features.
+Covers the portal's "Project details" field: what it does, benefits, impact, tools, creativity, and factors considered. Drafted with AI assistance from the implemented features. Checked against the text the owner entered in the portal on 2026-11-15; the portal shows the labels as headings on their own lines.
 
 What it does and how it works
 
@@ -55,7 +55,7 @@ On long missions, care is far away and communication is delayed. HAOMA aims to m
 
 Tools
 
-React and TypeScript with Vite, Tailwind CSS, shadcn/ui (Radix), Lucide icons, and Recharts. The body map uses a small WebGL and SVG engine without extra libraries. Tested with Vitest and Testing Library (340 automated tests), checked with oxlint and Prettier, hosted on Vercel, code on GitHub. Development was assisted by Claude Code (AI), as disclosed in the repository.
+React and TypeScript with Vite, Tailwind CSS, shadcn/ui (Radix), Lucide icons, and Recharts. The body map uses a small WebGL and SVG engine without extra libraries. Tested with Vitest and Testing Library (340 automated tests), checked with oxlint and Prettier, hosted on Vercel, code on GitHub. Designed and developed with VS Code and FigJam. Development was assisted by Claude Code, the Claude app, and ChatGPT (SI), as disclosed in the repository.
 
 What makes it creative
 

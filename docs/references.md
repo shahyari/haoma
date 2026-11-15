@@ -172,6 +172,8 @@ E-R7, E-R8, and E-R15 in `challenge.md` require these to be freely available or 
 | TP-17 | react-day-picker 10.0.2, date-fns 4.4.0 (via the shadcn `calendar` component) | Giampaolo Bellavite and contributors; date-fns contributors | https://daypicker.dev, https://date-fns.org | Date picker in the pain-log dialog | MIT | 2026-11-14 |
 | TP-18 | Inter (typeface) | The Inter Project Authors | https://github.com/rsms/inter | Body text in the demo slide deck (via Google Fonts) | SIL Open Font License 1.1 | 2026-11-15 |
 | TP-19 | Space Grotesk (typeface) | The Space Grotesk Project Authors | https://github.com/floriankarsten/space-grotesk | Headings in the demo slide deck (via Google Fonts) | SIL Open Font License 1.1 | 2026-11-15 |
+| TP-22 | FigJam (online whiteboard) | Figma, Inc. | https://www.figma.com/figjam/ | Owner's research notes, brainstorming of ideas and features, and wireframes (not part of the code or the submission) | Proprietary tool; nothing from it is distributed | 2026-11-15 |
+| TP-23 | Visual Studio Code (editor) | Microsoft | https://code.visualstudio.com | Development environment (not distributed) | MIT (source); product license for the Microsoft build | 2026-11-15 |
 
 Versions and licenses were read from the installed `node_modules` on 2026-11-14 and re-checked on 2026-11-15; all direct dependencies match the table. License summary of `package-lock.json` (2026-11-15, 520 packages): MIT 427, Apache-2.0 31, ISC 27, BSD-3-Clause 8, BSD-2-Clause 6, BlueOak-1.0.0 4, 0BSD 2, MPL-2.0 12, CC-BY-4.0 1, "MIT OR CC0-1.0" 1, "MIT AND ISC AND BSD-3-Clause" 1. All are OSI-approved or freely available (E-R7, E-R8).
 

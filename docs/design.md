@@ -135,7 +135,7 @@ As implemented (Tailwind default breakpoints `sm` 640, `md` 768, `lg` 1024, `xl`
 
 ## Design assets
 
-- Figma link: none. The interface was designed by the owner through written briefs, wireframes, and review rounds, and developed in code. There is no separate Figma deliverable.
+- Figma link: none. Figma was not used. The owner used **FigJam** to gather material from different sources in one place, take notes, brainstorm ideas and features, and draw wireframes. The interface was then specified in written briefs and review rounds and developed in code. The FigJam board is a working file, not a submitted deliverable.
 - Logo: owner-supplied `logo.svg` (2026-11-14), used as the favicon (`public/favicon.svg`, white in dark mode) and as the header mark (`src/components/Logo.tsx`, filled with the text colour). Recorded as TP-16 in `references.md`.
 - Icons: Lucide only (TP-08). Fonts: the app loads no web fonts. It uses the system UI stack (`system-ui`, `-apple-system`, `Segoe UI`, Roboto, …) and the system monospace stack for numbers (`src/index.css`). The demo deck uses Inter and Space Grotesk (TP-18, TP-19).
 - Screenshots and prototypes: the owner's body-map prototype `body-map.html` (made with the Claude app) was ported into `src/features/bodymap/` and is not kept in the repository. App screenshots appear only in the demo deck (`docs/demo/haoma-space-apps-2026-demo.pdf`).
