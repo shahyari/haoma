@@ -42,6 +42,8 @@ export interface DisplaySettings extends Formats {
   fontSize: FontSize
   /** "Assistive patterns": adds patterns to the status colours. */
   colorBlind: boolean
+  /** "Monospaced numbers" (owner, 2026-11-15): numbers in the monospaced font; on by default. */
+  monoNumbers: boolean
 }
 
 export const DEFAULT_SETTINGS: DisplaySettings = {
@@ -51,6 +53,7 @@ export const DEFAULT_SETTINGS: DisplaySettings = {
   contrast: 'normal',
   fontSize: 'medium',
   colorBlind: false,
+  monoNumbers: true,
   ...DEFAULT_FORMATS,
 }
 
@@ -77,6 +80,7 @@ export function parseSettings(raw: string | null): DisplaySettings {
     contrast: pick(v.contrast, CONTRASTS, d.contrast),
     fontSize: pick(v.fontSize, FONT_SIZES, d.fontSize),
     colorBlind: typeof v.colorBlind === 'boolean' ? v.colorBlind : d.colorBlind,
+    monoNumbers: typeof v.monoNumbers === 'boolean' ? v.monoNumbers : d.monoNumbers,
     temperatureUnit: pick(v.temperatureUnit, TEMPERATURE_UNITS, d.temperatureUnit),
     measurementSystem: pick(v.measurementSystem, MEASUREMENT_SYSTEMS, d.measurementSystem),
     dateFormat: pick(v.dateFormat, DATE_FORMATS, d.dateFormat),
@@ -123,5 +127,6 @@ export function applySettings(
   root.dataset.contrast = settings.contrast
   root.dataset.fontSize = settings.fontSize
   root.dataset.colorblind = String(settings.colorBlind)
+  root.dataset.monoNumbers = String(settings.monoNumbers)
   setFormats(settings)
 }

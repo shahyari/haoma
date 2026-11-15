@@ -287,11 +287,16 @@ html[data-font-size='large'] {
   html {
     @apply font-sans;
   }
-  /* Numbers use the monospaced font everywhere. */
+  /* Numbers keep equal-width digits, and use the monospaced font unless "Monospaced numbers"
+     is turned off in Settings (owner, 2026-11-15). */
   .num,
   input[inputmode='decimal'],
   input[inputmode='numeric'] {
-    @apply font-mono tabular-nums;
+    @apply tabular-nums;
+  }
+  :root:not([data-mono-numbers='false'])
+    :is(.num, input[inputmode='decimal'], input[inputmode='numeric']) {
+    @apply font-mono;
   }
 }
 

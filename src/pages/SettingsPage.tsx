@@ -134,6 +134,22 @@ export function SettingsPage() {
         <div className={settingsRow}>
           <div className="-my-2 flex min-h-9 items-center gap-2">
             <Checkbox
+              id="monoNumbers"
+              aria-describedby="monoNumbers-hint"
+              checked={settings.monoNumbers}
+              onCheckedChange={(checked) => update({ monoNumbers: checked === true })}
+            />
+            <Label htmlFor="monoNumbers">Monospaced numbers</Label>
+          </div>
+          <p id="monoNumbers-hint" className={rowHint}>
+            Shows numbers in a fixed-width font, for example{' '}
+            <span className="num text-foreground">118/76</span>, so readings line up and are easy to
+            compare.
+          </p>
+        </div>
+        <div className={settingsRow}>
+          <div className="-my-2 flex min-h-9 items-center gap-2">
+            <Checkbox
               id="colorBlind"
               checked={settings.colorBlind}
               onCheckedChange={(checked) => update({ colorBlind: checked === true })}
@@ -182,10 +198,6 @@ export function SettingsPage() {
       <SettingsCard title="Demo controls" id="demo-heading">
         <DemoControls />
       </SettingsCard>
-
-      <p className="text-sm text-muted-foreground">
-        Numbers always use a monospaced font, for example <span className="num">118/76</span>.
-      </p>
     </PageLayout>
   )
 }

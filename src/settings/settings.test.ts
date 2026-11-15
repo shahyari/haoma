@@ -61,4 +61,13 @@ describe('display settings', () => {
     })
     expect(root.classList.contains('dark')).toBe(true)
   })
+
+  it('shows numbers monospaced by default, and keeps the choice (owner, 2026-11-15)', () => {
+    expect(DEFAULT_SETTINGS.monoNumbers).toBe(true)
+    expect(parseSettings('{"monoNumbers":false}').monoNumbers).toBe(false)
+    expect(parseSettings('{"monoNumbers":"no"}').monoNumbers).toBe(true)
+    const root = document.createElement('html')
+    applySettings({ ...DEFAULT_SETTINGS, monoNumbers: false }, false, root)
+    expect(root.dataset.monoNumbers).toBe('false')
+  })
 })

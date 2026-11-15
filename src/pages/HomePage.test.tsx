@@ -370,3 +370,25 @@ describe('Header (owner, 2026-11-15)', () => {
     expect(screen.getByRole('button', { name: 'Log entry' })).toBeTruthy()
   })
 })
+
+describe('Monospaced numbers option (owner, 2026-11-15)', () => {
+  it('sits between Text size and Assistive patterns, and replaces the footer note', async () => {
+    const user = userEvent.setup()
+    renderApp('/settings')
+    const appearances = screen.getByRole('region', { name: 'Appearances' })
+    const order = ['Text size', 'Monospaced numbers', 'Assistive patterns'].map((text) =>
+      within(appearances).getByText(text),
+    )
+    expect(
+      order[0].compareDocumentPosition(order[1]) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(
+      order[1].compareDocumentPosition(order[2]) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(screen.queryByText(/Numbers always use a monospaced font/)).toBeNull()
+    const box = screen.getByRole('checkbox', { name: 'Monospaced numbers' })
+    expect(box.getAttribute('aria-checked')).toBe('true')
+    await user.click(box)
+    expect(document.documentElement.dataset.monoNumbers).toBe('false')
+  })
+})
