@@ -62,7 +62,7 @@ What the app shows falls into five kinds of information. None is a clinical thre
 | Personal baseline | Median of the last 7 comparable readings once 5 exist | A comparison with the astronaut's own history, used only by approved baseline rules | A normal range; a stable baseline does not mean healthy |
 | Simulated demo logic (label **Simulated demo logic**) | Demo value bands, today's two Attention readings, simulated crew centres | Values chosen to make the demo work | Reference ranges of any kind |
 
-Evidence statuses follow `science.md`: only `Approved` rules run in the app. Every rule and approved reference is listed in `scientific-foundations.md` and `references.md`. REF-63 (background hazard text) is still `Unverified` (`progress.md`).
+Evidence statuses follow `science.md`: only `Approved` rules run in the app. Every rule and approved reference is listed in `scientific-foundations.md` and `references.md`. The background hazard text on the indicator pages and About uses REF-12–REF-16 and REF-63, all `Approved`. It never changes a rule or status.
 
 ## Privacy statement
 

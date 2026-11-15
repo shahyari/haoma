@@ -81,6 +81,7 @@
 | 2026-11-14 | Demo data loads on the first visit; 3D/2D toggle at the bottom right of the figure in the figure-button style | `design.md`, `data-and-limitations.md` |
 | 2026-11-14 | Body map: owner prototype `body-map.html` integrated in the Home figure area for self-reported pain; replaces the navigation proposal | `design.md` |
 | 2026-11-14 | Brainstorm Section 16: Home layout (cards, avatar card, Demo data chip, "Normal" label, full width, logo links Home) | `design.md` |
+| 2026-11-15 | REF-63 approved by the owner after re-verification against the live page; no app change | `references.md` |
 | 2026-11-15 | RIDGE hazards shown as background on indicator pages and About; Sleep linked to isolation and confinement; Heart rate row approved | `scientific-foundations.md` → "Spaceflight hazards (RIDGE)" |
 | 2026-11-15 | Sex: optional profile attribute for evidence notes only; no split tool or sex-specific thresholds | `scientific-foundations.md` → "Sex as an optional profile attribute" |
 | 2026-11-14 | OD-16: RULE-17 split (≥ 40.6 °C urgent; RULE-31 review 39.4–40.5 °C), forehead explanation, REF-56 approved | `scientific-foundations.md`, `references.md` |
@@ -99,8 +100,7 @@
 7. Auto-mode source (LED lighting), zone source, condition-based suggestions.
 8. Berlin Local Event name and local judging times.
 9. Placement of the Sex control.
-10. REF-63 is `Unverified` but its text is shown as background on the Sleep page and About: approve or remove.
-11. Portal text: the "Project details" sentence about rules was corrected in `submission.md` (31 approved, 30 run). Re-paste if the portal has the older text. The deck's "31 approved rules" and "330 tests" stay accurate as a snapshot.
+10. Portal text: the "Project details" evaluation sentence in `submission.md` no longer gives a rule count. Re-paste it if the portal has the older text. The deck was corrected on slides 3 and 6 (2026-11-15).
 
 ## Environment status (2026-11-14)
 

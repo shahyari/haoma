@@ -2,7 +2,9 @@
 
 > **This is the official demo** (owner decision 2026-11-13, `challenge.md` Q-04). **Official limit:** up to 7 slides **including the title and intro slides**, in English (E-R11, E-R12). Decks over the limit are not eligible for Global Judging. The deck must show the team name, team members' names, and the selected challenge (E-R13). Host it at a public link that needs no login.
 
-**Finished deck:** [`docs/demo/haoma-space-apps-2026-demo.pdf`](demo/haoma-space-apps-2026-demo.pdf) (7 slides, 16:9, English, last changed 2026-11-15, commit `4300147`). Public link: https://github.com/shahyari/haoma/blob/main/docs/demo/haoma-space-apps-2026-demo.pdf. Typefaces Inter and Space Grotesk (TP-18, TP-19). The screenshots are of the real app with simulated demo data. There are no NASA logos. The outline below describes the deck as submitted. It was compared with the PDF's text and page renders on 2026-11-15.
+**Finished deck:** [`docs/demo/haoma-space-apps-2026-demo.pdf`](demo/haoma-space-apps-2026-demo.pdf) (7 slides, 16:9, English, last changed 2026-11-15). Public link: https://github.com/shahyari/haoma/blob/main/docs/demo/haoma-space-apps-2026-demo.pdf. Typefaces Inter and Space Grotesk (TP-18, TP-19). The screenshots are of the real app with simulated demo data. There are no NASA logos. The outline below describes the deck as submitted. It was compared with the PDF's text and page renders on 2026-11-15.
+
+**Correction 2026-11-15 (owner request):** two lines were reworded in place. Slide 3 "31 approved rules and a personal baseline" became "Approved rules and a personal baseline", because 30 of the 31 approved rules run. Slide 6 "keyboard, screen reader" became "keyboard, screen-reader labels", because no screen-reader test was done. The slide images were patched in Inter 15 pt and the invisible text layer updated to match. The other five slides are unchanged.
 
 ## 1. Title and intro
 
@@ -14,7 +16,7 @@
 
 ## 3. The solution
 
-"HAOMA: check in, understand, act." 1 Check in (one dialog, with context); 2 Understand (approved rules and a personal baseline give Normal, Attention, or Escalate); 3 Act (what to do first, why, and when to involve the flight surgeon). Home screenshot. Footer: live app and code URLs.
+"HAOMA: check in, understand, act." 1 Check in (one dialog, with context); 2 Understand ("Approved rules and a personal baseline show each reading as Normal, Attention, or Escalate."); 3 Act (what to do first, why, and when to involve the flight surgeon). Home screenshot. Footer: live app and code URLs.
 
 ## 4. Scenario A: routine check-in (simulated)
 
@@ -26,7 +28,7 @@
 
 ## 6. Scientific and UX foundations
 
-"Built on evidence, honest about its limits." Four cards: evidence label on every rule; NASA and partner resources (HRP cardiovascular, sleep, and behavioral health risks; OSDR OSD-575 and OSD-370; CSA Bio-Monitor; JAXA ISS medical equipment); safety boundaries (never diagnoses; "Not evaluated", never Normal; urgent results say who to contact and when); privacy and access (browser only; crew averages need three or more people; "High contrast, text size, patterns, keyboard, screen reader"). Footer: link to `references.md`.
+"Built on evidence, honest about its limits." Four cards: evidence label on every rule; NASA and partner resources (HRP cardiovascular, sleep, and behavioral health risks; OSDR OSD-575 and OSD-370; CSA Bio-Monitor; JAXA ISS medical equipment); safety boundaries (never diagnoses; "Not evaluated", never Normal; urgent results say who to contact and when); privacy and access (browser only; crew averages need three or more people; "High contrast, text size, patterns, keyboard, screen-reader labels"). Footer: link to `references.md`.
 
 ## 7. Outcome and next steps
 
@@ -35,5 +37,5 @@
 ## Presenter notes
 
 - Keep the story grounded in the real implementation. No impact metrics are claimed.
-- Of the 31 approved rules, 30 run in the app. RULE-28 (pre-EVA sleep) needs a task schedule the prototype does not have. Say so if asked.
-- Slide 6 lists "screen reader" as an access feature. The app has screen-reader labels, but it has not been tested with a screen reader (`design-decisions.md`).
+- Slide 7 says "31 approved rules", which is accurate: 31 are approved and 30 run. RULE-28 (pre-EVA sleep) needs a task schedule the prototype does not have. Say so if asked.
+- Screen-reader labels exist, but no screen-reader test has been done (`design-decisions.md`).

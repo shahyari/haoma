@@ -294,7 +294,7 @@ NASA HRP groups spaceflight stressors into five hazards, **RIDGE**: space Radiat
 | Heart rate | Gravity fields | Indicator summary; row approved by the owner 2026-11-15 |
 | Blood glucose | Distance from Earth, Hostile/closed environments | Indicator summary (HRP risk: food and nutrition) |
 | Body temperature | Hostile/closed environments; Radiation (indirect, via the immune response) | Indicator summary (HRP risk: altered immune response) |
-| Sleep | Isolation and confinement | Owner decision 2026-11-15: circadian rhythm can be altered by light and dark cycles, a small and noisy environment, and the stress of prolonged isolation and confinement [REF-63] |
+| Sleep | Isolation and confinement | Owner decision 2026-11-15: circadian rhythm can be altered by light and dark cycles, a small and noisy environment, and the stress of prolonged isolation and confinement [REF-63]. Also supported by the HRP isolation hazard page: "Sleep loss, circadian desynchronization, and work overload compound this issue" [REF-13] |
 | Mood | Isolation and confinement, Distance from Earth | Indicator summary (HRP risk: cognitive or behavioral conditions) |
 
 - **Radiation is not measured.** The app says so on About. The temperature link is indirect and is labeled as such; radiation monitoring stays open (SQ-08).
