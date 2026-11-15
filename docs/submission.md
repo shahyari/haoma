@@ -198,7 +198,7 @@ TODO: Medical validity, simulated data, non-diagnostic status, unimplemented cap
 - Live demo: https://haomaho.vercel.app
 - Source code: https://github.com/shahyari/haoma (checkpoint tag `spaceapps-checkpoint-1`)
 - Video: TODO: url
-- Presentation: 7-slide demo deck drafted 2026-11-15 (claude.ai artifact, private until shared). TODO: public link (export as PDF and host publicly, e.g. in this repository or Google Drive)
+- Presentation: https://github.com/shahyari/haoma/blob/main/docs/demo/haoma-space-apps-2026-demo.pdf (7-slide demo deck, PDF, 2026-11-15; English; shows team, member, and challenge per E-R11–E-R13)
 - Documentation: TODO: url
 
 ## Final submission checks
