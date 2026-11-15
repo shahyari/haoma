@@ -182,7 +182,7 @@ describe('Avatar card', () => {
 })
 
 describe('Owner layout changes of 2026-11-14', () => {
-  it('drops the banner column when there are no banners, so the body map fills the width', async () => {
+  it('shows no Health status region when there are no banners', async () => {
     renderApp('/', [{ ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' }])
     await screen.findByRole('region', { name: 'Body map' })
     expect(screen.queryByRole('region', { name: 'Health status' })).toBeNull()
@@ -252,13 +252,19 @@ describe('Usability review 2026-11-15', () => {
     expect(within(card('Heart rate')).queryByText('Due')).toBeNull()
   })
 
-  it('shows the activity graph and a summary strip above the cards', () => {
+  it('shows the activity graph in the right column and a summary strip above the cards', async () => {
     renderApp('/', [
       { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
       { ...daysAgo(0), indicator: 'sleep', hours: 5, source: 'selfReport' },
     ])
-    expect(indicators().getByText('Activity')).toBeTruthy()
-    expect(indicators().getByLabelText(/^Today: 2 of 6 indicators logged$/)).toBeTruthy()
+    expect(indicators().queryByText('Activity')).toBeNull()
+    expect(screen.getByLabelText(/^Today: 2 of 6 indicators logged$/)).toBeTruthy()
+    // Document order: cards, body map, activity graph, then the banners below it.
+    const map = await screen.findByRole('region', { name: 'Body map' })
+    const graph = screen.getByText('Activity')
+    const status = screen.getByRole('region', { name: 'Health status' })
+    expect(map.compareDocumentPosition(graph) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(graph.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     const strip = indicators().getByText(/indicators ·/)
     expect(strip.textContent).toBe('6 indicators · 4 due · 1 flagged')
   })

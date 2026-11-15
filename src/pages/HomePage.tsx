@@ -24,7 +24,6 @@ import { LogEntryDialog } from '@/features/entry/LogEntryDialog'
 import { ActivityGraph } from '@/features/home/ActivityGraph'
 import { StatusBanner } from '@/features/home/StatusBanner'
 import { entriesOf, evaluateAll, PHQ2_STATE_LABELS, phq2Screening } from '@/rules/evaluate'
-import { cn } from '@/lib/utils'
 import { PRE_LANDING_REMINDER } from '@/rules/rules'
 
 /** Card order from the owner's layout (brainstorm Section 16). */
@@ -86,18 +85,12 @@ export function HomePage() {
         </p>
       ) : null}
 
-      <div
-        className={cn(
-          'grid gap-4 lg:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)]',
-          // Banners get a right column only when there are any; otherwise the body map fills it.
-          hasBanners && 'xl:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)_minmax(16rem,22rem)]',
-        )}
-      >
+      {/* Cards | body map | activity graph with the banners below it (owner, 2026-11-15). */}
+      <div className="grid gap-4 lg:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)] xl:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)_minmax(16rem,22rem)]">
         <section aria-labelledby="indicators-heading" className="space-y-3">
           <h2 id="indicators-heading" className="sr-only">
             Indicators
           </h2>
-          <ActivityGraph entries={data.entries} now={now} />
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm text-muted-foreground">
               <span className="num">{HOME_ORDER.length}</span> indicators ·{' '}
@@ -201,31 +194,35 @@ export function HomePage() {
           </Suspense>
         </section>
 
-        {hasBanners ? (
-          <section
-            aria-labelledby="status-heading"
-            className="space-y-3 lg:col-span-2 xl:col-span-1"
-          >
-            <h2 id="status-heading" className="sr-only">
-              Health status
-            </h2>
-            {data.missionPhase === 'approachingLanding' ? (
-              <p role="status" className="flex gap-2 rounded-lg border bg-card p-3 text-sm">
-                <Info aria-hidden="true" className="size-5 shrink-0" />
-                <span>
-                  {PRE_LANDING_REMINDER}{' '}
-                  <span className="text-muted-foreground">Team design decision · RULE-30</span>
-                </span>
-              </p>
-            ) : null}
-            {alerts.map((assessment) => {
-              const latest = entriesOf(data.entries, assessment.indicator).at(-1)
-              return latest ? (
-                <StatusBanner key={assessment.indicator} assessment={assessment} latest={latest} />
-              ) : null
-            })}
-          </section>
-        ) : null}
+        <div className="space-y-3 lg:col-span-2 xl:col-span-1">
+          <ActivityGraph entries={data.entries} now={now} />
+          {hasBanners ? (
+            <section aria-labelledby="status-heading" className="space-y-3">
+              <h2 id="status-heading" className="sr-only">
+                Health status
+              </h2>
+              {data.missionPhase === 'approachingLanding' ? (
+                <p role="status" className="flex gap-2 rounded-lg border bg-card p-3 text-sm">
+                  <Info aria-hidden="true" className="size-5 shrink-0" />
+                  <span>
+                    {PRE_LANDING_REMINDER}{' '}
+                    <span className="text-muted-foreground">Team design decision · RULE-30</span>
+                  </span>
+                </p>
+              ) : null}
+              {alerts.map((assessment) => {
+                const latest = entriesOf(data.entries, assessment.indicator).at(-1)
+                return latest ? (
+                  <StatusBanner
+                    key={assessment.indicator}
+                    assessment={assessment}
+                    latest={latest}
+                  />
+                ) : null
+              })}
+            </section>
+          ) : null}
+        </div>
       </div>
     </div>
   )

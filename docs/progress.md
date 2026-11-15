@@ -8,6 +8,7 @@
 
 ## Completed
 
+- Home layout (owner, 2026-11-15): activity graph moved to the right column, banners below it, so the cards get more vertical room.
 - Owner consistency review (2026-11-15): number monospaced and unit in the normal font, smaller (`Measurement` component); "Demo data" chip is a secondary Badge that opens the demo notice; body map hint no longer overlaps Save report / Clear all when the figure and pain log stack (Home at 1024 px, report page). Activity grid capped at 320 px.
 - Owner usability review (2026-11-15), all five items: demo data relative to today with this morning's sleep and blood pressure at Attention (banners on first load; untouched stale demo data regenerated on load); Home **Log entry** dialog with six tabs that saves one or more indicators together; neutral **Due** chip next to the unchanged badge when there is no reading today (status follows AU-6); activity graph (contribution calendar) and summary strip above the cards; demo controls moved from the avatar card to Settings → Demo controls (`design.md`).
 - Phase A foundation (Checkpoint A). Display settings (`design.md` → "Display settings").
