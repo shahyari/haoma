@@ -80,25 +80,25 @@ TODO: Brief fictional mission story and actual workflow. Explicitly label simula
 ## NASA and partner-agency resources used
 | Resource | URL | How it informed the product | Used as data or reference? |
 |---|---|---|---|
-| Risk of Cardiovascular Adaptations (NASA) | https://www.nasa.gov/reference/risk-of-cardiovascular-adaptations/ | Heart-rhythm and post-landing low blood pressure guidance (RULE-08, RULE-26); REF-23 | Reference |
-| Cardiovascular Risk Overview (NASA HHP) | https://www.nasa.gov/directorates/esdmd/hhp/cv-risk/ | Cardiovascular risk context and preventive actions; REF-19 | Reference |
-| Risk from Inadequate Sleep and Irregular Schedules (NASA) | https://www.nasa.gov/reference/risk-from-inadequate-sleep-and-irregular-schedules/ | Sleep indicator, lighting and self-care actions; REF-38 | Reference |
+| Risk of Cardiovascular Adaptations (NASA) | https://www.nasa.gov/reference/risk-of-cardiovascular-adaptations/ | Arrhythmia, landing hypotension (cited by the heart-rate and post-landing rules); REF-23 | Reference |
+| Cardiovascular Risk Overview (NASA HHP) | https://www.nasa.gov/directorates/esdmd/hhp/cv-risk/ | CV risk; preventive actions; REF-19 | Reference |
+| Risk from Inadequate Sleep and Irregular Schedules (NASA) | https://www.nasa.gov/reference/risk-from-inadequate-sleep-and-irregular-schedules/ | Sleep risk; lighting; self-care time; REF-38 | Reference |
 | Sleep and Circadian Evidence Report (NASA NTRS) | https://ntrs.nasa.gov/citations/20160003864 | Sleep evidence; REF-39 | Reference |
-| Behavioral Health Risk (NASA HHP) | https://www.nasa.gov/directorates/esdmd/hhp/behavioral-health-risk/ | Mood trend guidance (RULE-22); REF-42 | Reference |
-| Behavioral Medicine Evidence Report (NASA NTRS) | https://ntrs.nasa.gov/citations/20160004365 | Behavioral medicine context; REF-43 | Reference |
-| Food and Nutrition Risk Record (NASA) | https://www.nasa.gov/wp-content/uploads/2025/08/food-risk-record-rev-d-web-final.pdf | Nutrition context for glucose; REF-29 | Reference |
-| HRP Overview: Immune (NASA NTRS) | https://ntrs.nasa.gov/api/citations/20230017691/downloads/HRP_OverviewPlattS2.pdf | Temperature and immune context; REF-33 | Reference |
-| OSDR OSD-575: Inspiration4 Blood Serum Metabolic Panel | https://osdr.nasa.gov/bio/repo/data/studies/OSD-575 | Cross-check of glucose and metabolic indicators in spaceflight (no rule changed); REF-55 | Data (reviewed) |
+| Behavioral Health Risk (NASA HHP) | https://www.nasa.gov/directorates/esdmd/hhp/behavioral-health-risk/ | Behavioral health risk; REF-42 | Reference |
+| Behavioral Medicine Evidence Report (NASA NTRS) | https://ntrs.nasa.gov/citations/20160004365 | Behavioral medicine; WinSCAT; REF-43 | Reference |
+| Food and Nutrition Risk Record (NASA) | https://www.nasa.gov/wp-content/uploads/2025/08/food-risk-record-rev-d-web-final.pdf | Nutrition risk; food variety; REF-29 | Reference |
+| HRP Overview: Immune (NASA NTRS) | https://ntrs.nasa.gov/api/citations/20230017691/downloads/HRP_OverviewPlattS2.pdf | Latent virus reactivation; REF-33 | Reference |
+| OSDR OSD-575: Inspiration4 Blood Serum Metabolic Panel | https://osdr.nasa.gov/bio/repo/data/studies/OSD-575 | Spaceflight cross-check (OD-13); no rule changed; REF-55 | Data (reviewed) |
 | OSDR OSD-370: Insulin Resistance from Physical Inactivity | https://osdr.nasa.gov/bio/repo/data/studies/OSD-370 | Context for glucose monitoring (bed-rest analog); REF-52 | Data (reviewed) |
-| NASA to Test Telemedicine with Polaris Dawn Crew | https://www.nasa.gov/humans-in-space/nasa-to-test-telemedicine-gather-essential-health-data-with-polaris-dawn-crew/ | Context for crew health-data collection; REF-54 | Reference |
+| NASA to Test Telemedicine with Polaris Dawn Crew | https://www.nasa.gov/humans-in-space/nasa-to-test-telemedicine-gather-essential-health-data-with-polaris-dawn-crew/ | Spaceflight health-data context (OD-13); REF-54 | Reference |
 | 5 Hazards of Human Spaceflight (NASA HRP) | https://www.nasa.gov/hrp/hazards/ | Problem framing; official challenge resource; REF-01 | Reference |
 | Risks of Human Spaceflight (NASA HRP) | https://www.nasa.gov/hrp/risks/ | Indicator relevance; official challenge resource; REF-05 | Reference |
 | Ongoing HRP Research in Space (NASA HRP) | https://www.nasa.gov/hrp/ongoing-hrp-research/ | Research context; official challenge resource; REF-06 | Reference |
-| Hazard: Space Radiation (NASA HRP) | https://www.nasa.gov/hrp/hazard-space-radiation/ | Hazard context; REF-12 | Reference |
-| Hazard: Isolation and Confinement (NASA HRP) | https://www.nasa.gov/hrp/hazard-isolation-and-confinement/ | Mood and sleep context; REF-13 | Reference |
-| Hazard: Distance From Earth (NASA HRP) | https://www.nasa.gov/hrp/hazard-distance-from-earth/ | Self-assessment far from care; REF-14 | Reference |
-| Hazard: Gravity Fields (NASA HRP) | https://www.nasa.gov/hrp/hazard-gravity-fields/ | Mission zones and landing phases; REF-15 | Reference |
-| Hazard: Hostile/Closed Environments (NASA HRP) | https://www.nasa.gov/hrp/hazard-hostile-closed-environments/ | Environment context; REF-16 | Reference |
+| Hazard: Space Radiation (NASA HRP) | https://www.nasa.gov/hrp/hazard-space-radiation/ | Hazard detail; REF-12 | Reference |
+| Hazard: Isolation and Confinement (NASA HRP) | https://www.nasa.gov/hrp/hazard-isolation-and-confinement/ | Hazard detail; REF-13 | Reference |
+| Hazard: Distance From Earth (NASA HRP) | https://www.nasa.gov/hrp/hazard-distance-from-earth/ | Hazard detail; REF-14 | Reference |
+| Hazard: Gravity Fields (NASA HRP) | https://www.nasa.gov/hrp/hazard-gravity-fields/ | Hazard detail; REF-15 | Reference |
+| Hazard: Hostile/Closed Environments (NASA HRP) | https://www.nasa.gov/hrp/hazard-hostile-closed-environments/ | Hazard detail; REF-16 | Reference |
 
 All 19 URLs returned 200 on 2026-11-15. Partner agencies (for the separate partner field): JAXA ISS medical equipment (REF-20) and CSA Bio-Monitor (REF-21), see `references.md`. Space Apps event pages (challenge statement, terms, guides) are not listed as resources used.
 
