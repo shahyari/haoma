@@ -81,7 +81,7 @@ Titles are the owner's link labels. "Link check" is Claude's automated HTTP chec
 
 ### Population and limitations (evidence policy point 6)
 
-Recorded by Claude on 2026-11-14 from each source's own text where checked; `TODO` marks details not yet checked. Tier 2 sources are general population, **not validated for astronauts in microgravity** (policy point 4).
+Recorded by Claude on 2026-11-14 from each source's own text where checked. REF-26 and REF-27 were completed on 2026-11-15 from their abstracts (Europe PMC). This adds detail only; their status is unchanged. Tier 2 sources are general population, **not validated for astronauts in microgravity** (policy point 4).
 
 | ID | Applicable population | Limitations for haoma |
 |---|---|---|
@@ -92,8 +92,8 @@ Recorded by Claude on 2026-11-14 from each source's own text where checked; `TOD
 | REF-22 | "Most adults"; athletes may be "as low as 40" | General population; not astronaut-specific |
 | REF-24 | General population (textbook summary of ADA criteria) | Tier 2b, supporting only since OD-11 (REF-46 is primary) |
 | REF-25 | **People with type 1 or type 2 diabetes** (ADA Standards of Care 2024, Section 6 "Glycemic Goals and Hypoglycemia"); it also notes 70 mg/dL as the neuroendocrine threshold "in people without diabetes" | Levels are defined for diabetes management; haoma adds a symptom gate (OD-12, REF-53) |
-| REF-26 | TODO: study population not yet checked | Data on insulin signaling are conflicting |
-| REF-27 | ISS astronauts. TODO: sample size not yet checked | Fasting carbohydrate use; not a threshold source |
+| REF-26 | Mice (liver and muscle tissue) and human gene-expression data from spaceflight; the abstract gives no human sample size | Data on insulin signaling are conflicting; gene expression only, no glucose thresholds |
+| REF-27 | 11 male ISS astronauts (mean age 45.7 years), measured before and after at least 3 months in flight | Men only; fasting carbohydrate use (indirect calorimetry); not a threshold source |
 | REF-28 | Ax-4 commercial crew | Company press release (Tier 3); a demonstration, not a validation |
 | REF-29, REF-33, REF-38, REF-39, REF-42, REF-43 | Astronauts (NASA risk records, evidence reports, presentations) | Risk context; REF-33 is a presentation, not peer reviewed |
 | REF-30 | Ill travelers on aircraft and ships (CDC Port Health screening) | A public-health screening definition, not a clinical diagnosis |
@@ -149,7 +149,7 @@ These `Approved` rules rest on sources that the 2026-11-14 policy places outside
 
 ## Third-party code, assets, and data
 
-E-R7, E-R8, and E-R15 in `challenge.md` require these to be freely available or OSI-licensed, compatible with Apache-2.0, and listed. Fill this table when dependencies are actually installed. Licenses below were read from the npm registry on 2026-11-13; verify the installed versions.
+E-R7, E-R8, and E-R15 in `challenge.md` require these to be freely available or OSI-licensed, compatible with Apache-2.0, and listed. Versions and licenses below were read from the installed `node_modules` and match `package-lock.json` (re-checked 2026-11-15).
 
 | ID | Dependency / asset | Author | URL | Use | License | Accessed |
 |---|---|---|---|---|---|---|
@@ -173,15 +173,24 @@ E-R7, E-R8, and E-R15 in `challenge.md` require these to be freely available or 
 | TP-18 | Inter (typeface) | The Inter Project Authors | https://github.com/rsms/inter | Body text in the demo slide deck (via Google Fonts) | SIL Open Font License 1.1 | 2026-11-15 |
 | TP-19 | Space Grotesk (typeface) | The Space Grotesk Project Authors | https://github.com/floriankarsten/space-grotesk | Headings in the demo slide deck (via Google Fonts) | SIL Open Font License 1.1 | 2026-11-15 |
 
-Versions and licenses were read from the installed `node_modules` on 2026-11-14. Transitive dependencies (from `package-lock.json`) are licensed MIT, ISC, Apache-2.0, BSD-2-Clause, BSD-3-Clause, 0BSD, BlueOak-1.0.0, MPL-2.0, and CC-BY-4.0 (one data package). TODO: before submission, re-run the license summary and name the MPL-2.0 and CC-BY-4.0 packages.
+Versions and licenses were read from the installed `node_modules` on 2026-11-14 and re-checked on 2026-11-15; all direct dependencies match the table. License summary of `package-lock.json` (2026-11-15, 520 packages): MIT 427, Apache-2.0 31, ISC 27, BSD-3-Clause 8, BSD-2-Clause 6, BlueOak-1.0.0 4, 0BSD 2, MPL-2.0 12, CC-BY-4.0 1, "MIT OR CC0-1.0" 1, "MIT AND ISC AND BSD-3-Clause" 1. All are OSI-approved or freely available (E-R7, E-R8).
+
+**Packages with notice or copyleft terms**
+
+| ID | Package | Pulled in by | License | Where it runs | Obligation and how it is met |
+|---|---|---|---|---|---|
+| TP-20 | lightningcss 1.33.0 and its platform binary (11 optional `lightningcss-*` packages; one is installed per platform) | `vite`, `@tailwindcss/vite` | MPL-2.0 | Build time only (CSS compiler). Not in the deployed bundle (checked: no match in `dist/assets`) | MPL-2.0 is file-level copyleft and applies when its source files are distributed or modified. We do neither: it is used unmodified from npm. Credited here. Source: https://github.com/parcel-bundler/lightningcss |
+| TP-21 | caniuse-lite 1.0.30001826 (browser-support data from caniuse.com) | `shadcn` CLI → `browserslist` | CC-BY-4.0 | Development tooling only. Not in the deployed bundle | Attribution: "caniuse-lite" by Ben Briggs and contributors, data from Can I use (https://caniuse.com) by Alexis Deveria, licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Not modified |
+
+No package is GPL, LGPL, or AGPL, and none is unlicensed. `axe-core` (MPL-2.0) is listed in `architecture.md` as optional but is not installed.
 
 ## AI assistance
 
 This section is required (`challenge.md` E-R6, E-R17, E-R18).
 
 - The pre-event preparation documentation (templates, rule capture, consolidation) was drafted with Claude Code on 2026-11-12 and 2026-11-13. Product concept and scope decisions (primary user, indicators, features) were made by the team. Claude Code proposed the wording of the guidance-policy reconciliation (Q-01), which the owner reviewed and approved. The indicator research table and the decisions OD-1 to OD-7 were compiled by the owner **with assistance from Claude** (chat). Claude Code imported them, link-checked the sources, verified the ADA Table 2.2 wording, and added source-quality notes (N-1 to N-4).
-- Code and data: AI generation must be acknowledged "in descriptive text and metadata". Planned approach: a statement in README and the submission, plus `Co-Authored-By` trailers on AI-assisted commits.
-- Images and video: AI-generated visuals must carry a visible watermark.
+- Code and data: AI generation must be acknowledged "in descriptive text and metadata". Done: a statement in the README and `submission.md`, the `description` field in `package.json`, a `generator` meta tag in `index.html`, and `Co-Authored-By` trailers on AI-assisted commits (all 58 commits as of 2026-11-15).
+- Images and video: AI-generated visuals must carry a visible watermark. No AI-generated images or video are submitted. The deck uses screenshots of the app, and the body-map 3D/2D models are code (disclosed above and in `submission.md`).
 - Development (from 2026-11-14 09:00 CET): the Phase A technical foundation (project setup, shell, data models, validation, storage, tests) was written by Claude Code under the owner's direction. AI-assisted commits carry a `Co-Authored-By` trailer, and `package.json` and `index.html` carry a note in their metadata.
 - Phase B features (2026-11-14): implemented by Claude Code under the owner's direction (history view, rule evaluation, Home layout, display settings, editing). The body map prototype (`body-map.html`, a dependency-free WebGL/SVG body model) was created by the owner with the Claude app; Claude Code ported it to TypeScript (`src/features/bodymap/`) and integrated it. Research checks and rule audits were done by Claude Code and decided by the owner (OD-14 to OD-16).
 
@@ -192,7 +201,7 @@ Pre-event work (before 2026-11-14 09:00 CET):
 - Preparation documentation and environment setup.
 - The owner's indicator research table (six indicators, thresholds, sources), imported into `scientific-foundations.md` on 2026-11-13. It was compiled with assistance from Claude (E-R6).
 
-No application code was written before the event (`challenge.md` E-R2, Q-02). TODO: final wording for the submission.
+No application code was written before the event (`challenge.md` E-R2, Q-02). The repository was created and first pushed at the event start (first commit 2026-11-14 09:00 CET), and all application code was written during the event. Final submission wording: `submission.md` → "Originality and attribution".
 
 ## NASA branding
 

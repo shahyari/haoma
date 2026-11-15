@@ -5,7 +5,12 @@
 ## Design intent
 
 - Audience and primary task: see `product.md`.
-- Design principles: TODO: 3–5 principles
+- Design principles, summarized from the owner's decisions recorded below (no new decisions):
+  1. **Action first, reason second.** Say what to do, then offer "Why?" with the rule, source, and evidence type (UX copy, 2026-11-15).
+  2. **Honest about evidence.** Every rule shows its evidence label. General references are never drawn as personal or astronaut ranges (D-01). Simulated and fictional data are always labeled.
+  3. **Never colour alone.** Status is shown with an icon, text, and colour, plus optional patterns. Chart lines differ by marker and line style.
+  4. **Missing is not normal.** "No measurement", "Not evaluated", and "Due" are neutral and distinct from Normal.
+  5. **Calm, consistent layout.** One page layout, one badge vocabulary (Normal, Attention, Escalate), and the monospaced numbers with units used everywhere.
 
 ## Information architecture
 
@@ -48,9 +53,26 @@ TODO (owner): how the app learns the astronaut's condition for the "suggested" o
 
 ## Components
 
+As implemented. shadcn/ui components (generated, `src/components/ui/`) are used as shipped unless noted.
+
 | Component | States | Interaction | Accessibility |
 |---|---|---|---|
-| TODO: component | TODO: default/focus/error/... | TODO: behavior | TODO: label/keyboard |
+| Button (`ui/button`) | default, outline, secondary, ghost, destructive; hover, focus, disabled | Click, Enter, Space | Visible focus ring; icon-only buttons have accessible names and titles |
+| Badge (`ui/badge`) and `StatusBadge` | Normal, Attention, Escalate (status colour, icon); Not evaluated, No measurement (neutral, dashed) | Not interactive; the "Demo data" Badge is a button that opens a popover | Text label and icon on every status; optional pattern strip |
+| Card (`ui/card`) | default; indicator cards as links | Whole card links to the indicator page | Link with an accessible name; full timestamp for screen readers |
+| Dialog (`ui/dialog`) | open, closed; confirmation variant with a destructive action | Log reading, entry and edit, delete and data confirmations, pain-log dialog | Focus trapped inside and returned on close; Escape closes; titled |
+| Tabs (`ui/tabs`) | active, filled (check), error (alert icon) | Log reading dialog, one tab per indicator | Arrow keys between tabs (Radix) |
+| Input, Label, Radio group, Checkbox, Select | default, focus, invalid with message, disabled | Entry forms, Settings | Labels bound to controls; error text linked to fields; 36 px row targets in Settings |
+| Popover and Calendar (`ui/popover`, `ui/calendar`) | open, closed; future days disabled | Demo-data notice; pain-log date picker | Keyboard date navigation (react-day-picker) |
+| Alert (`ui/alert`) and `StatusBanner` | Attention, Escalate; collapsed, expanded; "Why?" closed or open | Expand for actions; "Why?" toggle | Native disclosure semantics; the icon rotates only with motion allowed |
+| Chart (`ui/chart`, `HistoryChart`) | data, no data; optional crew line | Tooltip on hover, legend with line samples | Accessible name; followed by a data table; animation off |
+| Data table (indicator page) | paged (10, 25, 50); empty | Edit and Delete per row; Previous and Next | Caption, column and row headers; scroll region is focusable |
+| `Measurement` | monospaced or proportional number | — | Number and unit read together |
+| `PageLayout`, `BackLink` | — | Back goes to the previous page or Home | One `main` landmark; skip link in `AppShell` |
+| `ActivityGraph` | 5 intensity levels; today outlined | Tooltip per cell | Each cell has a label ("14 Nov 2026: 6 of 6 indicators logged") |
+| Body map (`features/bodymap/`) | 3D or 2D; empty, logs, read-only report | Drag, zoom, click (3D); Tab, Enter, Space (2D) | 2D is the keyboard path and is used automatically without WebGL |
+| States (`components/states/`) | empty, loading, error | — | Text messages; the spinner moves only when motion is allowed |
+| Separator, Skeleton | — | — | Decorative |
 
 ## Body map (F-04), owner prototype (2026-11-14)
 
@@ -104,14 +126,16 @@ The owner approved a UX copy review. Where older wording in this document differ
 
 ## Responsive / input behavior
 
-- Supported viewports: TODO: sizes
-- Keyboard: TODO: requirements
-- Touch: TODO: requirements
-- Reduced motion: TODO: requirements
+As implemented (Tailwind default breakpoints `sm` 640, `md` 768, `lg` 1024, `xl` 1280 px, plus a container query in the body map):
+
+- **Supported viewports:** phone width to wide desktop. Home uses one column below 1024 px, cards and body map (1 : 2) from 1024 px, and three columns (1 : 2 : 1) from 1280 px. Other pages are centred at up to 1024 px. Log reading becomes icon-only below 640 px. The body map stacks the figure and pain log when its card is narrower than 768 px, and hides one corner readout below 860 px. Checked in headless Chrome at 500 px and at desktop widths; a 320 px render of seeded pages has not been checked (`design-decisions.md`).
+- **Keyboard:** a skip link to the main content; every control reachable by Tab; dialogs trap focus, close with Escape, and return focus; Radix radio groups and tabs use arrow keys; the 2D body map regions are buttons (Enter or Space adds a point; number keys set intensity in the pain dialog). Covered by jsdom tests; a manual real-browser pass is still open.
+- **Touch:** the 3D body map uses pointer events (drag to rotate, two-finger pinch to zoom, tap to add a point). Settings rows keep 36 px targets. Other controls use the shadcn default sizes; no 44 px minimum is enforced.
+- **Reduced motion:** with `prefers-reduced-motion: reduce`, the body-map marker pulse is off and camera moves jump instead of animating. The banner chevron and loading spinner animate only with `motion-safe`. Charts never animate. Dialog and popover fade and zoom transitions (100 ms, tw-animate-css) are not turned off.
 
 ## Design assets
 
-- Figma link: TODO: URL or none
+- Figma link: none. The interface was designed by the owner through written briefs, wireframes, and review rounds, and developed in code. There is no separate Figma deliverable.
 - Logo: owner-supplied `logo.svg` (2026-11-14), used as the favicon (`public/favicon.svg`, white in dark mode) and as the header mark (`src/components/Logo.tsx`, filled with the text colour). Recorded as TP-16 in `references.md`.
-- Icons: Lucide only (TP-08). Fonts: TODO: sources (record them in `references.md`)
-- Screenshots / prototypes: TODO: paths
+- Icons: Lucide only (TP-08). Fonts: the app loads no web fonts. It uses the system UI stack (`system-ui`, `-apple-system`, `Segoe UI`, Roboto, …) and the system monospace stack for numbers (`src/index.css`). The demo deck uses Inter and Space Grotesk (TP-18, TP-19).
+- Screenshots and prototypes: the owner's body-map prototype `body-map.html` (made with the Claude app) was ported into `src/features/bodymap/` and is not kept in the repository. App screenshots appear only in the demo deck (`docs/demo/haoma-space-apps-2026-demo.pdf`).

@@ -14,6 +14,7 @@
 
 ## Completed
 
+- Documentation audit for submission (2026-11-15, documentation only): `submission.md` supporting sections (problem, how it works, demo scenario, decisions, originality, limitations, links, checks), `challenge.md` requirements matrix with statuses, `product.md` (statement, users, journey, screens, scenarios, definition of done), `data-and-limitations.md` limitations, reference kinds and privacy, `design.md` principles, components, responsive and input behavior, assets, `design-decisions.md` iterations and open questions, `architecture.md` data model, data flow, smoke test, `references.md` license inventory (TP-20 lightningcss MPL-2.0, TP-21 caniuse-lite CC-BY-4.0, both build-time only) and REF-26/REF-27 populations, `presentation-outline.md` matches the PDF, `demo-script.md` archived. Corrected: 30 of 31 approved rules run (RULE-28 not evaluated); 340 tests.
 - Demo pain logs (owner 2026-11-15): three simulated pain logs (Head, Left lower back, Left knee; note "Simulated demo entry.") seeded on the first visit so the body map is not empty; refreshed with the demo readings while untouched. Tests in `src/demo/demo.test.ts`.
 - RIDGE hazards (owner 2026-11-15): "Spaceflight hazards" section on every indicator page (linked HRP risk and hazards; no REF IDs on screen) and a RIDGE section on About (radiation stated as not measured; links the NASA page); Sleep → Isolation and confinement (owner, REF-63); Heart rate row approved by the owner. Background only, no rule or status changed. Tests in `src/domain/hazards.test.ts`.
 - Sex as an optional profile attribute (owner 2026-11-15): `sex` in stored data (default Not set; older data reads as Not set), control in Settings → Demo controls, evidence note SN-01 on the blood pressure page approved by the owner 2026-11-15 and shown for Female in Approaching landing and Post-landing; no rule, threshold, or status changed. REF-59–REF-62 approved. Tests in `src/domain/sex.test.ts`.
@@ -98,6 +99,8 @@
 7. Auto-mode source (LED lighting), zone source, condition-based suggestions.
 8. Berlin Local Event name and local judging times.
 9. Placement of the Sex control.
+10. REF-63 is `Unverified` but its text is shown as background on the Sleep page and About: approve or remove.
+11. Portal text: the "Project details" sentence about rules was corrected in `submission.md` (31 approved, 30 run). Re-paste if the portal has the older text. The deck's "31 approved rules" and "330 tests" stay accurate as a snapshot.
 
 ## Environment status (2026-11-14)
 
@@ -112,8 +115,9 @@ SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (
 
 - 2026-11-15 (crew comparison, Home layout, usability and consistency reviews): `npm run format:check` clean; `npm run lint` exit 0; `npm run typecheck` exit 0; `npm test` 16 files, 330 tests passed; `npm run build` exit 0 (chart stays a lazy chunk). `src/rules/` unchanged. Checked in headless Chrome: all six indicator pages at 1280 px (summary, chart lines and tooltip, table, unavailable days), blood pressure at phone width, Home layout at 1600 px.
 - Covers: rule boundaries, overlaps, precedence; temperature methods and legacy records; heart-rate rest state and symptom-based escalation; PHQ-2 single cutoff and 14-day validity; a sweep that no reading without an applicable rule is shown as Normal; temperature tier never drops as the value rises; symptom-only scenarios; demo scenario snapshot (sleep and blood pressure Attention, others Normal, no Escalate) and demo refresh; multi-indicator Log entry (partial failure saves nothing); Due marker outside the badge; activity graph and summary strip; Demo controls in Settings; keyboard (jsdom); token contrast; persistence.
+- 2026-11-15 (documentation audit): `npm run format:check` clean; `npm run lint`, `npm run typecheck`, `npm run build` exit 0; `npm test` 19 files, 340 tests passed. No file outside `README.md` and `docs/` changed. Local links, paths, and REF/RULE/TP/F/D IDs resolve. Public links return 200 without login.
 - Not done: manual keyboard pass in a real browser, screen reader, true 320 px render of seeded pages. No WCAG conformance is claimed.
 
 ## Next action
 
-Owner decisions 1–4 above. Unblocked meanwhile: a real-browser keyboard and responsive pass; slide deck and submission text before the freeze (Sun 18:00 CET).
+Owner: transfer `submission.md` to the portal (re-paste Project details if needed), tick the E-R16 checkboxes, and press Submit before Sun 2026-11-15 23:59 CET. Open decisions above do not block submission.

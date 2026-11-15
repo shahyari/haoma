@@ -1,6 +1,6 @@
 # Technical architecture
 
-**Responsibility:** The single home for stack decisions, the data model, data flow, engineering security constraints, project commands, and deployment. Stack decisions are final as of 2026-11-13; the data model below still needs confirmation.
+**Responsibility:** The single home for stack decisions, the data model, data flow, engineering security constraints, project commands, and deployment. Stack decisions are final as of 2026-11-13. The data model below describes the implemented code (2026-11-15).
 
 ## Constraints
 
@@ -13,7 +13,7 @@
 
 ## Decisions
 
-Status values: **Approved** (final; implementation still waits for the event start), **Required** (forced by an approved choice). All stack rows approved by the owner on 2026-11-13. Versions and licenses were read from the npm registry on 2026-11-13. Nothing is installed.
+Status values: **Approved** (final), **Required** (forced by an approved choice). All stack rows were approved by the owner on 2026-11-13 and installed at the event start (2026-11-14). Installed versions and licenses are in `references.md` (re-checked 2026-11-15).
 
 | Topic | Decision | Reason / notes | Status |
 |---|---|---|---|
@@ -83,7 +83,7 @@ These are routine tooling choices within the approved stack, delegated to Claude
 | Formatting (A8) | Prettier (MIT), dev-only | Consistent formatting; zero runtime cost |
 | Component tests | `@testing-library/react` (MIT) + `jsdom` (MIT), dev-only | Standard Vitest companions |
 | Keyboard tests | `@testing-library/user-event` (MIT), dev-only | Simulates real Tab, Enter, Space, and Escape sequences, which `fireEvent` cannot (added 2026-11-14) |
-| Accessibility checks | `axe-core` (MPL-2.0; dev-only), optional | Automated a11y smoke checks. MPL-2.0 applies to the library itself and is used for testing only. |
+| Accessibility checks | `axe-core` (MPL-2.0; dev-only), optional. **Not installed**: accessibility is checked by our own contrast and keyboard tests (`src/test/`) | Automated a11y smoke checks. MPL-2.0 applies to the library itself and is used for testing only. |
 | Validation | Hand-written TypeScript validators (no schema library) | Six indicators don't justify an extra dependency |
 | Date picker | shadcn `calendar` component, which installs `react-day-picker` 10.0.2 (MIT) and `date-fns` 4.4.0 (MIT) | Owner asked for the shadcn default date-time picker instead of the browser's (2026-11-14). Loaded only with the body map chunk |
 
@@ -105,7 +105,7 @@ These are routine tooling choices within the approved stack, delegated to Claude
 | `src/demo/` | Fictional profile and seeded simulated history |
 | `src/crew/` | Crew Average Comparison: `compare.ts` (pure, source-agnostic: comparability groups, same-day matching, per-member mean then crew mean, minimum cohort, neutral relation) and `simulated.ts` (seeded simulated crew, the only `CrewDataSource` today). A future synced source implements `CrewDataSource` (`kind`, `selfId`, `entries`) without UI changes. Never stored and never passed to `src/rules/` |
 | `src/test/` | Test setup and helpers, contrast measurement, keyboard and persistence tests |
-| `src/index.css` | Tailwind entry and design tokens (neutral placeholders, `design.md`) |
+| `src/index.css` | Tailwind entry and design tokens (themes, contrast, status colours; `design.md` → "Display settings") |
 | `vercel.json` | SPA rewrite so deep links load `index.html` |
 
 Tests sit next to the code as `*.test.ts(x)`. Import alias: `@/` → `src/`.
@@ -116,19 +116,25 @@ Installed versions (2026-11-14): React 19.3, React Router 8.5, Vite 8.3, TypeScr
 
 ## Data entities
 
-Indicator models are implemented in `src/domain/indicators.ts` (Phase A step A6). `CrewProfile` and `DemoScenario` fields wait for the owner's specs (F-06).
+Indicator models are implemented in `src/domain/indicators.ts` (Phase A step A6). All types are TypeScript; there is no database schema.
 
-- CrewProfile: TODO: fields (not needed so far; crew members in the simulated crew have an id only)
+- CrewProfile: not needed. Simulated crew members have an anonymous `memberId` only, and the demo astronaut is the constant `DEMO_PROFILE` (`src/demo/demo.ts`: name, role, mission, missionDay, label).
 - CrewEntry (`src/crew/compare.ts`): `memberId` (counting only, never shown) and a `HealthEntry`. CrewDataSource: `kind` (`simulated` / `synced`), `selfId` (the viewing astronaut, always excluded), `entries`. Generated in memory for the current day; not part of `AppData`.
 - HealthEntry: a union discriminated by `indicator`. Common fields: `id`, `recordedAt` (ISO 8601), `origin` (`userEntered` / `simulated`), optional `editedAt` (ISO 8601; set when an entry is edited, which also sets `origin` to `userEntered` and keeps `id` and `recordedAt`), optional `symptoms` (IDs from `src/domain/symptoms.ts`, taken from the symptom lists in the approved rules). Per indicator: blood pressure `systolicMmHg`, `diastolicMmHg`; heart rate `bpm`, optional `activity` (`rest` / `afterActivity`; required for new entries); glucose `mgDl`, `context`, `device`; temperature `celsius`, optional `method` (`oral` / `forehead`; required for new entries, absent on legacy entries), `exercisedLast30Min`; sleep `hours`, `source`; mood `kind` = `phq2` (`score` 0–6) or `dailyRating` (`rating` 1–5).
 - PainLog (`src/domain/pain.ts`, one point on the body map): `id`, `recordedAt`, optional `editedAt`, `region` (name shown), `organ` / `zone` (ids from the 2D map, or null), `position` and `normal` (model coordinates, metres), `view` (`3D` / `2D`), `intensity` (integer 1–10), optional `character` (one of 7 options), optional `note` (≤ 240 characters). Stored in `AppData.painLogs` (read from the earlier field name `painReports` too). PainReport: `id`, `createdAt` (save date), optional `astronaut` (name at saving), `logs` (one or more PainLogs, moved out of `painLogs` when saved), stored in `AppData.reports`. Report file: `painReportJson` / `parsePainReportJson` in `src/domain/pain.ts` (schema `haoma.painReport.v1`). Data without these fields loads with empty lists (no schema version change).
-- AppData (stored under `haoma:v1`): `schemaVersion`, `missionPhase` (app-level setting, default In flight), `entries`. Stored data that fails validation is reported as `corrupt` and left untouched; the app starts from defaults.
-- EvidenceReference: TODO: claim, REF ID, applicability, status
-- DemoScenario: TODO: profile, seeded entries, explanation
+- AppData (stored under `haoma:v1`): `schemaVersion`, `missionPhase` (app-level setting, default In flight), `entries`, `painLogs`, `reports`, and the optional profile attribute `sex` (default Not set). Stored data that fails validation is reported as `corrupt` and left untouched; the app starts from defaults.
+- Rule (`src/rules/rules.ts`, the evidence link): `id` (RULE-NN), `indicator`, `status` (normal / attention / escalate), `thresholdLabels` and `actionLabels` (evidence labels from `science.md`), `refs` (REF IDs), `condition`, `action` (owner-approved wording). A separate EvidenceReference type is not needed: references live in `references.md`, and only `Approved` rules are copied into code.
+- DemoScenario: not a separate type. The scenario is the output of `createDemoEntries(date)` and `createDemoPainLogs(date)` (`src/demo/demo.ts`) plus `DEMO_PROFILE`. Its description and provenance are in `data-and-limitations.md`.
+- Display settings (`src/settings/`, stored under `haoma:display:v1`): theme, mode, contrast, font size, monospaced numbers, assistive patterns, zone, temperature unit, measurement system, date format.
 
 ## Data flow
 
-TODO: input → validation → storage → display/trend → sourced prompt
+1. **Input:** Log reading or entry dialog (`src/features/entry/`) collects values and context. Units chosen in Settings are converted to °C and mg/dL (`src/domain/units.ts`).
+2. **Validation:** `src/domain/validation.ts` checks structure only (no health ranges). With several tabs, any invalid tab means nothing is saved.
+3. **Storage:** `HealthDataProvider` (`src/data/`) adds the entry to `AppData` and writes it to localStorage (`src/storage/`, in-memory fallback). Nothing leaves the browser.
+4. **Evaluation:** on every render, `evaluateAll` (`src/rules/evaluate.ts`) computes each indicator's status from the latest reading, the personal baseline (`personalBaseline`), the mission phase, and the approved rules (`src/rules/rules.ts`). Results are derived, never stored.
+5. **Display and trend:** Home cards, banners, and the Check-ins graph; indicator pages with chart, table, and baseline. The crew comparison (`src/crew/compare.ts`) reads simulated crew entries generated in memory and never feeds the rules.
+6. **Sourced prompt:** each result shows the rule's action first and, under "Why?", the condition, evidence labels, RULE ID, and REF IDs, which link to `references.md`.
 
 ## Security and privacy constraints (engineering)
 
@@ -136,10 +142,10 @@ The public privacy statement is in `data-and-limitations.md`.
 
 - No real personal health information in the public demo.
 - No secrets in client code or the repository.
-- Define whether user entries persist locally and how to clear them.
+- User entries persist in localStorage until cleared (Settings → Demo controls → Clear data, with confirmation; `data-and-limitations.md` → "Privacy statement").
 - Never transmit health data to an external service without explicit approval and a reviewed privacy plan.
 
-## Commands (fill after setup)
+## Commands
 
 The `verify` skill reads these.
 
@@ -154,9 +160,10 @@ The `verify` skill reads these.
 
 ## Deployment smoke test
 
-Last run: 2026-11-14 (Checkpoint A), anonymous `curl` against the production URL.
+Last run: 2026-11-15 (documentation audit), anonymous `curl` against the production URL. Core-scenario behavior is covered by the component tests. The checkpoint deployment (`spaceapps-checkpoint-1`) was also checked in Chrome (`progress.md`).
 
-- [x] Home page loads from the public URL.
+- [x] Home page loads from the public URL (https://haomaho.vercel.app, HTTP 200).
+- [x] Deep links load (for example `/about`, HTTP 200, via the SPA rewrite).
 - [x] No login required.
-- [ ] Core scenario works. (Not applicable yet: no product screens.)
-- [x] No secrets or personal data exposed.
+- [x] Core scenario works (demo loads on the first visit; Log reading, status, banners, and history are covered by `npm test`; checked in Chrome at the checkpoint, not re-checked manually after the last commits).
+- [x] No secrets or personal data exposed (no secrets in the repository; only fictional, simulated data).

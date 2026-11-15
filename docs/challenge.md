@@ -55,31 +55,31 @@ Classification is based on the statement's own wording:
 - **Optional:** listed under "may (but are not required to)".
 - **Example:** the statement gives it as an example only.
 
-"Planned evidence" links to feature IDs in `product.md` once they are defined.
+"Evidence" names the feature (`product.md`) and the screen, code, or document that addresses the item. Status values: **Implemented**, **Partially addressed**, **Not implemented**, **Not applicable**. Reviewed against the code and documents on 2026-11-15. Optional and example items are not treated as mandatory.
 
-| ID | Requirement (quoted) | Section | Class | Planned evidence (product.md) | Status |
+| ID | Requirement (quoted) | Section | Class | Evidence (feature, screen, file) | Status |
 |---|---|---|---|---|---|
-| R-01 | "build a health monitoring software that gathers health indicators" | Summary | Core | TODO: feature ID | Not started |
-| R-02 | "enables astronauts to evaluate and act on the status of their health" | Summary | Core | TODO: feature ID | Not started |
-| R-03 | "create a visual tool that helps astronauts assess their own health during space missions" | Objectives | Core | TODO: feature ID | Not started |
-| R-04 | "provides guidance on treatments and health improvements" | Objectives | Core | TODO: feature ID — see Q-01 | Not started |
-| R-05 | "Any kind of data can be used, as long as it represents a health indicator" | Objectives | Constraint | TODO: feature ID | Not started |
-| S-01 | Gather data "through any kind of input—keyboard text, mouse clicks, or camera images" | Objectives | Suggested | TODO | Not started |
-| S-02 | Use "NASA's Human Research Program resources, along with the publicly available resources from other space agencies" | Objectives | Suggested | `scientific-foundations.md` | Not started |
-| S-03a | "Which measurements can be performed in space?" | Objectives | Suggested | `scientific-foundations.md` | Not started |
-| S-03b | "Why is an exam needed?" | Objectives | Suggested | `scientific-foundations.md` | Not started |
-| S-03c | "How do spaceflight hazards affect these health indicators?" | Objectives | Suggested | `scientific-foundations.md` → "Spaceflight hazards (RIDGE)" | Done (2026-11-15) |
-| S-03d | "When might a result warrant attention from the crew or from flight surgeons on the ground?" | Objectives | Suggested | `scientific-foundations.md` — see Q-01 | Not started |
-| S-03e | "What actions can be taken to prevent a critical health condition?" | Objectives | Suggested | `scientific-foundations.md` | Not started |
-| S-04 | "presenting metrics and diagnosis clearly"; consider "animations and interactivity" | Objectives | Suggested | TODO — see Q-01 | Not started |
-| S-05 | "display a human figure where each part of the body is clickable" | Objectives | Example | TODO | Not started |
-| E-01 | Indicators: "blood pressure, heart rate, blood sugar, body temperature, daily sleep hours, and mood" | Background | Example (officially only examples; all six adopted as MVP scope by owner decision, `product.md`) | `scientific-foundations.md` | Not started |
-| O-01 | Insights for different environments (spacecraft, station, rover, planetary/lunar base) | Potential Considerations | Optional | TODO | Not started |
-| O-02 | Prompt measurements/actions "as a part of the mission routine" | Potential Considerations | Optional | TODO | Not started |
-| O-03 | Gamification system | Potential Considerations | Optional | TODO | Not started |
-| O-04 | Dynamic charts of indicators over time | Potential Considerations | Optional | TODO | Not started |
-| O-05 | Color coding of indicator status | Potential Considerations | Optional | TODO | Not started |
-| O-06 | Simple instructions and explanations covering measurements, indicators, and risks | Potential Considerations | Optional | TODO | Not started |
+| R-01 | "build a health monitoring software that gathers health indicators" | Summary | Core | F-01: Log reading dialog (header, every page) and Log reading on indicator pages; `src/features/entry/`, `src/domain/` | Implemented |
+| R-02 | "enables astronauts to evaluate and act on the status of their health" | Summary | Core | F-02, F-05: Home cards with status badges; Home banners with the action first and "Why?"; escalation names the flight surgeon and when; `src/rules/` | Implemented |
+| R-03 | "create a visual tool that helps astronauts assess their own health during space missions" | Objectives | Core | F-02, F-03, F-04: Home, indicator pages (chart, table, baseline, crew comparison), body map | Implemented |
+| R-04 | "provides guidance on treatments and health improvements" | Objectives | Core | F-05: rule actions (re-measure, rest and fluids, schedule and lighting, self-care time, pre-landing fluids and compression garments, contact the flight surgeon). By policy (Q-01, `science.md` → "Guidance policy") there are no treatment instructions without `Approved` evidence; treatment decisions are escalated to the flight surgeon | Partially addressed (preventive guidance and escalation; no treatment instructions, by design) |
+| R-05 | "Any kind of data can be used, as long as it represents a health indicator" | Objectives | Constraint | F-01: six indicators with units and input context (`src/domain/indicators.ts`); pain logs are self-reported and not interpreted | Implemented (constraint met) |
+| S-01 | Gather data "through any kind of input—keyboard text, mouse clicks, or camera images" | Objectives | Suggested | F-01, F-04: keyboard and pointer or touch input (forms, body map). Camera input excluded by owner decision 2026-11-13 (`product.md`) | Partially addressed |
+| S-02 | Use "NASA's Human Research Program resources, along with the publicly available resources from other space agencies" | Objectives | Suggested | NASA HRP pages, NASA reports, OSDR (OSD-575, OSD-370), CSA, JAXA (`references.md`, `submission.md` → "NASA and partner-agency resources used"); hazards on indicator pages and About | Implemented |
+| S-03a | "Which measurements can be performed in space?" | Objectives | Suggested | `scientific-foundations.md` → "Indicator summary", column "How it's measured in space" | Implemented (documented) |
+| S-03b | "Why is an exam needed?" | Objectives | Suggested | `scientific-foundations.md` → "Indicator summary" (HRP risk column); "Spaceflight hazards" section on each indicator page; `submission.md` → "Problem and intended users" | Partially addressed (risk context per indicator; no separate in-app explanation of why each exam is needed) |
+| S-03c | "How do spaceflight hazards affect these health indicators?" | Objectives | Suggested | `scientific-foundations.md` → "Spaceflight hazards (RIDGE)"; indicator pages and About | Implemented (2026-11-15) |
+| S-03d | "When might a result warrant attention from the crew or from flight surgeons on the ground?" | Objectives | Suggested | F-05: Attention and Escalate rules RULE-01–RULE-31 (`scientific-foundations.md`); escalation wording names the flight surgeon and when (`design.md` → "UX copy") | Implemented |
+| S-03e | "What actions can be taken to prevent a critical health condition?" | Objectives | Suggested | `scientific-foundations.md` → "Indicator summary" (Preventive actions); rule actions shown in the app (for example RULE-19 schedule and lighting, RULE-30 pre-landing fluids and compression garments) | Implemented |
+| S-04 | "presenting metrics and diagnosis clearly"; consider "animations and interactivity" | Objectives | Suggested | F-02, F-03, F-04: badges with icon and text, banners with a "Why?" layer, interactive charts with tooltips and data tables, 3D/2D body map. The app gives no diagnosis, by policy (Q-01) | Implemented (metrics and status; no diagnosis, by design) |
+| S-05 | "display a human figure where each part of the body is clickable" | Objectives | Example | F-04: body map, where every 3D surface point and every 2D region or organ is clickable and links to related indicators. It records self-reported pain and does not show function or health status per body part | Partially addressed |
+| E-01 | Indicators: "blood pressure, heart rate, blood sugar, body temperature, daily sleep hours, and mood" | Background | Example (officially only examples; all six adopted as MVP scope by owner decision, `product.md`) | All six in F-01 to F-03; evidence in `scientific-foundations.md` | Implemented |
+| O-01 | Insights for different environments (spacecraft, station, rover, planetary/lunar base) | Potential Considerations | Optional | Settings → Demo controls: mission zone (Earth, Space, Moon, Mars) sets the theme only; mission phase (in flight, approaching landing, post-landing) adds RULE-26 and RULE-30. No zone-specific reference values (no supported source, `product.md`) | Partially addressed |
+| O-02 | Prompt measurements/actions "as a part of the mission routine" | Potential Considerations | Optional | "Due" chips for indicators not measured today; PHQ-2 due every 14 days; RULE-30 pre-landing reminder. No schedule or notifications (F-07 not implemented) | Partially addressed |
+| O-03 | Gamification system | Potential Considerations | Optional | F-08 deferred by the owner (XP and levels, 2026-11-14) | Not implemented |
+| O-04 | Dynamic charts of indicators over time | Potential Considerations | Optional | F-03: history chart per indicator with tooltips, legend, optional crew-average line, and data table | Implemented |
+| O-05 | Color coding of indicator status | Potential Considerations | Optional | Status colours, always with an icon and text, plus optional assistive patterns (`design.md` → "Health communication") | Implemented |
+| O-06 | Simple instructions and explanations covering measurements, indicators, and risks | Potential Considerations | Optional | Entry hints (blood pressure, heart rate, glucose, sleep), method and context choices, the "Why?" layer, rules list with sources, hazards per indicator, About page | Partially addressed (not every indicator has a measurement instruction) |
 
 ## Official event and submission rules (verified excerpts)
 

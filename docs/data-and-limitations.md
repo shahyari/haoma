@@ -16,7 +16,7 @@
 
 ## Demo profiles
 
-One provisional fictional profile (owner decision 2026-11-14): **Alex Morgan**, Flight Engineer, **Aster-1 Lunar Transit Mission**, Mission Day 42. The person and mission are invented; Home labels the profile "Fictional profile" and states that all demo health measurements are simulated. The mission day is a fixed display value, not derived from the data. Additional crew members are deferred. No real private health records.
+One provisional fictional profile (owner decision 2026-11-14): **Alex Morgan**, Flight Engineer, **Aster-1 Lunar Transit Mission**, Mission Day 42. The person and mission are invented. The avatar card shows "Alex Morgan" and "Fictional Flight Engineer", with the notice "Demo data and fictional person — All health measurements in the demo are simulated". The "Demo data" chip in the header opens the same notice. The mission name and Mission Day 42 are defined in `src/demo/demo.ts` but are no longer shown in the app (owner 2026-11-14). The five other crew members exist only as anonymous simulated readings for the crew comparison (below); they have no profiles. No real private health records.
 
 **Edited entries:** an edited entry keeps its measurement time, gets `editedAt`, and is labeled "Manual entry (edited)", including a simulated entry that was edited, because the person set the new values.
 
@@ -52,18 +52,54 @@ For the Crew Average Comparison (owner spec 2026-11-15), `createCrewEntries` (`s
 
 ## Reference information versus thresholds
 
-TODO: Distinguish research citations, general clinical guidance, personal baseline calculations, and unvalidated demo-only rules. Use the evidence statuses from `science.md`.
+What the app shows falls into five kinds of information. None is a clinical threshold validated for astronauts.
+
+| Kind | Example | What it is | What it is not |
+|---|---|---|---|
+| Spaceflight research and NASA risk context (label **Spaceflight evidence**) | NASA HRP risks and hazards (REF-19, REF-23, REF-38, REF-42), ISS studies (REF-18, REF-32, REF-37), OSDR datasets (REF-52, REF-55) | Why an indicator matters in space and how it is measured there | A source of numeric thresholds. Samples are small, and OSDR cross-checks changed no rule |
+| General clinical references (label **General clinical reference**) | AHA blood pressure categories (REF-17), ADA fasting glucose (REF-46), MedlinePlus fever (REF-50), AASM sleep (REF-35), PHQ-2 cutoff (REF-51) | Adult reference values from Earth populations, used by the approved rules | Validated astronaut-specific or spaceflight thresholds; the app says so in each rule's label |
+| Team design decisions (label **Team design decision**) | Baseline window and minimum (P-1, P-2), PHQ-2 cadence, action wording, crew-comparison parameters (P-9–P-11, still to be confirmed) | Choices by the team where no source sets a value | Evidence; they are labeled as decisions |
+| Personal baseline | Median of the last 7 comparable readings once 5 exist | A comparison with the astronaut's own history, used only by approved baseline rules | A normal range; a stable baseline does not mean healthy |
+| Simulated demo logic (label **Simulated demo logic**) | Demo value bands, today's two Attention readings, simulated crew centres | Values chosen to make the demo work | Reference ranges of any kind |
+
+Evidence statuses follow `science.md`: only `Approved` rules run in the app. Every rule and approved reference is listed in `scientific-foundations.md` and `references.md`. REF-63 (background hazard text) is still `Unverified` (`progress.md`).
 
 ## Privacy statement
 
-haoma has no backend and makes no network requests with health data. The crew comparison uses simulated crew readings generated in the browser and shows only aggregates (mean, difference, number of contributing members) for cohorts of at least 3 other members, never an individual crew member's reading. Entries, pain logs, and saved pain reports (including their free-text notes) are stored only in this browser's localStorage (key `haoma:v1`) and display settings under `haoma:display:v1`. Nothing is saved remotely. "Clear my data" in Settings deletes all of them; "Clear all" in the pain log deletes the pain logs, and Delete on the Reports page deletes a report. "Download JSON" saves a report as a file on the device only when the person asks; it includes a "not a diagnosis" note. Checked against the code on 2026-11-14; re-check before submission.
+HAOMA has no backend, no analytics, and no third-party scripts, and it makes no network requests with health data. The host (Vercel) serves the static app files and, like any web host, may log those requests; no health data are part of them. The crew comparison uses simulated crew readings generated in the browser and shows only aggregates (mean, difference, number of contributing members) for cohorts of at least 3 other members, never an individual crew member's reading. Entries, pain logs, and saved pain reports (including their free-text notes) are stored only in this browser's localStorage (key `haoma:v1`) and display settings under `haoma:display:v1`. Nothing is saved remotely. "Clear data" in Settings → Demo controls deletes entries, pain logs, and reports after a confirmation dialog (display settings are kept); "Clear all" in the pain log deletes the pain logs, and Delete on the Reports page deletes a report. "Download JSON" saves a report as a file on the device, and "Open JSON" shows it in a new browser tab from a local blob URL, only when the person asks. Both include a "not a diagnosis" note, and nothing is uploaded. "Import JSON" reads a file locally. localStorage is not encrypted, so anyone with access to the browser profile can read the data, and in some private-browsing modes data last only for the session (in-memory fallback). Re-checked against the code on 2026-11-15: the only external URLs in the app are two links a person can click (the NASA page on About and the references list).
 
 ## Known limitations
 
-- TODO: scientific limitation
-- TODO: technical limitation
-- TODO: user testing limitation
-- TODO: data quality limitation
+**Scientific**
+
+- Not clinically validated, not a medical device, and not endorsed by NASA. The app gives no diagnosis.
+- Most thresholds are general adult references from Earth populations (AHA, ADA, MedlinePlus, AASM, PHQ-2 studies). Spaceflight changes fluid distribution, heart rate, sleep, and metabolism, so these values may not fit astronauts (`references.md` → "Population and limitations").
+- Spaceflight sources used for context have small samples (for example 8 ISS astronauts in REF-18, 4 Inspiration4 crew in REF-55) or are ground analogs (REF-48, REF-52).
+- Some parameters are team decisions without a source. Several owner decisions are open: crew-comparison parameters P-9–P-11, RULE-16 precedence, proposals P16-1–P16-4, evidence items C-5 and C-7 (`progress.md`).
+- RULE-28 (short sleep before an EVA) is approved but not evaluated, because the app has no task schedule (AU-8).
+- Sex is an optional attribute for evidence notes only. There are no sex-specific thresholds, and the evidence on sex differences in spaceflight is limited (REF-59–REF-62).
+- Crew averages come from simulated readings and cannot show that any value is safe.
+
+**Technical**
+
+- No wearable or sensor integration; all readings are typed by hand or simulated.
+- No backend, accounts, synchronization, or roles; the crew comparison has no real data source.
+- Data live in one browser's localStorage. They are lost when site data are cleared, are not shared between devices, are not encrypted, and may last only for the session in private browsing.
+- No secure medical-record infrastructure, audit trail, or access control.
+- Mission phase and zone are set by hand. "Auto" mode follows the device light or dark preference, not habitat lighting.
+
+**User testing**
+
+- No usability testing with astronauts, flight surgeons, or other participants.
+- Accessibility checks are automated only: token contrast for 16 theme combinations and keyboard flows in jsdom. There has been no manual keyboard pass in a real browser, no screen-reader test, and no true 320 px render of seeded pages. No WCAG conformance is claimed (`design-decisions.md`).
+
+**Data quality**
+
+- Manual entry depends on correct devices, technique, and context (rest, fasting, method). The app records context but cannot check it.
+- Validation is structural only (required fields, numbers, non-negative values, scales). An implausible value such as a typo is accepted and evaluated as entered.
+- The PHQ-2 stores only the total score; the daily mood rating is a trend measure only.
+- Pain logs are self-reported and never interpreted.
+- The simulated demo and crew data are deterministic and calmer than real data. The crew of five is too small for stable averages, and the matching is by calendar day, not time of day.
 
 ## Disclaimer (canonical)
 

@@ -1,6 +1,6 @@
 # Demo video script — 30 seconds maximum
 
-> **INACTIVE:** the owner chose slides as the demo format on 2026-11-13 (`challenge.md` Q-04). This script is kept only as a fallback; do not spend hackathon time on it unless that decision changes.
+> **ARCHIVED, OPTIONAL FALLBACK. Not part of the submission.** The owner chose slides as the demo format on 2026-11-13 (`challenge.md` Q-04), and the 7-slide deck is submitted (`presentation-outline.md`). No video is submitted. The `TODO:` items below are an unfilled template, not submission blockers. Fill them only if the demo format changes to video.
 >
 > **Official limit:** a video of 30 seconds or less (E-R11). Videos over the limit are not eligible for Global Judging. The alternative is the 7-slide deck in `presentation-outline.md`; the format is decided by the owner (`challenge.md` Q-04). The timeline below follows the official Project Submission Guide (REF-10). Narrate only implemented functionality.
 

@@ -11,7 +11,7 @@
 
 - **Intended user:** the astronaut (owner decision 2026-11-13; see `product.md`).
 - **Guidance boundaries:** per `science.md` → "Guidance policy". This covers educational and preventive guidance, measurement explanations, potential reasons for concern, and escalation to the crew medical officer or flight surgeons. It excludes unvalidated diagnostic conclusions.
-- TODO: Describe the self-assessment purpose and mission context.
+- **Self-assessment purpose and mission context:** on long missions, astronauts carry much of the responsibility for spotting health changes in themselves (challenge statement, REF-02). They are exposed to the five spaceflight hazards (REF-01, REF-12–REF-16) and are far from in-person care (REF-14). This document supports a quick daily self-check of six indicators against approved rules and the astronaut's own baseline. Each check ends in preventive guidance or escalation to the crew medical officer or flight surgeons, never a diagnosis. The mission phase (in flight, approaching landing, post-landing) matters because gravity transitions affect blood pressure and heart rate (REF-19, REF-23; RULE-26, RULE-30). Nothing here changes a threshold, rule, or status.
 
 **Label codes** (`science.md` → Guidance policy):
 - **SE** = Spaceflight evidence

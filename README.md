@@ -46,7 +46,7 @@ The fictional profile **Alex Morgan**, Flight Engineer on the invented **Aster-1
 ## Features actually implemented
 
 - Multi-indicator check-in and per-indicator entry, with validation and unit choices (°C/°F, mg/dL or mmol/L)
-- Rule evaluation RULE-01–RULE-31 with three distinct neutral states (No measurement, Not evaluated, Normal); no overall health score and no averaged statuses
+- Rule evaluation with the approved rules RULE-01–RULE-31 (RULE-28, short sleep before an EVA, needs a task schedule and is not evaluated), with three distinct neutral states (No measurement, Not evaluated, Normal); no overall health score and no averaged statuses
 - Two-layer guidance: the action first, then the reason, source, and evidence type
 - Per-indicator history with chart, paged data table, personal baseline, and editable and deletable entries
 - Crew average comparison with like-with-like matching and a minimum group of 3 (simulated crew)
@@ -54,7 +54,7 @@ The fictional profile **Alex Morgan**, Flight Engineer on the invented **Aster-1
 - Fictional demo profile and simulated history, labeled as such, loaded on the first visit
 - Display settings: four themes linked to the mission zone, light/dark mode, high contrast, text size, monospaced numbers, assistive patterns
 - Browser-only persistence (localStorage, with an in-memory fallback)
-- 330 automated tests (rule boundaries, scenarios, keyboard, contrast, persistence)
+- 340 automated tests (rule boundaries, scenarios, keyboard, contrast, persistence)
 
 ## Scientific grounding
 
@@ -106,10 +106,10 @@ Each document has one responsibility. `CLAUDE.md` routes development tasks to th
 | [`docs/submission.md`](docs/submission.md) | Canonical NASA submission text |
 | [`docs/presentation-outline.md`](docs/presentation-outline.md) | Demo slide deck outline (official demo format, ≤7 slides) |
 | [`docs/demo/`](docs/demo/haoma-space-apps-2026-demo.pdf) | The demo deck as submitted (PDF) |
-| [`docs/demo-script.md`](docs/demo-script.md) | Inactive: 30-second video script, kept as a fallback |
+| [`docs/demo-script.md`](docs/demo-script.md) | Archived optional fallback (30-second video script); not part of the submission |
 | [`.claude/skills/verify/`](.claude/skills/verify/SKILL.md) | Claude Code verification skill |
 
-Unfinished items are marked `TODO:`.
+Unfinished items are marked `TODO:`. Open owner decisions are listed in [`docs/progress.md`](docs/progress.md).
 
 ## Credits, sources, and licenses
 
