@@ -123,7 +123,7 @@ export function SettingsPage() {
           name="contrast"
           legend="Contrast"
           options={CONTRASTS}
-          labels={{ normal: 'Normal (WCAG AA)', high: 'High (WCAG AAA)' }}
+          labels={{ normal: 'Normal', high: 'High' }}
         />
         <Choice
           name="fontSize"

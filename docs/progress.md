@@ -8,7 +8,7 @@
 
 ## Completed
 
-- Settings → Appearances: "Monospaced numbers" option (on by default) between Text size and Assistive patterns, replacing the footer note (owner, 2026-11-15).
+- Settings → Appearances: Contrast labels "Normal" / "High" (no WCAG levels); "Monospaced numbers" option (on by default) between Text size and Assistive patterns, replacing the footer note (owner, 2026-11-15).
 - Clear data and Load demo data confirm in a dialog that states what is deleted and kept (owner, 2026-11-15).
 - Header (owner, 2026-11-15): "Haoma" with the Demo data chip on the left; Log entry next to the avatar on every page; Home summary strip removed.
 - Home columns (owner, 2026-11-15): 1 : 2 : 1 from 1280 px (equal side columns), 1 : 2 from 1024 px.

@@ -43,13 +43,11 @@ describe('browser persistence (localStorage)', () => {
 
   it('keeps display settings across a reload and applies them before rendering', async () => {
     reload('/settings')
-    fireEvent.click(await screen.findByLabelText('High (WCAG AAA)'))
+    fireEvent.click(await screen.findByLabelText('High'))
     expect(JSON.parse(localStorage.getItem(SETTINGS_KEY)!).contrast).toBe('high')
     reload('/settings')
     expect(
-      ((await screen.findByLabelText('High (WCAG AAA)')) as HTMLButtonElement).getAttribute(
-        'aria-checked',
-      ),
+      ((await screen.findByLabelText('High')) as HTMLButtonElement).getAttribute('aria-checked'),
     ).toBe('true')
     expect(document.documentElement.dataset.contrast).toBe('high')
   })
