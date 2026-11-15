@@ -30,6 +30,7 @@ export interface SexNote {
   phases: readonly MissionPhase[]
   /** Wording as approved in scientific-foundations.md (copy for health guidance). */
   text: string
+  /** Evidence for the docs; never shown in the app (owner 2026-11-15: no reference IDs on screen). */
   refs: readonly string[]
   status: EvidenceStatus
 }

@@ -521,7 +521,6 @@ export function IndicatorPage() {
           <div key={note.id} className="space-y-1 rounded-lg border bg-card p-4 text-sm">
             <p className="font-medium">Evidence note</p>
             <p>{note.text}</p>
-            <p className="text-muted-foreground">Sources: {note.refs.join(', ')}</p>
           </div>
         ))}
       </section>
