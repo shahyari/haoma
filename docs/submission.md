@@ -189,7 +189,11 @@ TODO: State what was created during the event; identify pre-existing/open-source
 
 This section is required (`challenge.md` E-R6). Source: `references.md` → AI assistance.
 
-TODO: Describe how Claude Code and any other AI tools were used during development.
+AI tools were used throughout the development of HAOMA to accelerate implementation, support research, and improve the overall quality of the project.
+
+Claude Code (Anthropic) served as the primary AI-assisted development tool. It was used to establish the application architecture, generate and refine code as well as 3D and 2D models, implement UI components and features, integrate data visualization, develop automated tests, identify and resolve bugs, maintain technical documentation, and assist with GitHub and Vercel workflows.
+
+ChatGPT (OpenAI) was used as a research, planning, and product-design assistant. It supported feature prioritization, scientific-source evaluation, and the preparation of structured implementation instructions for Claude Code.
 
 ## Limitations
 TODO: Medical validity, simulated data, non-diagnostic status, unimplemented capabilities, testing limitations.
@@ -197,7 +201,6 @@ TODO: Medical validity, simulated data, non-diagnostic status, unimplemented cap
 ## Project links
 - Live demo: https://haomaho.vercel.app
 - Source code: https://github.com/shahyari/haoma (checkpoint tag `spaceapps-checkpoint-1`)
-- Video: TODO: url
 - Presentation: https://github.com/shahyari/haoma/blob/main/docs/demo/haoma-space-apps-2026-demo.pdf (7-slide demo deck, PDF, 2026-11-15; English; shows team, member, and challenge per E-R11–E-R13)
 - Documentation: TODO: url
 
