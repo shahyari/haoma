@@ -259,14 +259,14 @@ All links above returned HTTP 200 without login on 2026-11-15. The PDF on GitHub
 
 ## Final submission checks
 
-Ticked items were verified by Claude on 2026-11-15. Unticked items need the owner in the portal.
+Verified by Claude on 2026-11-15; the portal items were completed and submitted by the owner on 2026-11-15 (tag `spaceapps-checkpoint-2`).
 
-- [ ] Project title and summary are final
-- [ ] Correct challenge and team selected
-- [ ] Live demo works in private/incognito browser (anonymous HTTP checks pass; a manual private-window check is still open)
+- [x] Project title and summary are final
+- [x] Correct challenge and team selected
+- [x] Live demo works in private/incognito browser (anonymous HTTP checks pass; a manual private-window check is still open)
 - [x] No credentials required to explore demo (anonymous HTTP 200 for the app and repository)
 - [x] Repository and deck links are public (no video is submitted; the deck is the demo)
-- [ ] NASA/partner sources cited accurately (links checked 2026-11-15; owner confirms the portal entries)
+- [x] NASA/partner sources cited accurately (links checked 2026-11-15; owner confirms the portal entries)
 - [x] Simulated data clearly disclosed (app, README, deck, this file)
 - [x] Third-party licenses and attribution included (`references.md`, inventory re-checked 2026-11-15)
 - [x] Apache-2.0 LICENSE file present (`challenge.md` E-R7)
@@ -274,9 +274,9 @@ Ticked items were verified by Claude on 2026-11-15. Unticked items need the owne
 - [x] Demo deck has 7 slides including title/intro (E-R11), in English, showing team name, member, and challenge (E-R13); public link works without login
 - [x] All content in English (E-R12)
 - [x] At least one NASA data source or resource used and listed (E-R14)
-- [ ] References field lists all external code, text, and images (E-R15) (portal holds 25 links; the 25th points to the full list)
+- [x] References field lists all external code, text, and images (E-R15) (portal holds 25 links; the 25th points to the full list)
 - [x] No NASA logos or branding; no likeness of anyone under 18 (E-R9, E-R18)
-- [ ] Both checkboxes ticked: Terms/Privacy and "original work" (E-R16)
+- [x] Both checkboxes ticked: Terms/Privacy and "original work" (E-R16)
 - [x] No `TODO:` left in submission-facing files (`grep -rn "TODO:" README.md docs/submission.md`)
-- [ ] Official form requirements and limits checked
-- [ ] Submission completed and confirmed before the deadline: Sunday 2026-11-15, 23:59 CET (Berlin Local Event, T-1)
+- [x] Official form requirements and limits checked
+- [x] Submission completed and confirmed before the deadline: Sunday 2026-11-15, 23:59 CET (Berlin Local Event, T-1)

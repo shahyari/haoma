@@ -3,7 +3,7 @@
 **Responsibility:** Current status only. Read this first in every session. Keep it short: replace stale entries instead of appending history.
 
 **Last updated:** 2026-11-15
-**Current phase:** B — Features. Owner review of 2026-11-14 approved the history view and set product decisions (below).
+**Current phase:** Submitted. The owner completed the portal and submitted on 2026-11-15 (checkpoint 2).
 **Build status:** Passing. Repository https://github.com/shahyari/haoma (public). Production https://haomaho.vercel.app.
 
 ## Submission checkpoints
@@ -11,6 +11,7 @@
 | Tag | Date | Commit | Production | Deployment | Verified |
 |---|---|---|---|---|---|
 | `spaceapps-checkpoint-1` | 2026-11-15 09:19 CET | `24c9d958cd7ad9cab8da13e95c86df2637f28704` | https://haomaho.vercel.app | https://haoma-ask1k2prl-ho-shah.vercel.app (`dpl_5cTyHAefM8Myhxi3AThFHzJUCUnm`, Ready) | format, lint, typecheck, 330 tests, build; live routes 200, latest copy in the live bundle, no runtime errors in Chrome |
+| `spaceapps-checkpoint-2` | 2026-11-15 18:04 CET | `0011fdae1a1f098997d5a89277bce584933ca3e0` | https://haomaho.vercel.app | https://haoma-76d9tl0c2-ho-shah.vercel.app (`dpl_PUsrhLgK2eurndg5vEjCYHe6cdcy`, Ready) | Final submitted version. Format, lint, typecheck, 340 tests, build; live bundle matches the tagged source; app, deck PDF, and tag return 200 without login |
 
 ## Completed
 
@@ -120,4 +121,4 @@ SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (
 
 ## Next action
 
-Owner: transfer `submission.md` to the portal (re-paste Project details if needed), tick the E-R16 checkboxes, and press Submit before Sun 2026-11-15 23:59 CET. Open decisions above do not block submission.
+None for the submission. Wait for judging (Global Finalists 2026-12-17). Open owner decisions above are future work.
