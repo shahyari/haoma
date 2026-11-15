@@ -51,6 +51,18 @@ No published standard exists for these, so all are **TDD**. They must be configu
 | P-7 Regular short sleep | ≤ 6 h on 3 or more of the last 7 nights | RULE-20 |
 | P-8 Transition windows | **Approaching landing:** from 24 h before the planned landing until landing. **Post-landing:** from landing until 72 h after (day 3). Informed by REF-47 (recovery "profound within the first 24 h", but intolerance still seen on day 3) and REF-48 (fluid loading 1–3 h before re-entry); no source states these windows | RULE-26, RULE-30 |
 
+### Crew comparison parameters (owner spec 2026-11-15)
+
+The Crew Average Comparison is **context, not interpretation**: it is not a rule, sets no status, and is never used by RULE-01–RULE-31 or the personal baseline. The owner's spec asked Claude to define and document the matching window and minimum cohort; the values below are **TDD, proposed by Claude, owner to confirm**.
+
+| Parameter | Value | Used by |
+|---|---|---|
+| P-9 Minimum crew cohort | A crew average is shown only when at least 3 other crew members have a comparable reading; otherwise it is hidden, with the reason | Crew comparison (privacy and stability) |
+| P-10 Matching window | The same local calendar day (mission day) as the reading. Each member counts once (the mean of their comparable readings that day); the crew average is the arithmetic mean over members. The viewing astronaut is always excluded | Crew comparison |
+| P-11 "Close to" band | "Close to the crew average" when the difference is at most 0.5 crew standard deviations (sample SD of the member values); otherwise "above" or "below". Wording only, never a status or colour | Crew comparison |
+
+**Comparability (like with like):** heart rate by rest state (no rest state recorded → excluded); blood pressure systolic and diastolic separately (no measurement condition is recorded); glucose by fasting state and device (unknown fasting state → excluded); temperature by method (no method recorded, or within 30 min after exercise → excluded, as for P-6); sleep by source; mood by daily rating only. **PHQ-2 scores are never aggregated or compared.** Excluded crew readings are counted and explained by reason only. Missing readings are skipped, never treated as zero.
+
 ### Mission phase (OD-3, OD-8)
 
 A mission-phase setting: **In flight / Approaching landing / Post-landing**, with windows from P-8. In the demo the phase comes from the simulated mission timeline (**SDL**). It can also be set manually, for example when the flight surgeon ends the post-landing phase early.

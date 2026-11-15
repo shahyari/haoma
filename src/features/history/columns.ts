@@ -14,6 +14,8 @@ import {
   temperatureUnitLabel,
 } from '@/domain/units'
 
+import type { CrewMetric } from '@/crew/compare'
+
 import type { ChartSeries } from './HistoryChart'
 
 export const ORIGIN_LABELS: Record<EntryOrigin, string> = {
@@ -39,7 +41,11 @@ export interface HistoryView {
   title?: string
   description?: string
   unit: string
-  series: (ChartSeries & { value: (entry: HealthEntry) => number | undefined })[]
+  series: (ChartSeries & {
+    value: (entry: HealthEntry) => number | undefined
+    /** The crew metric compared with this series, in display units; omitted when never compared (PHQ-2). */
+    crew?: { metric: CrewMetric; display?: (stored: number) => number }
+  })[]
   columns: Column[]
   filter?: (entry: HealthEntry) => boolean
   yDomain?: [number, number]
@@ -67,11 +73,13 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
           key: 'systolic',
           label: 'Systolic',
           value: pick((e: E<'bloodPressure'>) => e.systolicMmHg),
+          crew: { metric: 'systolic' },
         },
         {
           key: 'diastolic',
           label: 'Diastolic',
           value: pick((e: E<'bloodPressure'>) => e.diastolicMmHg),
+          crew: { metric: 'diastolic' },
         },
       ],
       columns: [
@@ -94,7 +102,14 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
     {
       id: 'heartRate',
       unit: 'bpm',
-      series: [{ key: 'bpm', label: 'Heart rate', value: pick((e: E<'heartRate'>) => e.bpm) }],
+      series: [
+        {
+          key: 'bpm',
+          label: 'Heart rate',
+          value: pick((e: E<'heartRate'>) => e.bpm),
+          crew: { metric: 'bpm' },
+        },
+      ],
       columns: [
         { header: 'Heart rate (bpm)', numeric: true, cell: pick((e: E<'heartRate'>) => e.bpm) },
         {
@@ -119,6 +134,7 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
           key: 'mgDl',
           label: 'Glucose',
           value: pick((e: E<'bloodGlucose'>) => displayGlucose(e.mgDl)),
+          crew: { metric: 'mgDl', display: displayGlucose },
         },
       ],
       columns: [
@@ -153,6 +169,7 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
           value: pick((e: E<'bodyTemperature'>) =>
             e.method === 'oral' ? displayTemperature(e.celsius) : undefined,
           ),
+          crew: { metric: 'celsius', display: displayTemperature },
         },
         {
           key: 'forehead',
@@ -160,6 +177,7 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
           value: pick((e: E<'bodyTemperature'>) =>
             e.method === 'forehead' ? displayTemperature(e.celsius) : undefined,
           ),
+          crew: { metric: 'celsius', display: displayTemperature },
         },
         {
           key: 'unknownMethod',
@@ -167,6 +185,7 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
           value: pick((e: E<'bodyTemperature'>) =>
             e.method ? undefined : displayTemperature(e.celsius),
           ),
+          crew: { metric: 'celsius', display: displayTemperature },
         },
       ],
       columns: [
@@ -196,7 +215,14 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
     {
       id: 'sleep',
       unit: 'h',
-      series: [{ key: 'hours', label: 'Sleep', value: pick((e: E<'sleep'>) => e.hours) }],
+      series: [
+        {
+          key: 'hours',
+          label: 'Sleep',
+          value: pick((e: E<'sleep'>) => e.hours),
+          crew: { metric: 'hours' },
+        },
+      ],
       columns: [
         { header: 'Sleep (hours)', numeric: true, cell: pick((e: E<'sleep'>) => e.hours) },
         { header: 'Measured by', cell: pick((e: E<'sleep'>) => SLEEP_SOURCE_LABELS[e.source]) },
@@ -218,6 +244,7 @@ export const HISTORY_VIEWS: Record<IndicatorId, HistoryView[]> = {
           key: 'rating',
           label: 'Daily rating',
           value: (e) => (e.indicator === 'mood' && e.kind === 'dailyRating' ? e.rating : undefined),
+          crew: { metric: 'rating' },
         },
       ],
       columns: [

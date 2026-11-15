@@ -67,6 +67,15 @@ The owner created the body map in the Claude app (`body-map.html`) and asked for
 - **Integration changes from the prototype (Claude):** the white-on-black HUD is mapped to theme tokens, so it follows the theme, light or dark mode, and contrast settings. The panel and dialog use the app's components. The prototype's Google Fonts are not loaded; the app fonts are used. Pulse animations are off with reduced motion. Reports are stored with the app's data, not under a separate key.
 - **Wording:** "Pain log · self-reported, not a diagnostic tool". Organ names describe where the person points; nothing is interpreted, and no status or rule uses the reports.
 
+## Crew comparison (owner spec 2026-11-15)
+
+On each indicator's history page, between Personal baseline and History.
+
+- **Summary card** "Crew comparison" with a secondary badge **"Simulated crew data"**. It covers the latest comparable reading (for mood, the latest daily rating) and shows these rows: Your latest measurement (with time), Crew average, Difference (signed, with unit; blood pressure as systolic / diastolic), Based on N other crew members, Period ("15 Nov 2026 (same mission day)"), and Compared readings (the comparability group, for example "At rest readings"). One neutral sentence per value follows: "Your reading is above / below / close to the crew average", with systolic and diastolic separately. Then a note on crew readings left out that day, with counts and reasons only. The fixed explanation reads: "Crew averages provide mission context, not medical reference ranges. Similar measurements across the crew do not necessarily indicate that they are safe." A disclosure, "How the crew average is calculated", explains which readings are included, why some are excluded, the minimum cohort, and why crew averages don't replace the personal baseline or a clinical assessment. No status badge and no status colour.
+- **Unavailable state:** "Crew average not available." with the reason (reading not comparable, no comparable crew reading, or fewer than 3 other members). No numbers are shown.
+- **Chart:** a checkbox "Show crew average (simulated)" next to the History heading (on by default) adds a crew-average line per own series ("Crew average", or "Crew average · Systolic" and so on). The line has the same colour as its own series, is dash-dot with no markers, and has gaps where no average exists. The tooltip shows both values and "n = N". The caption names the dash-dot line. The table gets "Crew average (unit)" and "Crew members" columns ("Not available" / "–").
+- **Privacy:** aggregates only. No crew names, no individual readings, and the average is hidden below 3 contributing members.
+
 ## Health communication
 
 - Never rely on color alone for attention states. This also applies to the optional color coding (`challenge.md` O-05).

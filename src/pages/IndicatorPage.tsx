@@ -19,8 +19,14 @@ import {
 import { INDICATOR_IDS, INDICATORS, type HealthEntry, type IndicatorId } from '@/domain/indicators'
 import { phq2Schedule } from '@/features/checkin/checkin'
 import { EntryDialog } from '@/features/entry/EntryDialog'
+import { crewAverageFor, type CrewResult } from '@/crew/compare'
+import { simulatedCrewSource } from '@/crew/simulated'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { HISTORY_VIEWS, provenanceLabel, type HistoryView } from '@/features/history/columns'
-import type { ChartPoint } from '@/features/history/HistoryChart'
+import { CrewComparison, displayCrewValue } from '@/features/history/CrewComparison'
+import { crewCountKey } from '@/features/history/chartKeys'
+import type { ChartPoint, ChartSeries } from '@/features/history/HistoryChart'
 import { FindingList, REFERENCES_URL, RuleEvidence } from '@/features/home/StatusBanner'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import {
@@ -50,6 +56,7 @@ function HistorySection({
   baselineLabel,
   label,
   onEdit,
+  crew,
 }: {
   view: HistoryView
   entries: HealthEntry[]
@@ -57,18 +64,40 @@ function HistorySection({
   baselineLabel?: string
   label: string
   onEdit: (entry: HealthEntry) => void
+  /** Crew average per entry id; omitted when the crew average is hidden. */
+  crew?: Map<string, CrewResult>
 }) {
   const rows = view.filter ? entries.filter(view.filter) : entries
   // Only series with readings get a line and a legend entry.
   const series = view.series.filter((s) => rows.some((r) => s.value(r) !== undefined))
+  /** The crew average matched to one of your readings for a series, in display units. */
+  const crewValue = (entry: HealthEntry, s: HistoryView['series'][number]) => {
+    const result = crew?.get(entry.id)
+    if (!s.crew || !result?.available || s.value(entry) === undefined) return undefined
+    const metric = result.metrics[s.crew.metric]
+    return metric ? displayCrewValue(s.crew.metric, metric.mean) : undefined
+  }
+  const crewSeries: ChartSeries[] = series
+    .filter((s) => rows.some((r) => crewValue(r, s) !== undefined))
+    .map((s) => ({
+      key: `crew_${s.key}`,
+      label: series.length > 1 ? `Crew average · ${s.label}` : 'Crew average',
+      crewOf: s.key,
+    }))
   const points: ChartPoint[] = rows.map((entry) => {
     const point: ChartPoint = { t: Date.parse(entry.recordedAt) }
     for (const s of series) {
       const value = s.value(entry)
       if (value !== undefined) point[s.key] = value
+      const average = crewValue(entry, s)
+      if (average !== undefined) {
+        point[`crew_${s.key}`] = average
+        point[crewCountKey(`crew_${s.key}`)] = (crew!.get(entry.id) as { members: number }).members
+      }
     }
     return point
   })
+  const comparable = crew !== undefined && series.some((s) => s.crew)
   const name = view.title ?? label
 
   return (
@@ -89,7 +118,7 @@ function HistorySection({
             >
               <HistoryChart
                 label={`Line chart of ${name}, ${rows.length} readings. The same values are in the table that follows.`}
-                series={series}
+                series={[...series, ...crewSeries]}
                 points={points}
                 unit={view.unit}
                 baseline={baseline}
@@ -99,8 +128,11 @@ function HistorySection({
             </Suspense>
             <figcaption className="mt-2 text-sm text-muted-foreground">
               Measured values only
-              {baseline !== undefined ? ', with your personal baseline as a dotted line' : ''}. No
-              reference ranges are drawn on the chart.
+              {baseline !== undefined ? ', with your personal baseline as a dotted line' : ''}
+              {crewSeries.length > 0
+                ? ', and the simulated crew average as a dash-dot line (same mission day, comparable readings only; gaps where no average is available)'
+                : ''}
+              . No reference ranges are drawn on the chart.
             </figcaption>
           </figure>
           <div
@@ -125,6 +157,16 @@ function HistorySection({
                       {column.header}
                     </th>
                   ))}
+                  {comparable ? (
+                    <>
+                      <th scope="col" className="px-3 py-2 font-medium whitespace-nowrap">
+                        Crew average ({view.unit === 'rating' ? '1–5' : view.unit})
+                      </th>
+                      <th scope="col" className="px-3 py-2 font-medium whitespace-nowrap">
+                        Crew members
+                      </th>
+                    </>
+                  ) : null}
                   <th scope="col" className="px-3 py-2 font-medium whitespace-nowrap">
                     <span className="sr-only">Actions</span>
                   </th>
@@ -144,6 +186,24 @@ function HistorySection({
                         {column.cell(entry)}
                       </td>
                     ))}
+                    {comparable
+                      ? (() => {
+                          const result = crew.get(entry.id)
+                          const values = series
+                            .map((s) => crewValue(entry, s))
+                            .filter((v) => v !== undefined)
+                          return (
+                            <>
+                              <td className="num px-3 py-2">
+                                {values.length > 0 ? values.join('/') : 'Not available'}
+                              </td>
+                              <td className="num px-3 py-2">
+                                {result?.available ? result.members : '–'}
+                              </td>
+                            </>
+                          )
+                        })()
+                      : null}
                     <td className="px-3 py-1 text-right">
                       <Button
                         variant="ghost"
@@ -175,12 +235,16 @@ export function IndicatorPage() {
   // A new key per opening gives each entry a fresh form; the dialog stays mounted so it can close properly.
   const [opened, setOpened] = useState(0)
   const [now] = useState(() => new Date())
+  // Simulated crew data, generated for today and never stored or evaluated by the rules.
+  const crewSource = useMemo(() => simulatedCrewSource(now), [now])
+  const [showCrew, setShowCrew] = useState(true)
   const indicator = INDICATOR_IDS.find((id) => id === indicatorId) as IndicatorId | undefined
 
   const entries = useMemo(
     () => (indicator ? (entriesOf(data.entries, indicator) as HealthEntry[]) : []),
     [data.entries, indicator],
   )
+  const crewByEntry = new Map(entries.map((e) => [e.id, crewAverageFor(e, crewSource)]))
   if (!indicator) return <NotFoundPage />
 
   const { label } = INDICATORS[indicator]
@@ -415,10 +479,22 @@ export function IndicatorPage() {
         </section>
       ) : null}
 
+      <CrewComparison indicator={indicator} entries={entries} source={crewSource} />
+
       <section aria-labelledby="history-heading" className="space-y-4">
-        <h2 id="history-heading" className={sectionHeading}>
-          History
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="history-heading" className={sectionHeading}>
+            History
+          </h2>
+          <div className="flex min-h-9 items-center gap-2">
+            <Checkbox
+              id="show-crew"
+              checked={showCrew}
+              onCheckedChange={(checked) => setShowCrew(checked === true)}
+            />
+            <Label htmlFor="show-crew">Show crew average (simulated)</Label>
+          </div>
+        </div>
         {HISTORY_VIEWS[indicator].map((view) => (
           <HistorySection
             key={view.id}
@@ -427,6 +503,7 @@ export function IndicatorPage() {
             baseline={baselineShown}
             baselineLabel={baselineMethod ? `Personal baseline (${baselineMethod})` : undefined}
             label={label}
+            crew={showCrew ? crewByEntry : undefined}
             onEdit={(entry) => {
               setEditing(entry)
               setOpened((n) => n + 1)

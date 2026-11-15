@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
+import userEvent from '@testing-library/user-event'
 
 import type { HealthEntry } from '@/domain/indicators'
 import { DEFAULT_FORMATS, setFormats } from '@/domain/units'
@@ -85,6 +86,8 @@ describe('IndicatorPage', () => {
       'Diastolic (mmHg)',
       'Symptoms reported',
       'Provenance',
+      'Crew average (mmHg)',
+      'Crew members',
       'Actions',
     ])
     const rows = t.getAllByRole('row').slice(1)
@@ -92,7 +95,9 @@ describe('IndicatorPage', () => {
       rows.map((r) =>
         within(r)
           .getAllByRole('cell')
-          .map((c) => c.textContent),
+          .map((c) => c.textContent)
+          // The two crew columns depend on the simulated crew for these days (tested separately).
+          .filter((_, i) => i < 4 || i === 6),
       ),
     ).toEqual([
       ['118', '74', 'None', 'Manual entry', 'Edit'],
@@ -374,5 +379,87 @@ describe('Units chosen in Settings (display only)', () => {
     expect(store.load().data.entries[0]).toMatchObject({ mgDl: 126.1 })
     expect(latest().getByText(fullText('7 mmol/L'))).toBeTruthy()
     expect(latest().getByText('Escalate')).toBeTruthy()
+  })
+})
+
+describe('Crew Average Comparison (owner spec 2026-11-15)', () => {
+  const crewSection = () => within(screen.getByRole('region', { name: /Crew comparison/ }))
+
+  it('summarises the latest reading against the simulated crew, with neutral wording', () => {
+    renderApp('/indicators/heartRate', [
+      { ...daysAgo(0), indicator: 'heartRate', bpm: 66, activity: 'rest' },
+    ])
+    const section = crewSection()
+    expect(section.getByText('Simulated crew data')).toBeTruthy()
+    for (const term of [
+      'Your latest measurement',
+      'Crew average',
+      'Difference',
+      'Based on',
+      'Period',
+    ])
+      expect(section.getByText(term)).toBeTruthy()
+    expect(section.getByText('Based on').nextElementSibling?.textContent).toMatch(
+      /^\d+ other crew members$/,
+    )
+    expect(section.getByText('Period').nextElementSibling?.textContent).toMatch(
+      /\(same mission day\)$/,
+    )
+    expect(
+      section.getByText(/Your reading is (above|below|close to) the crew average\./),
+    ).toBeTruthy()
+    expect(
+      section.getByText(/Crew averages provide mission context, not medical reference ranges\./),
+    ).toBeTruthy()
+    expect(document.body.textContent).not.toMatch(
+      /healthier|better than average|normal for the crew/i,
+    )
+    // No status badge in the crew section.
+    expect(
+      screen
+        .getByRole('region', { name: /Crew comparison/ })
+        .querySelector('[data-slot="badge"][data-variant="outline"]'),
+    ).toBeNull()
+  })
+
+  it('shows an unavailable state instead of numbers when the reading cannot be matched', () => {
+    renderApp('/indicators/heartRate', [{ ...daysAgo(0), indicator: 'heartRate', bpm: 66 }])
+    expect(crewSection().getByText('Crew average not available.')).toBeTruthy()
+    expect(crewSection().queryByText('Difference')).toBeNull()
+  })
+
+  it('compares blood pressure systolic and diastolic separately', () => {
+    renderApp('/indicators/bloodPressure', [
+      { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 128, diastolicMmHg: 82 },
+    ])
+    expect(crewSection().getByText(/Your systolic reading is/)).toBeTruthy()
+    expect(crewSection().getByText(/Your diastolic reading is/)).toBeTruthy()
+  })
+
+  it('never compares PHQ-2 scores', () => {
+    renderApp('/indicators/mood', [{ ...daysAgo(0), indicator: 'mood', kind: 'phq2', score: 1 }])
+    expect(
+      crewSection().getByText(
+        'No daily mood rating to compare yet. PHQ-2 scores are never compared.',
+      ),
+    ).toBeTruthy()
+    expect(crewSection().queryByText('Crew average')).toBeNull()
+  })
+
+  it('toggles the crew average in the chart table, without changing the status', async () => {
+    const user = userEvent.setup()
+    renderApp('/indicators/sleep', [
+      { ...daysAgo(0), indicator: 'sleep', hours: 5, source: 'selfReport' },
+    ])
+    const headers = () =>
+      within(table(/table of readings/))
+        .getAllByRole('columnheader')
+        .map((h) => h.textContent)
+    const status = () => latest().getByText('Attention')
+    expect(status()).toBeTruthy()
+    expect(headers()).toContain('Crew members')
+    await user.click(screen.getByRole('checkbox', { name: 'Show crew average (simulated)' }))
+    expect(headers()).not.toContain('Crew members')
+    expect(status()).toBeTruthy()
   })
 })

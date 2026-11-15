@@ -8,6 +8,7 @@
 
 ## Completed
 
+- **Crew Average Comparison** (owner spec 2026-11-15) on all six indicator pages: summary (latest vs. crew average, signed difference, members, period, neutral wording, unavailable state), optional dash-dot crew line in the chart with n in the tooltip, crew columns in the table; like-with-like matching per indicator, same mission day, viewer excluded, minimum cohort 3, PHQ-2 never compared; simulated crew of five (`src/crew/`). No rule, status, or baseline changed.
 - Home layout (owner, 2026-11-15): activity graph moved to the right column, banners below it, so the cards get more vertical room.
 - Owner consistency review (2026-11-15): number monospaced and unit in the normal font, smaller (`Measurement` component); "Demo data" chip is a secondary Badge that opens the demo notice; body map hint no longer overlaps Save report / Clear all when the figure and pain log stack (Home at 1024 px, report page). Activity grid capped at 320 px.
 - Owner usability review (2026-11-15), all five items: demo data relative to today with this morning's sleep and blood pressure at Attention (banners on first load; untouched stale demo data regenerated on load); Home **Log entry** dialog with six tabs that saves one or more indicators together; neutral **Due** chip next to the unchanged badge when there is no reading today (status follows AU-6); activity graph (contribution calendar) and summary strip above the cards; demo controls moved from the avatar card to Settings → Demo controls (`design.md`).
@@ -58,6 +59,7 @@
 | 2026-11-14 | Section 17 (Settings, avatar card); fixed width for every page except Home; save banner back in the pain log; pain date and time below Character with the shadcn date picker; unticked logs stay in the pain log (confirmed) | `design.md` |
 | 2026-11-14 | Reports: saving moves logs into the report; success banner with View report; report view on the body map; open, download, and import JSON; file includes astronaut name and save date | `design.md` |
 | 2026-11-14 | Body map follow-ups: region → indicator links, Save report and Reports page, date and time per log, Max card removed, average kept, full-height and full-width body map, fixed width and Back for About and Settings | `design.md` |
+| 2026-11-15 | Crew Average Comparison built (replaces the 2026-11-14 deferral); parameters P-9–P-11 proposed by Claude | `product.md`, `design.md`, `scientific-foundations.md`, `data-and-limitations.md` |
 | 2026-11-15 | Consistency review: units in the normal font, Demo data chip opens the notice, body map hint fix | `design.md` |
 | 2026-11-15 | Usability review: demo relative to today with two Attention readings; Log entry dialog; Due marker (status unchanged, AU-6); activity graph and summary strip; demo controls in Settings | `design.md`, `data-and-limitations.md` |
 | 2026-11-14 | Demo data loads on the first visit; 3D/2D toggle at the bottom right of the figure in the figure-button style | `design.md`, `data-and-limitations.md` |
@@ -70,13 +72,14 @@
 
 ## Outstanding decisions (owner)
 
-1. RULE-16 precedence: a single oral 39.4–40.5 °C reading still escalates through RULE-16 when there is no baseline yet, the reading is more than 0.5 °C above the baseline, or symptoms are reported. Keep, or cap RULE-16 below 39.4 °C (`scientific-foundations.md` → "OD-16 implementation and verification").
-2. Proposals P16-1 to P16-4 (`scientific-foundations.md` → "OD-16 proposals"): symptom-only heart-rate rule (RULE-32), RULE-08 split and wording, RULE-17/RULE-31 wording, temperature symptom list.
-3. REF-57, REF-58 (NHLBI): approve. AHA warning-signs page: PDF export needed (automated access blocked).
-4. Body map: confirm the region → indicator links (`design.md` → "Body map").
-5. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
-6. Auto-mode source (LED lighting), zone source, condition-based suggestions.
-7. Berlin Local Event name and local judging times.
+1. Crew comparison parameters P-9 (minimum cohort 3), P-10 (same mission day), P-11 ("close to" = within 0.5 crew SD): confirm (`scientific-foundations.md` → "Crew comparison parameters").
+2. RULE-16 precedence: a single oral 39.4–40.5 °C reading still escalates through RULE-16 when there is no baseline yet, the reading is more than 0.5 °C above the baseline, or symptoms are reported. Keep, or cap RULE-16 below 39.4 °C (`scientific-foundations.md` → "OD-16 implementation and verification").
+3. Proposals P16-1 to P16-4 (`scientific-foundations.md` → "OD-16 proposals"): symptom-only heart-rate rule (RULE-32), RULE-08 split and wording, RULE-17/RULE-31 wording, temperature symptom list.
+4. REF-57, REF-58 (NHLBI): approve. AHA warning-signs page: PDF export needed (automated access blocked).
+5. Body map: confirm the region → indicator links (`design.md` → "Body map").
+6. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
+7. Auto-mode source (LED lighting), zone source, condition-based suggestions.
+8. Berlin Local Event name and local judging times.
 
 ## Environment status (2026-11-14)
 
@@ -89,7 +92,7 @@ SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (
 
 ## Verification
 
-- 2026-11-15 (usability and consistency reviews): `npm run format:check` clean; `npm run lint` exit 0; `npm run typecheck` exit 0; `npm test` 15 files, 291 tests passed; `npm run build` exit 0. Checked in headless Chrome: Home at 1600×900 and 1024×768 (hint in its own row, no overlap), units, Demo data chip, Log entry dialog, Settings.
+- 2026-11-15 (crew comparison, Home layout, usability and consistency reviews): `npm run format:check` clean; `npm run lint` exit 0; `npm run typecheck` exit 0; `npm test` 16 files, 311 tests passed (20 new for crew comparison); `npm run build` exit 0 (chart stays a lazy chunk). `src/rules/` unchanged. Checked in headless Chrome: all six indicator pages at 1280 px (summary, chart lines and tooltip, table, unavailable days), blood pressure at phone width, Home layout at 1600 px.
 - Covers: rule boundaries, overlaps, precedence; temperature methods and legacy records; heart-rate rest state and symptom-based escalation; PHQ-2 single cutoff and 14-day validity; a sweep that no reading without an applicable rule is shown as Normal; temperature tier never drops as the value rises; symptom-only scenarios; demo scenario snapshot (sleep and blood pressure Attention, others Normal, no Escalate) and demo refresh; multi-indicator Log entry (partial failure saves nothing); Due marker outside the badge; activity graph and summary strip; Demo controls in Settings; keyboard (jsdom); token contrast; persistence.
 - Not done: manual keyboard pass in a real browser, screen reader, true 320 px render of seeded pages. No WCAG conformance is claimed.
 

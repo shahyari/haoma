@@ -10,9 +10,13 @@ import {
 } from '@/components/ui/chart'
 import { formatDateTime, formatShortDate } from '@/domain/dates'
 
+import { crewCountKey } from './chartKeys'
+
 export interface ChartSeries {
   key: string
   label: string
+  /** A crew-average line: dash-dot, no markers, same colour as its own series. */
+  crewOf?: string
 }
 
 export interface ChartPoint {
@@ -48,8 +52,13 @@ export function HistoryChart({
   baselineLabel = 'Personal baseline',
   yDomain,
 }: Props) {
+  const own = series.filter((s) => !s.crewOf)
+  const colorOf = (s: ChartSeries) => {
+    const i = own.findIndex((o) => o.key === (s.crewOf ?? s.key))
+    return COLORS[i % COLORS.length]
+  }
   const config: ChartConfig = Object.fromEntries(
-    series.map((s, i) => [s.key, { label: s.label, color: COLORS[i % COLORS.length] }]),
+    series.map((s) => [s.key, { label: s.label, color: colorOf(s) }]),
   )
   return (
     <ChartContainer
@@ -83,6 +92,27 @@ export function HistoryChart({
         <ChartTooltip
           content={
             <ChartTooltipContent
+              formatter={(value, _name, item) => {
+                const key = String(item.dataKey)
+                const count = item.payload?.[crewCountKey(key)] as number | undefined
+                return (
+                  <div className="flex w-full items-center justify-between gap-3">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <span
+                        aria-hidden="true"
+                        className="size-2.5 shrink-0 rounded-[2px]"
+                        style={{ background: `var(--color-${key})` }}
+                      />
+                      {config[key]?.label}
+                    </span>
+                    <span className="num font-medium text-foreground">
+                      {value}
+                      {unit === 'rating' || unit === 'score' ? '' : ` ${unit}`}
+                      {count !== undefined ? ` · n = ${count}` : ''}
+                    </span>
+                  </div>
+                )
+              }}
               labelFormatter={(_, payload) => {
                 const t = payload?.[0]?.payload?.t as number | undefined
                 return t === undefined ? '' : formatDateTime(t)
@@ -102,7 +132,7 @@ export function HistoryChart({
             }}
           />
         ) : null}
-        {series.map((s, i) => (
+        {own.map((s, i) => (
           <Line
             key={s.key}
             dataKey={s.key}
@@ -117,6 +147,26 @@ export function HistoryChart({
             isAnimationActive={false}
           />
         ))}
+        {/* Crew averages: dash-dot and no markers, so they never differ from your line by colour alone. */}
+        {series
+          .filter((s) => s.crewOf)
+          .map((s) => (
+            <Line
+              key={s.key}
+              dataKey={s.key}
+              name={s.label}
+              type="linear"
+              stroke={`var(--color-${s.key})`}
+              strokeOpacity={0.8}
+              strokeWidth={2}
+              strokeDasharray="10 4 2 4"
+              dot={false}
+              activeDot={{ r: 4, fill: 'var(--card)' }}
+              // A gap where no crew average exists; missing days are never bridged.
+              connectNulls={false}
+              isAnimationActive={false}
+            />
+          ))}
         {series.length > 1 ? <ChartLegend content={<ChartLegendContent />} /> : null}
       </LineChart>
     </ChartContainer>
