@@ -20,6 +20,7 @@ import {
 import { useHealthData } from '@/data/HealthDataProvider'
 import { createDemoEntries } from '@/demo/demo'
 import { MISSION_PHASE_LABELS, MISSION_PHASES, type MissionPhase } from '@/domain/mission'
+import { SEX_LABELS, SEX_VALUES, type Sex } from '@/domain/sex'
 import { useSettings } from '@/settings/SettingsProvider'
 import { ZONE_LABELS, ZONES, type Zone } from '@/settings/settings'
 
@@ -93,7 +94,7 @@ const count = (n: number, one: string, many: string) => (
  * the demo data, and clearing data, grouped in Settings and away from the avatar card.
  */
 export function DemoControls() {
-  const { data, replaceEntries, clearAll, setMissionPhase } = useHealthData()
+  const { data, replaceEntries, clearAll, setMissionPhase, setSex } = useHealthData()
   const { settings, update } = useSettings()
   const hasData = data.entries.length + data.painLogs.length + data.reports.length > 0
 
@@ -137,6 +138,26 @@ export function DemoControls() {
             {MISSION_PHASES.map((phase) => (
               <SelectItem key={phase} value={phase}>
                 {MISSION_PHASE_LABELS[phase]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Owner decision 2026-11-15: optional; never changes a rule, threshold, or status. */}
+      <div className="grid gap-2">
+        <Label id="sex-label">Sex (optional)</Label>
+        <p id="sex-hint" className="text-sm text-muted-foreground">
+          Used only to show approved evidence notes. Rules and thresholds are the same for everyone.
+        </p>
+        <Select value={data.sex} onValueChange={(sex) => setSex(sex as Sex)}>
+          <SelectTrigger aria-labelledby="sex-label" aria-describedby="sex-hint" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SEX_VALUES.map((sex) => (
+              <SelectItem key={sex} value={sex}>
+                {SEX_LABELS[sex]}
               </SelectItem>
             ))}
           </SelectContent>

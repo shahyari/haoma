@@ -7,6 +7,7 @@
  */
 import type { HealthEntry } from '@/domain/indicators'
 import { DEFAULT_MISSION_PHASE, MISSION_PHASES, type MissionPhase } from '@/domain/mission'
+import { DEFAULT_SEX, SEX_VALUES, type Sex } from '@/domain/sex'
 import { validatePainLog, validatePainReport, type PainLog, type PainReport } from '@/domain/pain'
 import { isRecord, validateEntry } from '@/domain/validation'
 
@@ -16,6 +17,8 @@ export const STORAGE_KEY = `haoma:v${SCHEMA_VERSION}`
 export interface AppData {
   schemaVersion: typeof SCHEMA_VERSION
   missionPhase: MissionPhase
+  /** Optional sex attribute (owner 2026-11-15). Absent in older data (read as 'notSet'). Never changes a rule. */
+  sex: Sex
   entries: HealthEntry[]
   /** Self-reported pain points from the body map. Absent in data saved before 2026-11-14 (read as empty). */
   painLogs: PainLog[]
@@ -49,6 +52,7 @@ export function createDefaultData(): AppData {
   return {
     schemaVersion: SCHEMA_VERSION,
     missionPhase: DEFAULT_MISSION_PHASE,
+    sex: DEFAULT_SEX,
     entries: [],
     painLogs: [],
     reports: [],
@@ -67,6 +71,8 @@ function parseAppData(raw: string): AppData | undefined {
   if (typeof phase !== 'string' || !(MISSION_PHASES as readonly string[]).includes(phase)) {
     return undefined
   }
+  const sex = parsed.sex ?? DEFAULT_SEX
+  if (typeof sex !== 'string' || !(SEX_VALUES as readonly string[]).includes(sex)) return undefined
   if (!Array.isArray(parsed.entries)) return undefined
   const entries: HealthEntry[] = []
   for (const item of parsed.entries) {
@@ -93,6 +99,7 @@ function parseAppData(raw: string): AppData | undefined {
   return {
     schemaVersion: SCHEMA_VERSION,
     missionPhase: phase as MissionPhase,
+    sex: sex as Sex,
     entries,
     painLogs,
     reports,

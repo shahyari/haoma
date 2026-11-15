@@ -270,6 +270,20 @@ Evidence checked against the approved sources (the basis of OD-15):
 
 **Mood and PHQ-2 (2026-11-14):** the item wording, the stem ("Over the last 2 weeks, how often have you been bothered by the following problems?"), the answer scale (0–3 per item) and the total (0–6) match REF-40. The app uses **one cutoff, 3** (REF-51; OD-15). A meta-analysis also reports a cutoff of 2: sensitivity 0.91 and specificity 0.67 for ≥ 2, against 0.72 and 0.85 for ≥ 3 (semistructured-interview studies). It recommends ≥ 2 mainly as the first step before a PHQ-9 [REF-56, approved by the owner as a supporting reference, OD-16]. In short: ≥ 2 catches more cases (higher sensitivity) at the cost of more false positives (lower specificity). The cutoff of 3 is not clinically validated for astronauts. The prototype does not mix the two cutoffs. The app states that the PHQ-2 is a screener validated in primary care and obstetrics-gynecology patients, not in astronauts, that it is neither a diagnosis nor a daily mood rating, and that a score below the cutoff does not rule out depression.
 
+## Sex as an optional profile attribute (owner decision 2026-11-15)
+
+**Decision (owner):** no separate tool, data set, or thresholds per sex. Sex is an optional profile attribute (Not set / Female / Male, default Not set) that only selects evidence notes. It never changes a rule, threshold, status, baseline, or crew comparison. Code: `src/domain/sex.ts`; control in Settings → Demo controls.
+
+**Why not split:** the evidence does not support sex-specific thresholds. In 2001, post-flight orthostatic intolerance was the only astronaut issue with enough data for valid conclusions on sex differences, and differences between individuals are usually as large as or larger than differences between sexes [REF-59]. The 2014 NASA/NSBRI review reported no sex difference in behavioral responses or in the musculoskeletal response to unloading, and a higher landing-day prevalence of orthostatic intolerance and greater plasma volume loss in women [REF-60]. A 2024 review lists most other sex-linked differences as questions for future flights [REF-62].
+
+**Display rule:** a note is shown only when its status is `Approved` (`science.md`), and only on its indicator page, for the matching sex and mission phase. Until approved, nothing is shown.
+
+| Note | Indicator | Sex | Mission phase | Proposed wording (Claude draft; owner to approve) | Evidence | Status |
+|---|---|---|---|---|---|---|
+| SN-01 | Blood pressure | Female | Approaching landing, Post-landing | "After landing, lightheadedness or fainting on standing has been reported more often in female astronauts than in male astronauts. The rules and thresholds here are the same for everyone, and differences between individuals are often larger than differences between sexes." | REF-59, REF-60, REF-61 (context REF-47, REF-62) | Unverified |
+
+Not proposed: a UTI note (no matching indicator in the MVP).
+
 ## Challenge guiding questions → evidence
 
 These map to `challenge.md` S-03a–e. All answers are drawn from the imported table; approved by the owner 2026-11-14.

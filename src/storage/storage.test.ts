@@ -16,6 +16,7 @@ const entry: HealthEntry = {
 const data: AppData = {
   schemaVersion: 1,
   missionPhase: 'postLanding',
+  sex: 'notSet',
   entries: [entry],
   painLogs: [],
   reports: [],

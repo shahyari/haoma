@@ -1,3 +1,4 @@
+import { sexNotesFor } from '@/domain/sex'
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
 import { lazy, Suspense, useMemo, useState } from 'react'
 import { useParams } from 'react-router'
@@ -346,6 +347,7 @@ export function IndicatorPage() {
     now,
   })
   const baseline = personalBaseline(indicator, data.entries)
+  const sexNotes = sexNotesFor(indicator, data.sex, data.missionPhase)
   const unclassifiedTemperature =
     latest?.indicator === 'bodyTemperature' &&
     latest.method !== 'oral' &&
@@ -515,6 +517,13 @@ export function IndicatorPage() {
         {indicator === 'mood' ? (
           <p className="rounded-md border p-3 text-sm font-medium">{MOOD_SAFETY_MESSAGE}</p>
         ) : null}
+        {sexNotes.map((note) => (
+          <div key={note.id} className="space-y-1 rounded-lg border bg-card p-4 text-sm">
+            <p className="font-medium">Evidence note</p>
+            <p>{note.text}</p>
+            <p className="text-muted-foreground">Sources: {note.refs.join(', ')}</p>
+          </div>
+        ))}
       </section>
 
       {baseline ? (

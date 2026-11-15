@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import { createDemoEntries, refreshDemoEntries } from '@/demo/demo'
 import type { HealthEntry } from '@/domain/indicators'
 import type { MissionPhase } from '@/domain/mission'
+import type { Sex } from '@/domain/sex'
 import type { PainLog, PainReport } from '@/domain/pain'
 import {
   createAppStore,
@@ -26,6 +27,7 @@ interface HealthDataValue {
   /** Replaces all entries, e.g. when loading the simulated demo history. */
   replaceEntries: (entries: HealthEntry[]) => void
   setMissionPhase: (phase: MissionPhase) => void
+  setSex: (sex: Sex) => void
   /** Adds the report, or replaces the stored one with the same id. */
   savePainLog: (report: PainLog) => void
   deletePainLog: (id: string) => void
@@ -103,6 +105,7 @@ export function HealthDataProvider({
       deleteEntry: (id) => change((d) => ({ ...d, entries: d.entries.filter((x) => x.id !== id) })),
       replaceEntries: (entries) => change((d) => ({ ...d, entries })),
       setMissionPhase: (missionPhase) => change((d) => ({ ...d, missionPhase })),
+      setSex: (sex) => change((d) => ({ ...d, sex })),
       savePainLog: (report) =>
         change((d) => ({
           ...d,
