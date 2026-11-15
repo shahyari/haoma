@@ -106,6 +106,8 @@ All 19 URLs returned 200 on 2026-11-15. Partner agencies (for the separate partn
 
 Portal field "Space Agency Partner & Other Data": partner-agency sources, the other references the rules use, and all code and tools. Sources from `references.md` (REF-34, superseded, is left out); code from `references.md` → "Third-party code, assets, and data". The logo and the body map are the team's own work (TP-16; body map prototype by the owner with the Claude app). Links checked 2026-11-15: all public; heart.org, cdc.gov, aasm.org, mayoclinic.org, jamanetwork.com, and one DOI block automated checks (403) but open in a browser.
 
+**Portal limit (2026-11-15):** the field accepts 25 links. Entered: the 4 partner sources and the first 21 references (through Stahn et al.). The 25th slot is replaced by one link to the full list: "Full list of references, code, and tools (HAOMA repository)" → https://github.com/shahyari/haoma/blob/main/docs/references.md.
+
 ### Space agency partners
 
 | Link Text | Link Url |
@@ -196,7 +198,7 @@ TODO: Medical validity, simulated data, non-diagnostic status, unimplemented cap
 - Live demo: https://haomaho.vercel.app
 - Source code: https://github.com/shahyari/haoma (checkpoint tag `spaceapps-checkpoint-1`)
 - Video: TODO: url
-- Presentation: TODO: url
+- Presentation: 7-slide demo deck drafted 2026-11-15 (claude.ai artifact, private until shared). TODO: public link (export as PDF and host publicly, e.g. in this repository or Google Drive)
 - Documentation: TODO: url
 
 ## Final submission checks
