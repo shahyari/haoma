@@ -325,3 +325,28 @@ describe('Consistency review 2026-11-15', () => {
     expect(notice.getByText('All health measurements in the demo are simulated.')).toBeTruthy()
   })
 })
+
+describe('Layout review 2026-11-15', () => {
+  it.each(['/settings', '/about', '/reports', '/indicators/sleep'])(
+    '%s uses the shared centred page layout',
+    (path) => {
+      renderApp(path)
+      const page = screen.getByRole('heading', { level: 1 }).closest('.max-w-5xl')
+      expect(page?.className).toContain('mx-auto')
+      expect(page?.className).toContain('space-y-8')
+    },
+  )
+
+  it('shows the astronaut name larger than the role in the avatar card', () => {
+    renderApp('/')
+    const profile = openProfile()
+    expect(profile.getByText('Alex Morgan').className).toContain('text-lg')
+    expect(profile.getByText('Fictional Flight Engineer').className).toContain('text-sm')
+  })
+
+  it('labels each Settings radio group by its row title', () => {
+    renderApp('/settings')
+    for (const name of ['Theme', 'Mode', 'Contrast', 'Text size', 'Temperature', 'Date format'])
+      expect(screen.getByRole('radiogroup', { name })).toBeTruthy()
+  })
+})

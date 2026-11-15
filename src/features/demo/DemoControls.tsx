@@ -60,7 +60,7 @@ export function DemoControls() {
 
   return (
     <>
-      <div className="grid gap-1.5">
+      <div className="grid gap-2">
         <Label id="zone-label">Mission zone</Label>
         <Select value={settings.zone} onValueChange={(zone) => update({ zone: zone as Zone })}>
           <SelectTrigger aria-labelledby="zone-label" className="w-full">
@@ -77,8 +77,12 @@ export function DemoControls() {
       </div>
 
       {/* Not in the wireframe: the mission phase drives approved rules (RULE-26, RULE-30). */}
-      <div className="grid gap-1.5">
+      <div className="grid gap-2">
         <Label id="phase-label">Mission phase</Label>
+        <p id="phase-hint" className="text-sm text-muted-foreground">
+          Team-set parameter: “Approaching landing” is the 24 hours before landing, “Post-landing”
+          the 72 hours after.
+        </p>
         <Select
           value={data.missionPhase}
           onValueChange={(phase) => setMissionPhase(phase as MissionPhase)}
@@ -98,13 +102,13 @@ export function DemoControls() {
             ))}
           </SelectContent>
         </Select>
-        <p id="phase-hint" className="text-sm text-muted-foreground">
-          Team-set parameter: “Approaching landing” is the 24 hours before landing, “Post-landing”
-          the 72 hours after.
-        </p>
       </div>
 
-      <div className="space-y-2">
+      <div className="grid gap-2">
+        <p className="text-sm leading-none font-medium">Demo data</p>
+        <p className="text-sm text-muted-foreground">
+          Data is stored only in this browser. Clearing deletes entries, pain logs, and reports.
+        </p>
         <div className="flex flex-wrap gap-2">
           <ConfirmButton
             label="Load demo data"
@@ -119,9 +123,6 @@ export function DemoControls() {
             onConfirm={() => clearAll()}
           />
         </div>
-        <p className="text-sm text-muted-foreground">
-          Data is stored only in this browser. Clearing deletes entries, pain logs, and reports.
-        </p>
       </div>
     </>
   )

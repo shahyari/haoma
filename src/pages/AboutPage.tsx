@@ -1,14 +1,11 @@
 import { DISCLAIMER } from '@/app/disclaimer'
-import { BackLink } from '@/components/BackLink'
+import { PageLayout } from '@/components/PageLayout'
 
 /** Placeholder. Final content follows docs/data-and-limitations.md once it is written. */
 export function AboutPage() {
   return (
-    // Same fixed width as Settings (owner, 2026-11-14).
-    <div className="mx-auto w-full max-w-5xl space-y-4">
-      <BackLink />
-      <div className="max-w-prose space-y-4">
-        <h1 className="text-2xl font-semibold">About</h1>
+    <PageLayout title="About">
+      <div className="space-y-4 rounded-lg border bg-card p-4">
         <p>
           haoma is a prototype for the NASA Space Apps Challenge 2026 challenge “Create Health
           Monitoring Software for Astronauts on Space Missions”.
@@ -19,6 +16,6 @@ export function AboutPage() {
           endorsed by NASA.
         </p>
       </div>
-    </div>
+    </PageLayout>
   )
 }

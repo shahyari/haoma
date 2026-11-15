@@ -1,12 +1,12 @@
 import { Link } from 'react-router'
 
+import { PageLayout } from '@/components/PageLayout'
 import { EmptyState } from '@/components/states/StatePanel'
 import { Button } from '@/components/ui/button'
 
 export function NotFoundPage() {
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-4">
-      <h1 className="text-2xl font-semibold">Page not found</h1>
+    <PageLayout title="Page not found" back={false}>
       <EmptyState
         title="This page does not exist"
         action={
@@ -15,6 +15,6 @@ export function NotFoundPage() {
           </Button>
         }
       />
-    </div>
+    </PageLayout>
   )
 }

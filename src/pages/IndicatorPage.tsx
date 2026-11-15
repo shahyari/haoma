@@ -2,7 +2,7 @@ import { Pencil, Plus } from 'lucide-react'
 import { lazy, Suspense, useMemo, useState } from 'react'
 import { useParams } from 'react-router'
 
-import { BackLink } from '@/components/BackLink'
+import { PageLayout } from '@/components/PageLayout'
 import { EmptyState } from '@/components/states/StatePanel'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
@@ -292,25 +292,21 @@ export function IndicatorPage() {
   const elevated = indicator === 'heartRate' ? restingAbove100(data.entries, now) : undefined
 
   return (
-    // Fixed width like Settings; only Home is full width (owner, 2026-11-14).
-    <div className="mx-auto w-full max-w-5xl space-y-8">
-      <div className="space-y-3">
-        <BackLink />
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold">{label}</h1>
-          <Button
-            onClick={() => {
-              setEditing(undefined)
-              setOpened((n) => n + 1)
-              setAdding(true)
-            }}
-          >
-            <Plus aria-hidden="true" />
-            Add entry
-          </Button>
-        </div>
-      </div>
-
+    <PageLayout
+      title={label}
+      actions={
+        <Button
+          onClick={() => {
+            setEditing(undefined)
+            setOpened((n) => n + 1)
+            setAdding(true)
+          }}
+        >
+          <Plus aria-hidden="true" />
+          Add entry
+        </Button>
+      }
+    >
       <section aria-labelledby="latest-heading" className="space-y-3">
         <h2 id="latest-heading" className={sectionHeading}>
           Latest measurement
@@ -560,6 +556,6 @@ export function IndicatorPage() {
           onOpenChange={setAdding}
         />
       ) : null}
-    </div>
+    </PageLayout>
   )
 }

@@ -2,7 +2,7 @@ import { Eye, Upload } from 'lucide-react'
 import { useRef, useState, type ChangeEvent } from 'react'
 import { Link } from 'react-router'
 
-import { BackLink } from '@/components/BackLink'
+import { PageLayout } from '@/components/PageLayout'
 import { EmptyState } from '@/components/states/StatePanel'
 import { Button } from '@/components/ui/button'
 import { useHealthData } from '@/data/HealthDataProvider'
@@ -48,31 +48,27 @@ export function ReportsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
-      <BackLink />
-      <div className="flex flex-wrap items-start gap-3">
-        <div className="flex-1 space-y-1">
-          <h1 className="text-2xl font-semibold">Reports</h1>
-          <p className="text-sm text-muted-foreground">
-            Saved and imported pain reports, newest first. Self-reported data, not a diagnosis.
-            Stored only in this browser.
-          </p>
-        </div>
-        <Button variant="outline" onClick={() => fileInput.current?.click()}>
-          <Upload aria-hidden="true" />
-          Import JSON
-        </Button>
-        <input
-          ref={fileInput}
-          type="file"
-          accept="application/json,.json"
-          className="sr-only"
-          tabIndex={-1}
-          aria-label="Report file to import"
-          onChange={onFile}
-        />
-      </div>
-
+    <PageLayout
+      title="Reports"
+      description="Saved and imported pain reports, newest first. Self-reported data, not a diagnosis. Stored only in this browser."
+      actions={
+        <>
+          <Button variant="outline" onClick={() => fileInput.current?.click()}>
+            <Upload aria-hidden="true" />
+            Import JSON
+          </Button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="application/json,.json"
+            className="sr-only"
+            tabIndex={-1}
+            aria-label="Report file to import"
+            onChange={onFile}
+          />
+        </>
+      }
+    >
       {imported ? (
         <p
           role="status"
@@ -147,6 +143,6 @@ export function ReportsPage() {
           ))}
         </ul>
       )}
-    </div>
+    </PageLayout>
   )
 }

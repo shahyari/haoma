@@ -83,7 +83,7 @@ export function ProfileMenu() {
             >
               {initials}
             </span>
-            <p className="font-medium">{DEMO_PROFILE.name}</p>
+            <p className="text-lg font-semibold">{DEMO_PROFILE.name}</p>
             <p className="text-sm text-muted-foreground">Fictional {DEMO_PROFILE.role}</p>
           </div>
 
