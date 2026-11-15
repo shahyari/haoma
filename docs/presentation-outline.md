@@ -4,7 +4,7 @@
 
 ## 1. Title and intro
 
-TODO: project title and tagline. Fixed content: team name haoma; team member Hossein Shahyari; Local Event Berlin; challenge "Create Health Monitoring Software for Astronauts on Space Missions".
+TODO: project title and tagline. Fixed content: team name Haoma; team member Hossein Shahyari; Local Event Berlin; challenge "Create Health Monitoring Software for Astronauts on Space Missions".
 
 ## 2. The mission and the problem
 

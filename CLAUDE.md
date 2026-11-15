@@ -2,7 +2,7 @@
 
 ## Mission
 
-Build **haoma**, a web-based astronaut health self-assessment prototype for the NASA Space Apps Challenge 2026 challenge "Create Health Monitoring Software for Astronauts on Space Missions". Team: haoma. This is a hackathon project, not a clinical product.
+Build **haoma**, a web-based astronaut health self-assessment prototype for the NASA Space Apps Challenge 2026 challenge "Create Health Monitoring Software for Astronauts on Space Missions". Team: Haoma. This is a hackathon project, not a clinical product.
 
 ## Phase gate
 

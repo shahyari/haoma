@@ -3,7 +3,7 @@
 > **Status: working prototype**, built during the NASA Space Apps Challenge 2026 hackathon (November 14–15, 2026). Development started at the event start, in line with the rule that teams may not begin working on challenges before the hackathon.
 
 **Challenge:** [Create Health Monitoring Software for Astronauts on Space Missions](https://www.spaceappschallenge.org/2026/challenges/health-monitoring-software/)
-**Team:** haoma
+**Team:** Haoma
 **Participants:** Hossein Shahyari
 **Event:** Local Event, Berlin
 

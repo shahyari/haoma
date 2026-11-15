@@ -25,7 +25,7 @@ HAOMA - Health Assessment, Observation & Mission Assistance (owner, 2026-11-15)
 A mission-aware health companion for astronauts.
 
 ## Team and challenge
-- Team: haoma
+- Team: Haoma
 - Challenge: Create Health Monitoring Software for Astronauts on Space Missions
 - Event: Local Event, Berlin. TODO: official local event name
 - Team members: Hossein Shahyari (solo team)
