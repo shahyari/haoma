@@ -37,16 +37,62 @@ interface Props {
   yDomain?: [number, number]
 }
 
-const COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)']
-/** Later series are dashed or dotted with hollow markers, so series never differ by colour alone. */
-const DASHES = [undefined, '6 4', '1 3']
+/**
+ * Line styles (owner, 2026-11-15): your readings are solid lines in the primary chart colour,
+ * told apart by their markers (filled circle, outlined circle, outlined square). Crew
+ * averages are dash-dot lines in the secondary chart colour, without markers.
+ */
+const OWN_COLOR = 'var(--chart-1)'
+const CREW_COLOR = 'var(--chart-2)'
+const OWN_MARKERS = ['filled', 'hollow', 'square'] as const
 const CREW_DASH = '10 4 2 4'
+
+type Marker = (typeof OWN_MARKERS)[number] | 'none'
 
 interface LineStyle {
   key: string
   label: string
   dash?: string
-  marker: 'filled' | 'hollow' | 'none'
+  marker: Marker
+}
+
+/** The marker drawn on each of your readings. */
+function MarkerShape({
+  marker,
+  cx,
+  cy,
+  color,
+  r = 3.5,
+}: {
+  marker: Marker
+  cx: number
+  cy: number
+  color: string
+  r?: number
+}) {
+  if (marker === 'none') return null
+  if (marker === 'square')
+    return (
+      <rect
+        x={cx - r}
+        y={cy - r}
+        width={r * 2}
+        height={r * 2}
+        stroke={color}
+        strokeWidth={1.5}
+        fill="var(--card)"
+      />
+    )
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={r}
+      stroke={color}
+      strokeWidth={1.5}
+      fill={marker === 'filled' ? color : 'var(--card)'}
+    />
+  )
 }
 
 /** A short sample of a line (pattern and marker), used in the legend and the tooltip. */
@@ -63,16 +109,7 @@ function LineSample({ style }: { style: LineStyle }) {
         strokeWidth="2"
         strokeDasharray={style.dash}
       />
-      {style.marker === 'none' ? null : (
-        <circle
-          cx="14"
-          cy="5"
-          r="3"
-          stroke={color}
-          strokeWidth="1.5"
-          fill={style.marker === 'filled' ? color : 'var(--card)'}
-        />
-      )}
+      <MarkerShape marker={style.marker} cx={14} cy={5} r={3} color={color} />
     </svg>
   )
 }
@@ -105,16 +142,12 @@ export function HistoryChart({
   yDomain,
 }: Props) {
   const own = series.filter((s) => !s.crewOf)
-  const colorOf = (s: ChartSeries) => {
-    const i = own.findIndex((o) => o.key === (s.crewOf ?? s.key))
-    return COLORS[i % COLORS.length]
-  }
+  const colorOf = (s: ChartSeries) => (s.crewOf ? CREW_COLOR : OWN_COLOR)
   const styles: LineStyle[] = [
     ...own.map((s, i) => ({
       key: s.key,
       label: s.label,
-      dash: DASHES[i % DASHES.length],
-      marker: i === 0 ? ('filled' as const) : ('hollow' as const),
+      marker: OWN_MARKERS[i % OWN_MARKERS.length] as Marker,
     })),
     ...series
       .filter((s) => s.crewOf)
@@ -200,14 +233,25 @@ export function HistoryChart({
             type="linear"
             stroke={`var(--color-${s.key})`}
             strokeWidth={2}
-            strokeDasharray={DASHES[i % DASHES.length]}
-            dot={{ r: i === 0 ? 3 : 4, fill: i === 0 ? `var(--color-${s.key})` : 'var(--card)' }}
+            dot={({ cx, cy, index }: { cx?: number; cy?: number; index?: number }) =>
+              cx === undefined || cy === undefined ? (
+                <g key={`${s.key}-${index}`} />
+              ) : (
+                <MarkerShape
+                  key={`${s.key}-${index}`}
+                  marker={OWN_MARKERS[i % OWN_MARKERS.length]}
+                  cx={cx}
+                  cy={cy}
+                  color={`var(--color-${s.key})`}
+                />
+              )
+            }
             activeDot={{ r: 5 }}
             connectNulls
             isAnimationActive={false}
           />
         ))}
-        {/* Crew averages: dash-dot and no markers, so they never differ from your line by colour alone. */}
+        {/* Crew averages: secondary colour, dash-dot, no markers, so they never differ from your line by colour alone. */}
         {series
           .filter((s) => s.crewOf)
           .map((s) => (
@@ -217,7 +261,6 @@ export function HistoryChart({
               name={s.label}
               type="linear"
               stroke={`var(--color-${s.key})`}
-              strokeOpacity={0.8}
               strokeWidth={2}
               strokeDasharray={CREW_DASH}
               dot={false}
