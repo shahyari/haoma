@@ -4,7 +4,6 @@ import {
   Info,
   Moon,
   Pipette,
-  Plus,
   Smile,
   Thermometer,
   type LucideIcon,
@@ -13,28 +12,16 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 
 import { StatusBadge } from '@/components/StatusBadge'
-import { Button } from '@/components/ui/button'
 import { useHealthData } from '@/data/HealthDataProvider'
 import { calendarDaysBetween, formatDateTime, formatDaysAgo, formatTimeAgo } from '@/domain/dates'
 import { Measurement } from '@/components/Measurement'
 import { formatContext } from '@/domain/format'
 import { INDICATORS, type IndicatorId } from '@/domain/indicators'
-import { dailyCheckIn } from '@/features/checkin/checkin'
-import { LogEntryDialog } from '@/features/entry/LogEntryDialog'
+import { HOME_ORDER } from '@/features/home/order'
 import { ActivityGraph } from '@/features/home/ActivityGraph'
 import { StatusBanner } from '@/features/home/StatusBanner'
 import { entriesOf, evaluateAll, PHQ2_STATE_LABELS, phq2Screening } from '@/rules/evaluate'
 import { PRE_LANDING_REMINDER } from '@/rules/rules'
-
-/** Card order from the owner's layout (brainstorm Section 16). */
-const HOME_ORDER: IndicatorId[] = [
-  'heartRate',
-  'bloodPressure',
-  'bloodGlucose',
-  'bodyTemperature',
-  'sleep',
-  'mood',
-]
 
 /** Lucide icons per indicator (Claude's choice; blood pressure follows the owner's example). */
 const ICONS: Record<IndicatorId, LucideIcon> = {
@@ -72,9 +59,6 @@ export function HomePage() {
     .sort((a, b) => Number(b.status === 'escalate') - Number(a.status === 'escalate'))
   const screening = phq2Screening(data.entries, now)
   const hasBanners = alerts.length > 0 || data.missionPhase === 'approachingLanding'
-  const checkIn = dailyCheckIn(data.entries, now)
-  const due = HOME_ORDER.filter((id) => !checkIn.find((i) => i.indicator === id)?.done)
-  const [logOpen, setLogOpen] = useState(false)
 
   return (
     <div className="space-y-4">
@@ -94,25 +78,6 @@ export function HomePage() {
           <h2 id="indicators-heading" className="sr-only">
             Indicators
           </h2>
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-sm text-muted-foreground">
-              <span className="num">{HOME_ORDER.length}</span> indicators ·{' '}
-              <span className="num">{due.length}</span> due ·{' '}
-              <span className="num">{alerts.length}</span> flagged
-            </p>
-            <Button onClick={() => setLogOpen(true)}>
-              <Plus aria-hidden="true" />
-              Log entry
-            </Button>
-          </div>
-          {logOpen ? (
-            <LogEntryDialog
-              open
-              onOpenChange={setLogOpen}
-              order={HOME_ORDER}
-              initialTab={due[0] ?? HOME_ORDER[0]}
-            />
-          ) : null}
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             {HOME_ORDER.map((indicator) => {
               const assessment = byIndicator.get(indicator)!

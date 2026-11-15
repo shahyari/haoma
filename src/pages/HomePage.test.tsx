@@ -139,7 +139,7 @@ describe('HomePage (owner brainstorm Section 16)', () => {
   it('replaces the demo disclaimer on the main screen with a "Demo data" chip', () => {
     const store = renderApp('/settings')
     fireEvent.click(screen.getByRole('button', { name: 'Load demo data' }))
-    fireEvent.click(screen.getByRole('link', { name: 'haoma, Home' }))
+    fireEvent.click(screen.getByRole('link', { name: 'Haoma, Home' }))
     expect(screen.getByText('Demo data')).toBeTruthy()
     expect(screen.queryByText(/are invented for this demonstration/)).toBeNull()
     expect(card('Heart rate').textContent).toContain('Simulated')
@@ -176,7 +176,7 @@ describe('Avatar card', () => {
 
   it('the logo links back to Home', () => {
     renderApp('/about')
-    fireEvent.click(screen.getByRole('link', { name: 'haoma, Home' }))
+    fireEvent.click(screen.getByRole('link', { name: 'Haoma, Home' }))
     expect(screen.getByRole('heading', { level: 1, name: 'Home' })).toBeTruthy()
   })
 })
@@ -252,7 +252,7 @@ describe('Usability review 2026-11-15', () => {
     expect(within(card('Heart rate')).queryByText('Due')).toBeNull()
   })
 
-  it('shows the activity graph in the right column and a summary strip above the cards', async () => {
+  it('shows the activity graph in the right column, with no summary strip', async () => {
     renderApp('/', [
       { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
       { ...daysAgo(0), indicator: 'sleep', hours: 5, source: 'selfReport' },
@@ -265,8 +265,7 @@ describe('Usability review 2026-11-15', () => {
     const status = screen.getByRole('region', { name: 'Health status' })
     expect(map.compareDocumentPosition(graph) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(graph.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    const strip = indicators().getByText(/indicators ·/)
-    expect(strip.textContent).toBe('6 indicators · 4 due · 1 flagged')
+    expect(screen.queryByText(/indicators ·/)).toBeNull()
   })
 
   it('logs several indicators at once from the Log entry dialog', async () => {
@@ -348,5 +347,23 @@ describe('Layout review 2026-11-15', () => {
     renderApp('/settings')
     for (const name of ['Theme', 'Mode', 'Contrast', 'Text size', 'Temperature', 'Date format'])
       expect(screen.getByRole('radiogroup', { name })).toBeTruthy()
+  })
+})
+
+describe('Header (owner, 2026-11-15)', () => {
+  it('shows "Haoma" with the Demo data chip on the left, and Log entry next to the avatar', () => {
+    renderApp('/', [{ ...daysAgo(0), indicator: 'heartRate', bpm: 66, activity: 'rest' }])
+    const header = screen.getByRole('banner')
+    expect(within(header).getByText('Haoma')).toBeTruthy()
+    const [left, right] = Array.from(header.firstElementChild!.children) as HTMLElement[]
+    expect(within(left).getByRole('link', { name: 'Haoma, Home' })).toBeTruthy()
+    expect(within(left).getByRole('button', { name: 'Demo data: show notice' })).toBeTruthy()
+    expect(within(right).getByRole('button', { name: 'Log entry' })).toBeTruthy()
+    expect(within(right).getByRole('button', { name: /^Profile: Alex Morgan/ })).toBeTruthy()
+  })
+
+  it('offers Log entry on other pages too', () => {
+    renderApp('/settings')
+    expect(screen.getByRole('button', { name: 'Log entry' })).toBeTruthy()
   })
 })

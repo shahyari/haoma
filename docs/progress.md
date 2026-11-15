@@ -8,6 +8,7 @@
 
 ## Completed
 
+- Header (owner, 2026-11-15): "Haoma" with the Demo data chip on the left; Log entry next to the avatar on every page; Home summary strip removed.
 - Home columns (owner, 2026-11-15): 1 : 2 : 1 from 1280 px (equal side columns), 1 : 2 from 1024 px.
 - Layout review (owner, 2026-11-15): shared `PageLayout` for Settings, About, Reports, Report, indicator and not-found pages (centred, 1024 px, same spacing); consistent Settings row spacing (title, hint, control, 8 px); larger astronaut name in the avatar card.
 - **Crew Average Comparison** (owner spec 2026-11-15) on all six indicator pages, below History; your readings are solid primary lines told apart by markers (filled / outlined circle / outlined square), crew averages dash-dot in the secondary colour; legend and tooltip show the same line samples: summary (latest vs. crew average, signed difference, members, period, neutral wording, unavailable state), optional dash-dot crew line in the chart with n in the tooltip, crew columns in the table; like-with-like matching per indicator, same mission day, viewer excluded, minimum cohort 3, PHQ-2 never compared; simulated crew of five (`src/crew/`). No rule, status, or baseline changed.
@@ -94,7 +95,7 @@ SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (
 
 ## Verification
 
-- 2026-11-15 (crew comparison, Home layout, usability and consistency reviews): `npm run format:check` clean; `npm run lint` exit 0; `npm run typecheck` exit 0; `npm test` 16 files, 321 tests passed; `npm run build` exit 0 (chart stays a lazy chunk). `src/rules/` unchanged. Checked in headless Chrome: all six indicator pages at 1280 px (summary, chart lines and tooltip, table, unavailable days), blood pressure at phone width, Home layout at 1600 px.
+- 2026-11-15 (crew comparison, Home layout, usability and consistency reviews): `npm run format:check` clean; `npm run lint` exit 0; `npm run typecheck` exit 0; `npm test` 16 files, 323 tests passed; `npm run build` exit 0 (chart stays a lazy chunk). `src/rules/` unchanged. Checked in headless Chrome: all six indicator pages at 1280 px (summary, chart lines and tooltip, table, unavailable days), blood pressure at phone width, Home layout at 1600 px.
 - Covers: rule boundaries, overlaps, precedence; temperature methods and legacy records; heart-rate rest state and symptom-based escalation; PHQ-2 single cutoff and 14-day validity; a sweep that no reading without an applicable rule is shown as Normal; temperature tier never drops as the value rises; symptom-only scenarios; demo scenario snapshot (sleep and blood pressure Attention, others Normal, no Escalate) and demo refresh; multi-indicator Log entry (partial failure saves nothing); Due marker outside the badge; activity graph and summary strip; Demo controls in Settings; keyboard (jsdom); token contrast; persistence.
 - Not done: manual keyboard pass in a real browser, screen reader, true 320 px render of seeded pages. No WCAG conformance is claimed.
 
