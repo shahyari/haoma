@@ -191,9 +191,13 @@ This section is required (`challenge.md` E-R6). Source: `references.md` → AI a
 
 AI tools were used throughout the development of HAOMA to accelerate implementation, support research, and improve the overall quality of the project.
 
-Claude Code (Anthropic) served as the primary AI-assisted development tool. It was used to establish the application architecture, generate and refine code as well as 3D and 2D models, implement UI components and features, integrate data visualization, develop automated tests, identify and resolve bugs, maintain technical documentation, and assist with GitHub and Vercel workflows.
+Claude Code (Anthropic) served as the primary AI-assisted development tool. It was used to establish the application architecture, generate and refine code, fictional demo history data, presentation preparation, implement UI components and features, integrate data visualization, develop automated tests, identify and resolve bugs, maintain technical documentation, and assist with GitHub and Vercel workflows.
 
-ChatGPT (OpenAI) was used as a research, planning, and product-design assistant. It supported feature prioritization, scientific-source evaluation, and the preparation of structured implementation instructions for Claude Code.
+Claude app (Anthropic) were utilized to generate and refine the 3D and 2D models, as well as compiling indicator research table.
+
+ChatGPT (OpenAI) was used as a research and planning assistant. It supported feature prioritization, scientific-source evaluation, and the preparation of structured implementation instructions for Claude Code.
+
+Human oversight and responsibility: The project concept, product direction, feature requirements, design decisions, and final approvals were managed by the human team member. AI-generated implementations and recommendations were reviewed and iteratively refined. Scientific claims and health interpretation rules were evaluated against referenced sources, with explicit distinctions between established medical knowledge, prototype-defined logic, and simulated data.
 
 ## Limitations
 TODO: Medical validity, simulated data, non-diagnostic status, unimplemented capabilities, testing limitations.

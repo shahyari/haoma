@@ -455,9 +455,6 @@ function buildParts(): Part[] {
     [1, 1, 1],
     [],
   )
-  addPart('nose', ellipsoid(10, 8), [0.011, 0.022, 0.012], [{ t: [0, 1.632, 0.098] }], {
-    noOutline: true,
-  })
   for (const sx of [1, -1]) {
     const side = sx > 0 ? 'Left' : 'Right'
     const ARM_UP = 83 * DEG,
@@ -566,8 +563,6 @@ function regionOf(part: Part, p: V3): string {
       return `${side} eye`
     case 'ear':
       return `${side} ear`
-    case 'nose':
-      return 'Face'
     case 'head':
       return p[1] > 1.72 ? 'Head' : front ? 'Face' : 'Back of head'
     case 'neck':
