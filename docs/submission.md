@@ -251,7 +251,7 @@ The full list is in `data-and-limitations.md` → "Known limitations". The canon
 ## Project links
 - Live demo: https://haomaho.vercel.app
 - Source code: https://github.com/shahyari/haoma (checkpoint tag `spaceapps-checkpoint-1`)
-- Presentation: https://github.com/shahyari/haoma/blob/main/docs/demo/haoma-space-apps-2026-demo.pdf (7-slide demo deck, PDF, 2026-11-15; English; shows team, member, and challenge per E-R11–E-R13)
+- Presentation: https://haomaho.vercel.app/haoma-demo.pdf (opens in the browser's PDF viewer; served by Vercel from `public/haoma-demo.pdf`, an identical copy of `docs/demo/haoma-space-apps-2026-demo.pdf`, which stays the copy of record; 7-slide demo deck, PDF, 2026-11-15; English; shows team, member, and challenge per E-R11–E-R13)
 - Documentation: https://github.com/shahyari/haoma/tree/main/docs (index in the README → Documentation)
 - Scientific foundations: https://github.com/shahyari/haoma/blob/main/docs/scientific-foundations.md; references: https://github.com/shahyari/haoma/blob/main/docs/references.md
 

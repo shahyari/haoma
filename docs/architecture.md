@@ -106,7 +106,8 @@ These are routine tooling choices within the approved stack, delegated to Claude
 | `src/crew/` | Crew Average Comparison: `compare.ts` (pure, source-agnostic: comparability groups, same-day matching, per-member mean then crew mean, minimum cohort, neutral relation) and `simulated.ts` (seeded simulated crew, the only `CrewDataSource` today). A future synced source implements `CrewDataSource` (`kind`, `selfId`, `entries`) without UI changes. Never stored and never passed to `src/rules/` |
 | `src/test/` | Test setup and helpers, contrast measurement, keyboard and persistence tests |
 | `src/index.css` | Tailwind entry and design tokens (themes, contrast, status colours; `design.md` → "Display settings") |
-| `vercel.json` | SPA rewrite so deep links load `index.html` |
+| `vercel.json` | SPA rewrite so deep links load `index.html` (static files such as `public/haoma-demo.pdf` are served first) |
+| `public/haoma-demo.pdf` | Copy of the demo deck (`docs/demo/`), served at `/haoma-demo.pdf` so it opens in the browser |
 
 Tests sit next to the code as `*.test.ts(x)`. Import alias: `@/` → `src/`.
 
