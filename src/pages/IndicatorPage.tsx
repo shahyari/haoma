@@ -479,8 +479,6 @@ export function IndicatorPage() {
         </section>
       ) : null}
 
-      <CrewComparison indicator={indicator} entries={entries} source={crewSource} />
-
       <section aria-labelledby="history-heading" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="history-heading" className={sectionHeading}>
@@ -512,6 +510,8 @@ export function IndicatorPage() {
           />
         ))}
       </section>
+
+      <CrewComparison indicator={indicator} entries={entries} source={crewSource} />
 
       <section aria-labelledby="rules-heading" className="space-y-3">
         <h2 id="rules-heading" className={sectionHeading}>

@@ -422,6 +422,17 @@ describe('Crew Average Comparison (owner spec 2026-11-15)', () => {
     ).toBeNull()
   })
 
+  it('comes after History', () => {
+    renderApp('/indicators/heartRate', [
+      { ...daysAgo(0), indicator: 'heartRate', bpm: 66, activity: 'rest' },
+    ])
+    const history = screen.getByRole('heading', { name: 'History' })
+    const crewHeading = screen.getByRole('heading', { name: 'Crew comparison' })
+    expect(
+      history.compareDocumentPosition(crewHeading) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
   it('shows an unavailable state instead of numbers when the reading cannot be matched', () => {
     renderApp('/indicators/heartRate', [{ ...daysAgo(0), indicator: 'heartRate', bpm: 66 }])
     expect(crewSection().getByText('Crew average not available.')).toBeTruthy()

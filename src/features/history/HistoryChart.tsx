@@ -3,7 +3,6 @@ import { CartesianGrid, Line, LineChart, ReferenceLine, XAxis, YAxis } from 'rec
 import {
   ChartContainer,
   ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
@@ -41,6 +40,48 @@ interface Props {
 const COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)']
 /** Later series are dashed or dotted with hollow markers, so series never differ by colour alone. */
 const DASHES = [undefined, '6 4', '1 3']
+const CREW_DASH = '10 4 2 4'
+
+/**
+ * Legend with a sample of each line (pattern and marker), so your readings and the crew
+ * average are told apart by line style, not by colour alone.
+ */
+function LineLegend({
+  items,
+}: {
+  items: { key: string; label: string; dash?: string; marker: 'filled' | 'hollow' | 'none' }[]
+}) {
+  return (
+    <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-3 text-xs">
+      {items.map((item) => (
+        <li key={item.key} className="flex items-center gap-1.5">
+          <svg width="28" height="10" viewBox="0 0 28 10" aria-hidden="true" className="shrink-0">
+            <line
+              x1="1"
+              y1="5"
+              x2="27"
+              y2="5"
+              stroke={`var(--color-${item.key})`}
+              strokeWidth="2"
+              strokeDasharray={item.dash}
+            />
+            {item.marker === 'none' ? null : (
+              <circle
+                cx="14"
+                cy="5"
+                r="3"
+                stroke={`var(--color-${item.key})`}
+                strokeWidth="1.5"
+                fill={item.marker === 'filled' ? `var(--color-${item.key})` : 'var(--card)'}
+              />
+            )}
+          </svg>
+          {item.label}
+        </li>
+      ))}
+    </ul>
+  )
+}
 
 /** Measured values over time. The data table next to it carries the same values. */
 export function HistoryChart({
@@ -159,7 +200,7 @@ export function HistoryChart({
               stroke={`var(--color-${s.key})`}
               strokeOpacity={0.8}
               strokeWidth={2}
-              strokeDasharray="10 4 2 4"
+              strokeDasharray={CREW_DASH}
               dot={false}
               activeDot={{ r: 4, fill: 'var(--card)' }}
               // A gap where no crew average exists; missing days are never bridged.
@@ -167,7 +208,30 @@ export function HistoryChart({
               isAnimationActive={false}
             />
           ))}
-        {series.length > 1 ? <ChartLegend content={<ChartLegendContent />} /> : null}
+        {series.length > 1 ? (
+          <ChartLegend
+            content={() => (
+              <LineLegend
+                items={[
+                  ...own.map((s, i) => ({
+                    key: s.key,
+                    label: s.label,
+                    dash: DASHES[i % DASHES.length],
+                    marker: i === 0 ? ('filled' as const) : ('hollow' as const),
+                  })),
+                  ...series
+                    .filter((s) => s.crewOf)
+                    .map((s) => ({
+                      key: s.key,
+                      label: s.label,
+                      dash: CREW_DASH,
+                      marker: 'none' as const,
+                    })),
+                ]}
+              />
+            )}
+          />
+        ) : null}
       </LineChart>
     </ChartContainer>
   )
