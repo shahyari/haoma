@@ -32,7 +32,33 @@ function mulberry32(seed: number) {
 /** Day offset of the simulated PHQ-2, so that it is still current (AU-5) when the demo is loaded. */
 const DEMO_PHQ2_OFFSET = 10
 
-/** One simulated entry per indicator per day for the 14 days before `now`, plus one PHQ-2. */
+/**
+ * This morning's simulated readings (owner usability review, 2026-11-15): four of the six
+ * indicators, so two stay due today, and two of them deliberately at Attention under approved
+ * rules, so Home shows a banner on first load. Sleep 6.2 h is under 7 h (RULE-19, not RULE-20:
+ * no other night is 6 h or fewer); 128/82 mmHg is in RULE-02's band.
+ */
+export const DEMO_TODAY = {
+  bloodPressure: { systolicMmHg: 128, diastolicMmHg: 82 },
+  heartRate: { bpm: 66 },
+  sleep: { hours: 6.2 },
+  mood: { rating: 4 },
+} as const
+
+/** 07:00 today, or just before `now` when it is earlier than that (never before midnight). */
+function thisMorning(now: Date): Date {
+  const morning = new Date(now)
+  morning.setHours(7, 0, 0, 0)
+  if (morning < now) return morning
+  const midnight = new Date(now)
+  midnight.setHours(0, 0, 0, 0)
+  return new Date(Math.max(midnight.getTime(), now.getTime() - 60_000))
+}
+
+/**
+ * One simulated entry per indicator per day for the 14 days before `now`, one PHQ-2, and
+ * this morning's readings (`DEMO_TODAY`).
+ */
 export function createDemoEntries(now: Date): HealthEntry[] {
   const random = mulberry32(2026)
   const between = (min: number, max: number, decimals = 0) => {
@@ -77,5 +103,39 @@ export function createDemoEntries(now: Date): HealthEntry[] {
     if (offset === DEMO_PHQ2_OFFSET)
       entries.push({ ...base('phq2'), indicator: 'mood', kind: 'phq2', score: 0 })
   }
+
+  const today = (name: string) => ({
+    id: `demo-${name}-0`,
+    recordedAt: thisMorning(now).toISOString(),
+    origin: 'simulated' as const,
+  })
+  entries.push(
+    { ...today('bp'), indicator: 'bloodPressure', ...DEMO_TODAY.bloodPressure },
+    { ...today('hr'), indicator: 'heartRate', ...DEMO_TODAY.heartRate, activity: 'rest' },
+    { ...today('sleep'), indicator: 'sleep', ...DEMO_TODAY.sleep, source: 'selfReport' },
+    { ...today('mood'), indicator: 'mood', kind: 'dailyRating', ...DEMO_TODAY.mood },
+  )
   return entries
+}
+
+/**
+ * True when every stored entry is untouched demo data, so the demo can be regenerated
+ * relative to today without losing anything the person entered or edited.
+ */
+export function isUntouchedDemo(entries: HealthEntry[]): boolean {
+  return (
+    entries.length > 0 &&
+    entries.every(
+      (e) => e.origin === 'simulated' && e.editedAt === undefined && e.id.startsWith('demo-'),
+    )
+  )
+}
+
+/** Regenerates untouched demo data when its newest reading is from an earlier day. */
+export function refreshDemoEntries(entries: HealthEntry[], now: Date): HealthEntry[] | undefined {
+  if (!isUntouchedDemo(entries)) return undefined
+  const newest = Math.max(...entries.map((e) => Date.parse(e.recordedAt)))
+  const startOfToday = new Date(now)
+  startOfToday.setHours(0, 0, 0, 0)
+  return newest < startOfToday.getTime() ? createDemoEntries(now) : undefined
 }

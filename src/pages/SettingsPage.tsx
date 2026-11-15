@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { BackLink } from '@/components/BackLink'
 import { StatusBadge } from '@/components/StatusBadge'
+import { DemoControls } from '@/features/demo/DemoControls'
 import { DATE_FORMATS, MEASUREMENT_SYSTEMS, TEMPERATURE_UNITS } from '@/domain/units'
 import { STATUSES } from '@/rules/types'
 import { useSettings } from '@/settings/SettingsProvider'
@@ -94,7 +95,7 @@ export function SettingsPage() {
           <Choice
             name="theme"
             legend="Theme"
-            hint={`Auto follows the mission zone (now: ${ZONE_LABELS[resolveTheme(settings)]}), set in the profile menu.`}
+            hint={`Auto follows the mission zone (now: ${ZONE_LABELS[resolveTheme(settings)]}), set under Demo controls.`}
             options={THEME_CHOICES}
             labels={{ auto: 'Auto', ...ZONE_LABELS }}
           />
@@ -165,9 +166,12 @@ export function SettingsPage() {
           />
         </SettingsCard>
 
+        <SettingsCard title="Demo controls" id="demo-heading">
+          <DemoControls />
+        </SettingsCard>
+
         <p className="text-sm text-muted-foreground">
           Numbers always use a monospaced font, for example <span className="num">118/76</span>.
-          Mission zone, mission phase, demo data, and clearing data are in the profile menu.
         </p>
       </div>
     </div>

@@ -59,7 +59,7 @@ describe('browser persistence (localStorage)', () => {
     expect(localStorage.getItem(STORAGE_KEY)).toBe('{not json')
   })
 
-  it('clears all data from the avatar card after confirmation', () => {
+  it('clears all data from Settings → Demo controls after confirmation', () => {
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
@@ -76,15 +76,14 @@ describe('browser persistence (localStorage)', () => {
         ],
       }),
     )
-    reload('/')
-    fireEvent.click(screen.getByRole('button', { name: /^Profile: Alex Morgan/ }))
-    const card = within(screen.getByRole('dialog'))
+    reload('/settings')
+    const card = within(screen.getByRole('region', { name: 'Demo controls' }))
     fireEvent.click(card.getByRole('button', { name: 'Clear data' }))
     expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull()
     fireEvent.click(card.getByRole('button', { name: 'Confirm: delete all data' }))
     // An empty dataset is stored, so the demo history is not loaded again on the next visit.
     expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries).toEqual([])
-    reload()
+    reload('/')
     expect(
       within(screen.getByRole('region', { name: 'Indicators' })).getAllByText('No measurement'),
     ).toHaveLength(6)

@@ -58,3 +58,11 @@ export function formatTimeAgo(value: string | number | Date, now: Date): string 
   const hours = Math.floor(minutes / 60)
   return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`
 }
+
+/** "today", "yesterday", "3 days ago" (whole local calendar days). */
+export function formatDaysAgo(value: string | number | Date, now: Date): string {
+  const days = calendarDaysBetween(new Date(value), now)
+  if (days <= 0) return 'today'
+  if (days === 1) return 'yesterday'
+  return `${days} days ago`
+}

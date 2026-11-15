@@ -4,6 +4,7 @@ import {
   Info,
   Moon,
   Pipette,
+  Plus,
   Smile,
   Thermometer,
   type LucideIcon,
@@ -12,10 +13,14 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 
 import { StatusBadge } from '@/components/StatusBadge'
+import { Button } from '@/components/ui/button'
 import { useHealthData } from '@/data/HealthDataProvider'
-import { calendarDaysBetween, formatDateTime, formatTimeAgo } from '@/domain/dates'
+import { calendarDaysBetween, formatDateTime, formatDaysAgo, formatTimeAgo } from '@/domain/dates'
 import { formatContext, formatValue } from '@/domain/format'
 import { INDICATORS, type IndicatorId } from '@/domain/indicators'
+import { dailyCheckIn } from '@/features/checkin/checkin'
+import { LogEntryDialog } from '@/features/entry/LogEntryDialog'
+import { ActivityGraph } from '@/features/home/ActivityGraph'
 import { StatusBanner } from '@/features/home/StatusBanner'
 import { entriesOf, evaluateAll, PHQ2_STATE_LABELS, phq2Screening } from '@/rules/evaluate'
 import { cn } from '@/lib/utils'
@@ -67,6 +72,9 @@ export function HomePage() {
     .sort((a, b) => Number(b.status === 'escalate') - Number(a.status === 'escalate'))
   const screening = phq2Screening(data.entries, now)
   const hasBanners = alerts.length > 0 || data.missionPhase === 'approachingLanding'
+  const checkIn = dailyCheckIn(data.entries, now)
+  const due = HOME_ORDER.filter((id) => !checkIn.find((i) => i.indicator === id)?.done)
+  const [logOpen, setLogOpen] = useState(false)
 
   return (
     <div className="space-y-4">
@@ -84,10 +92,30 @@ export function HomePage() {
           hasBanners && 'xl:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)_minmax(16rem,22rem)]',
         )}
       >
-        <section aria-labelledby="indicators-heading">
+        <section aria-labelledby="indicators-heading" className="space-y-3">
           <h2 id="indicators-heading" className="sr-only">
             Indicators
           </h2>
+          <ActivityGraph entries={data.entries} now={now} />
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm text-muted-foreground">
+              <span className="num">{HOME_ORDER.length}</span> indicators ·{' '}
+              <span className="num">{due.length}</span> due ·{' '}
+              <span className="num">{alerts.length}</span> flagged
+            </p>
+            <Button onClick={() => setLogOpen(true)}>
+              <Plus aria-hidden="true" />
+              Log entry
+            </Button>
+          </div>
+          {logOpen ? (
+            <LogEntryDialog
+              open
+              onOpenChange={setLogOpen}
+              order={HOME_ORDER}
+              initialTab={due[0] ?? HOME_ORDER[0]}
+            />
+          ) : null}
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             {HOME_ORDER.map((indicator) => {
               const assessment = byIndicator.get(indicator)!
@@ -111,6 +139,12 @@ export function HomePage() {
                     <span className="flex items-center gap-2">
                       <Icon aria-hidden="true" className="size-5 shrink-0" />
                       <span className="flex-1 font-medium">{INDICATORS[indicator].label}</span>
+                      {today ? null : (
+                        // Check-in completeness is kept apart from the reading's status (AU-6).
+                        <span className="rounded-full border border-dashed px-2 py-0.5 text-xs font-medium">
+                          Due
+                        </span>
+                      )}
                       <StatusBadge status={assessment.status} />
                     </span>
                     {latest ? (
@@ -124,7 +158,9 @@ export function HomePage() {
                     <span className="block text-sm text-muted-foreground">
                       {today
                         ? `Measured ${formatTimeAgo(today.recordedAt, now)}`
-                        : 'Not measured today'}
+                        : latest
+                          ? `Not measured today · last ${formatDaysAgo(latest.recordedAt, now)}`
+                          : 'Not measured today'}
                       {latest ? (
                         <span className="sr-only">
                           {' '}

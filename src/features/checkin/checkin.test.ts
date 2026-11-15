@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createDemoEntries, DEMO_DAYS } from '@/demo/demo'
+import { createDemoEntries, DEMO_DAYS, DEMO_TODAY, refreshDemoEntries } from '@/demo/demo'
 import type { HealthEntry } from '@/domain/indicators'
 import { validateEntry } from '@/domain/validation'
 import { evaluateAll } from '@/rules/evaluate'
@@ -69,15 +69,33 @@ describe('demo history', () => {
   const entries = createDemoEntries(now)
   it('is deterministic, structurally valid, and entirely labeled simulated', () => {
     expect(createDemoEntries(now)).toEqual(entries)
-    expect(entries.length).toBe(DEMO_DAYS * 6 + 1)
+    expect(entries.length).toBe(DEMO_DAYS * 6 + 1 + Object.keys(DEMO_TODAY).length)
     for (const entry of entries) {
       expect(validateEntry(entry).ok).toBe(true)
       expect(entry.origin).toBe('simulated')
     }
   })
-  it('ends yesterday, leaving today’s check-in open, with a PHQ-2 that is still current', () => {
-    expect(dailyCheckIn(entries, now).every((i) => !i.done)).toBe(true)
+  it('logs four indicators this morning, leaving glucose and temperature due, with a current PHQ-2', () => {
+    const done = dailyCheckIn(entries, now)
+      .filter((i) => i.done)
+      .map((i) => i.indicator)
+    expect(done.sort()).toEqual(['bloodPressure', 'heartRate', 'mood', 'sleep'])
     expect(phq2Schedule(entries, now).due).toBe(false)
+    const latest = Math.max(...entries.map((e) => Date.parse(e.recordedAt)))
+    expect(new Date(latest)).toEqual(new Date(2026, 10, 14, 7, 0))
+  })
+  it('never dates this morning’s readings after `now`, even before 07:00', () => {
+    const early = new Date(2026, 10, 14, 0, 30)
+    const times = createDemoEntries(early).map((e) => Date.parse(e.recordedAt))
+    expect(Math.max(...times)).toBeLessThan(early.getTime())
+    expect(new Date(Math.max(...times)).getDate()).toBe(14)
+  })
+  it('is regenerated relative to today only while it is untouched demo data from an earlier day', () => {
+    const tomorrow = new Date(2026, 10, 15, 9, 0)
+    expect(refreshDemoEntries(entries, now)).toBeUndefined()
+    expect(refreshDemoEntries(entries, tomorrow)).toEqual(createDemoEntries(tomorrow))
+    expect(refreshDemoEntries([...entries, hr(at(2026, 10, 13))], tomorrow)).toBeUndefined()
+    expect(refreshDemoEntries([], tomorrow)).toBeUndefined()
   })
   it('contains no Escalate reading', () => {
     const statuses = evaluateAll(entries, { missionPhase: 'inFlight', now }).map((a) => a.status)

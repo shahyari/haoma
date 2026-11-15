@@ -13,8 +13,8 @@ describe('keyboard', () => {
     renderApp()
     const indicators = within(screen.getByRole('region', { name: 'Indicators' }))
     const first = indicators.getAllByRole('link')[0]
-    // Skip link, logo and avatar come first; the first card follows.
-    for (let i = 0; i < 4 && document.activeElement !== first; i++) await user.tab()
+    // Skip link, logo, avatar and Log entry come first; the first card follows.
+    for (let i = 0; i < 6 && document.activeElement !== first; i++) await user.tab()
     expect(document.activeElement).toBe(first)
     await user.keyboard('{Enter}')
     expect(screen.getByRole('heading', { level: 1, name: 'Heart rate' })).toBeTruthy()

@@ -618,7 +618,7 @@ describe('OD-16 heart rate: symptom-only scenarios (no new rule until approved)'
 })
 
 describe('demo scenario under the current rules', () => {
-  it('gives every indicator an in-reference status (all values are calm, simulated)', async () => {
+  it('puts this morning’s sleep and blood pressure at Attention and the rest at Normal (simulated)', async () => {
     const { createDemoEntries } = await import('@/demo/demo')
     const now = new Date(2026, 10, 14, 12)
     const statuses = evaluateAll(createDemoEntries(now), { missionPhase: 'inFlight', now }).map(
@@ -626,11 +626,11 @@ describe('demo scenario under the current rules', () => {
     )
     expect(statuses).toMatchInlineSnapshot(`
       [
-        "bloodPressure:normal:RULE-01",
+        "bloodPressure:attention:RULE-02",
         "heartRate:normal:RULE-06",
         "bloodGlucose:normal:RULE-09",
         "bodyTemperature:normal:RULE-14",
-        "sleep:normal:RULE-18",
+        "sleep:attention:RULE-19",
         "mood:normal:RULE-21",
       ]
     `)

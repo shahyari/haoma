@@ -18,6 +18,7 @@ const LABELS = [
 
 const indicators = () => within(screen.getByRole('region', { name: 'Indicators' }))
 const card = (label: string) => indicators().getByRole('link', { name: new RegExp(`^${label}`) })
+const DEMO_COUNT = 14 * 6 + 1 + 4
 const openProfile = () => {
   fireEvent.click(screen.getByRole('button', { name: /^Profile: Alex Morgan/ }))
   return within(screen.getByRole('dialog'))
@@ -30,7 +31,10 @@ describe('HomePage (owner brainstorm Section 16)', () => {
     expect(cards.map((c) => LABELS.find((label) => c.textContent?.startsWith(label)))).toEqual(
       LABELS,
     )
-    expect(indicators().getAllByRole('listitem').length).toBe(6)
+    const cardList = indicators()
+      .getAllByRole('list')
+      .find((l) => l.tagName === 'UL')!
+    expect(within(cardList).getAllByRole('listitem').length).toBe(6)
     expect(screen.getByRole('heading', { name: 'Indicators' }).className).toContain('sr-only')
   })
 
@@ -80,7 +84,7 @@ describe('HomePage (owner brainstorm Section 16)', () => {
     expect(card('Heart rate').textContent).toContain('Measured 5 mins ago')
     if (now.getHours() >= 2)
       expect(card('Blood pressure').textContent).toContain('Measured 1 hour ago')
-    expect(card('Sleep').textContent).toContain('Not measured today')
+    expect(card('Sleep').textContent).toContain('Not measured today · last yesterday')
     // The full timestamp is kept for screen readers only.
     const visible = card('Sleep').cloneNode(true) as HTMLElement
     visible.querySelectorAll('.sr-only').forEach((n) => n.remove())
@@ -133,21 +137,21 @@ describe('HomePage (owner brainstorm Section 16)', () => {
   })
 
   it('replaces the demo disclaimer on the main screen with a "Demo data" chip', () => {
-    const store = renderApp()
-    fireEvent.click(openProfile().getByRole('button', { name: 'Load demo data' }))
-    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+    const store = renderApp('/settings')
+    fireEvent.click(screen.getByRole('button', { name: 'Load demo data' }))
+    fireEvent.click(screen.getByRole('link', { name: 'haoma, Home' }))
     expect(screen.getByText('Demo data')).toBeTruthy()
     expect(screen.queryByText(/are invented for this demonstration/)).toBeNull()
     expect(card('Heart rate').textContent).toContain('Simulated')
     const { entries } = store.load().data
-    expect(entries.length).toBe(14 * 6 + 1)
+    expect(entries.length).toBe(DEMO_COUNT)
     expect(entries.every((e) => e.origin === 'simulated')).toBe(true)
     expect(document.body.textContent).not.toMatch(/health score/i)
   })
 })
 
 describe('Avatar card', () => {
-  it('follows the Section 17 wireframe: profile, links, demo notice, zone, demo data, clear data', () => {
+  it('shows the profile, links and demo notice; the demo controls are in Settings', () => {
     renderApp('/', [
       { ...daysAgo(0), indicator: 'bloodPressure', systolicMmHg: 150, diastolicMmHg: 95 },
     ])
@@ -161,10 +165,9 @@ describe('Avatar card', () => {
     ).toEqual(['Reports', 'Settings', 'About'])
     expect(profile.getByText('Demo data and fictional person')).toBeTruthy()
     expect(profile.getByText('All health measurements in the demo are simulated.')).toBeTruthy()
-    expect(profile.getByRole('combobox', { name: 'Mission zone' })).toBeTruthy()
-    expect(profile.getByRole('combobox', { name: 'Mission phase' })).toBeTruthy()
-    expect(profile.getByRole('button', { name: 'Load demo data' })).toBeTruthy()
-    expect(profile.getByRole('button', { name: 'Clear data' })).toBeTruthy()
+    expect(profile.queryByRole('combobox')).toBeNull()
+    expect(profile.queryByRole('button', { name: 'Load demo data' })).toBeNull()
+    expect(profile.queryByRole('button', { name: 'Clear data' })).toBeNull()
     expect(profile.getByRole('link', { name: 'About' }).getAttribute('href')).toBe('/about')
     fireEvent.click(profile.getByRole('link', { name: 'Settings' }))
     expect(screen.queryByRole('dialog')).toBeNull()
@@ -204,11 +207,20 @@ describe('Owner layout changes of 2026-11-14', () => {
   })
 })
 
-describe('Avatar card controls (Section 17)', () => {
+describe('Demo controls in Settings (usability review 2026-11-15)', () => {
+  it('groups zone, phase, demo data and clearing under a "Demo controls" heading', () => {
+    renderApp('/settings')
+    const demo = within(screen.getByRole('region', { name: 'Demo controls' }))
+    expect(demo.getByRole('combobox', { name: 'Mission zone' })).toBeTruthy()
+    expect(demo.getByRole('combobox', { name: 'Mission phase' })).toBeTruthy()
+    expect(demo.getByRole('button', { name: 'Load demo data' })).toBeTruthy()
+    expect(demo.getByRole('button', { name: 'Clear data' })).toBeTruthy()
+  })
+
   it('sets the mission zone (which drives the automatic theme) and the mission phase', async () => {
     const user = userEvent.setup()
-    const store = renderApp('/')
-    const profile = openProfile()
+    const store = renderApp('/settings')
+    const profile = within(screen.getByRole('region', { name: 'Demo controls' }))
     await user.click(profile.getByRole('combobox', { name: 'Mission zone' }))
     await user.click(screen.getByRole('option', { name: 'Mars' }))
     expect(document.documentElement.dataset.theme).toBe('mars')
@@ -218,13 +230,70 @@ describe('Avatar card controls (Section 17)', () => {
   })
 
   it('asks before replacing existing entries with demo data', () => {
-    const store = renderApp('/', [
+    const store = renderApp('/settings', [
       { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
     ])
-    const profile = openProfile()
-    fireEvent.click(profile.getByRole('button', { name: 'Load demo data' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Load demo data' }))
     expect(store.load().data.entries.length).toBe(1)
-    fireEvent.click(profile.getByRole('button', { name: 'Replace entries with demo data' }))
-    expect(store.load().data.entries.length).toBe(14 * 6 + 1)
+    fireEvent.click(screen.getByRole('button', { name: 'Replace entries with demo data' }))
+    expect(store.load().data.entries.length).toBe(DEMO_COUNT)
+  })
+})
+
+describe('Usability review 2026-11-15', () => {
+  it('marks a card "Due" when it has no reading today, outside the badge, keeping the status', () => {
+    renderApp('/', [
+      { ...daysAgo(1), indicator: 'sleep', hours: 7.5, source: 'selfReport' },
+      { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
+    ])
+    expect(within(card('Sleep')).getByText('Due')).toBeTruthy()
+    expect(within(card('Sleep')).getByText('Normal').closest('[data-slot="badge"]')).toBeTruthy()
+    expect(within(card('Sleep')).getByText('Due').closest('[data-slot="badge"]')).toBeNull()
+    expect(within(card('Heart rate')).queryByText('Due')).toBeNull()
+  })
+
+  it('shows the activity graph and a summary strip above the cards', () => {
+    renderApp('/', [
+      { ...daysAgo(0), indicator: 'heartRate', bpm: 70, activity: 'rest' },
+      { ...daysAgo(0), indicator: 'sleep', hours: 5, source: 'selfReport' },
+    ])
+    expect(indicators().getByText('Activity')).toBeTruthy()
+    expect(indicators().getByLabelText(/^Today: 2 of 6 indicators logged$/)).toBeTruthy()
+    const strip = indicators().getByText(/indicators ·/)
+    expect(strip.textContent).toBe('6 indicators · 4 due · 1 flagged')
+  })
+
+  it('logs several indicators at once from the Log entry dialog', async () => {
+    const user = userEvent.setup()
+    const store = renderApp('/')
+    await user.click(screen.getByRole('button', { name: 'Log entry' }))
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.getAllByRole('tab').map((t) => t.textContent)).toEqual(LABELS)
+    // Heart rate is first and selected.
+    await user.type(dialog.getByLabelText('Heart rate (bpm)'), '64')
+    await user.click(dialog.getByLabelText('At rest'))
+    await user.click(dialog.getByRole('tab', { name: 'Sleep' }))
+    await user.type(dialog.getByLabelText('Sleep (hours)'), '7.5')
+    await user.click(dialog.getByRole('button', { name: 'Save 2 entries' }))
+    // The sleep source is missing: nothing is saved, and the error is shown.
+    expect(store.load().data.entries).toHaveLength(0)
+    expect(dialog.getByRole('alert').textContent).toContain('sleep')
+    await user.click(dialog.getByLabelText('Self-report'))
+    await user.click(dialog.getByRole('button', { name: 'Save 2 entries' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(
+      store
+        .load()
+        .data.entries.map((e) => e.indicator)
+        .sort(),
+    ).toEqual(['heartRate', 'sleep'])
+  })
+
+  it('asks for at least one reading before saving', async () => {
+    const user = userEvent.setup()
+    renderApp('/')
+    await user.click(screen.getByRole('button', { name: 'Log entry' }))
+    await user.click(screen.getByRole('button', { name: 'Save entries' }))
+    expect(screen.getByRole('alert').textContent).toBe('Enter at least one reading.')
   })
 })

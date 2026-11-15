@@ -21,9 +21,10 @@ One provisional fictional profile (owner decision 2026-11-14): **Alex Morgan**, 
 
 ## Simulated history generation
 
-Generated in the browser by `createDemoEntries` (`src/demo/demo.ts`, written with AI assistance) on the first visit (nothing stored in this browser yet; owner request 2026-11-14), and again when the user chooses "Load demo data" in the avatar card. "Clear data" stores an empty dataset, so a cleared app is not refilled on the next visit:
+Generated in the browser by `createDemoEntries` (`src/demo/demo.ts`, written with AI assistance) on the first visit (nothing stored in this browser yet; owner request 2026-11-14), and again when the user chooses "Load demo data" in Settings → Demo controls. Stored demo data that nobody has added to or edited (every entry simulated, unedited, with a demo id) is regenerated on load when its newest reading is from an earlier day, so the latest readings are always from this morning (owner usability review, 2026-11-15). "Clear data" stores an empty dataset, so a cleared app is not refilled on the next visit:
 
-- **Time range:** the 14 days before today, one entry per indicator per day at 07:00 local time, so today's check-in stays open.
+- **Time range:** the 14 days before today, with one entry per indicator per day at 07:00 local time. Today has four readings at 07:00 (or just before the current time if it is earlier): blood pressure, heart rate, sleep and the mood rating. Glucose and temperature stay due, so the check-in is partly open.
+- **Today's readings (fixed, Simulated demo logic):** 128/82 mmHg and 6.2 h of sleep, chosen so that approved rules put them at Attention (RULE-02, RULE-19) and Home shows banners on first load (owner usability review, 2026-11-15). Heart rate 66 bpm at rest, mood rating 4. No other demo night is 6 h or less, so RULE-20 does not apply and there is no Escalate.
 - **Heart rate** entries are recorded "at rest".
 - **Values:** drawn uniformly from fixed bands chosen by the team for a calm demo (blood pressure 108–118 / 68–76 mmHg, heart rate 62–70 bpm, fasting glucose 82–94 mg/dL by fingerstick, oral temperature 36.5–36.9 °C, self-reported sleep 6.5–7.9 h, daily mood rating 3–5) and one PHQ-2 of 0 ten days before today, so that it is still current (a PHQ-2 result counts for 14 days, OD-14). These bands are **Simulated demo logic**, not reference ranges.
 - **Randomness:** a seeded generator (mulberry32, seed 2026), so the same day always produces the same history.

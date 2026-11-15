@@ -57,14 +57,14 @@ On long-duration missions, astronauts face the hazards of human spaceflight (rad
 
 ## Solution
 
-- **Home:** six indicator cards (heart rate, blood pressure, blood glucose, body temperature, sleep, mood) with the latest value, status badge (Normal, Attention, Escalate, or the neutral Not evaluated / No measurement), and when it was measured; status banners with the triggered rule, recommended action, evidence labels, and reference IDs; the body map in the centre.
+- **Home:** six indicator cards (heart rate, blood pressure, blood glucose, body temperature, sleep, mood) with the latest value, status badge (Normal, Attention, Escalate, or the neutral Not evaluated / No measurement), when it was measured, and a "Due" marker when there is no reading today; an activity graph of daily logging and a summary strip; a **Log entry** dialog with one tab per indicator to save several readings at once; status banners with the triggered rule, recommended action, evidence labels, and reference IDs; the body map in the centre.
 - **Indicator pages:** latest value with provenance, status and the rule behind it, personal baseline, a chart with an accessible data table, editable history, and the approved rules for that indicator with their references.
 - **Body map and pain log:** a 3D (WebGL) and 2D (SVG, keyboard-accessible) body model. Pain logs record region, intensity, character, date and time, and a note, with links to related indicators. Logs can be saved as reports, viewed read-only on the body map, and opened, downloaded, or imported as JSON. Pain logs are self-reported and never interpreted.
-- **Avatar card and Settings:** the fictional profile, mission zone and mission phase, load demo data, clear data; theme, mode, contrast, text size, assistive patterns, units, and date format.
+- **Avatar card and Settings:** the fictional profile in the avatar card; in Settings, theme, mode, contrast, text size, assistive patterns, units, date format, and the demo controls (mission zone, mission phase, load demo data, clear data).
 
 ## Demo scenario
 
-The fictional profile **Alex Morgan**, Flight Engineer on the invented **Aster-1 Lunar Transit Mission**, with a simulated 14-day history of all six indicators and one PHQ-2 screening. The history loads automatically on a first visit and can be reloaded from the avatar card. All values are simulated and fall in calm bands, so every indicator starts as Normal; entering a new value (for example a high oral temperature) shows how the app evaluates it, explains why, and recommends an action. The person, mission, and data are fictional ([`docs/data-and-limitations.md`](docs/data-and-limitations.md)).
+The fictional profile **Alex Morgan**, Flight Engineer on the invented **Aster-1 Lunar Transit Mission**, with a simulated 14-day history of all six indicators, one PHQ-2 screening, and four readings from this morning. The history loads automatically on a first visit, stays relative to today, and can be reloaded from Settings. All values are simulated. This morning's sleep (6.2 h) and blood pressure (128/82) are deliberately at Attention, and the rest are Normal; entering a new value (for example a high oral temperature) shows how the app evaluates it, explains why, and recommends an action. The person, mission, and data are fictional ([`docs/data-and-limitations.md`](docs/data-and-limitations.md)).
 
 ## Features actually implemented
 

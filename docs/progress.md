@@ -2,12 +2,13 @@
 
 **Responsibility:** Current status only. Read this first in every session. Keep it short: replace stale entries instead of appending history.
 
-**Last updated:** 2026-11-14
+**Last updated:** 2026-11-15
 **Current phase:** B — Features. Owner review of 2026-11-14 approved the history view and set product decisions (below).
 **Build status:** Passing. Repository https://github.com/shahyari/haoma (public). Production https://haomaho.vercel.app.
 
 ## Completed
 
+- Owner usability review (2026-11-15), all five items: demo data relative to today with this morning's sleep and blood pressure at Attention (banners on first load; untouched stale demo data regenerated on load); Home **Log entry** dialog with six tabs that saves one or more indicators together; neutral **Due** chip next to the unchanged badge when there is no reading today (status follows AU-6); activity graph (contribution calendar) and summary strip above the cards; demo controls moved from the avatar card to Settings → Demo controls (`design.md`).
 - Phase A foundation (Checkpoint A). Display settings (`design.md` → "Display settings").
 - Rule evaluation RULE-01–RULE-30 (`src/rules/`) with three distinct neutral states: **No measurement**, **Not evaluated**, **Normal**.
 - Home (Section 16): logo links Home; avatar card with the fictional profile Alex Morgan, indicators to review, demo-data notice, Settings and About; "Demo data" chip; six separate indicator cards (check-in state merged in; PHQ-2 state on Mood; standard left-aligned badge); green tier labeled "Normal"; banners in a right column; full-width layout; the body map fills the figure area (next item).
@@ -55,6 +56,7 @@
 | 2026-11-14 | Section 17 (Settings, avatar card); fixed width for every page except Home; save banner back in the pain log; pain date and time below Character with the shadcn date picker; unticked logs stay in the pain log (confirmed) | `design.md` |
 | 2026-11-14 | Reports: saving moves logs into the report; success banner with View report; report view on the body map; open, download, and import JSON; file includes astronaut name and save date | `design.md` |
 | 2026-11-14 | Body map follow-ups: region → indicator links, Save report and Reports page, date and time per log, Max card removed, average kept, full-height and full-width body map, fixed width and Back for About and Settings | `design.md` |
+| 2026-11-15 | Usability review: demo relative to today with two Attention readings; Log entry dialog; Due marker (status unchanged, AU-6); activity graph and summary strip; demo controls in Settings | `design.md`, `data-and-limitations.md` |
 | 2026-11-14 | Demo data loads on the first visit; 3D/2D toggle at the bottom right of the figure in the figure-button style | `design.md`, `data-and-limitations.md` |
 | 2026-11-14 | Body map: owner prototype `body-map.html` integrated in the Home figure area for self-reported pain; replaces the navigation proposal | `design.md` |
 | 2026-11-14 | Brainstorm Section 16: Home layout (cards, avatar card, Demo data chip, "Normal" label, full width, logo links Home) | `design.md` |
@@ -84,8 +86,8 @@ SQ-01–SQ-08 in `scientific-foundations.md`. RULE-01–RULE-30 are `Approved` (
 
 ## Verification
 
-- 2026-11-14 (first-visit demo data, 3D/2D toggle move): `npm run format:check` clean; `npm run lint` exit 0; `npm run typecheck` exit 0; `npm test` 15 files, 282 tests passed; `npm run build` exit 0. Home checked in headless Chrome with WebGL at 1600 px: demo history loaded on a fresh profile, toggle at the bottom right of the figure.
-- Covers: rule boundaries, overlaps, precedence; temperature methods and legacy records; heart-rate rest state and symptom-based escalation; PHQ-2 single cutoff and 14-day validity; a sweep that no reading without an applicable rule is shown as Normal; temperature tier never drops as the value rises (36.0–42.0 °C); symptom-only scenarios; demo scenario snapshot (all six Normal); keyboard (jsdom); token contrast; persistence.
+- 2026-11-15 (usability review): `npm run format:check` clean; `npm run lint` exit 0; `npm run typecheck` exit 0; `npm test` 15 files, 289 tests passed; `npm run build` exit 0. Home, the Log entry dialog (validation and tab states) and Settings checked in headless Chrome at 1600 px on a fresh profile: two Attention banners, two Due cards, activity graph, Demo controls card.
+- Covers: rule boundaries, overlaps, precedence; temperature methods and legacy records; heart-rate rest state and symptom-based escalation; PHQ-2 single cutoff and 14-day validity; a sweep that no reading without an applicable rule is shown as Normal; temperature tier never drops as the value rises; symptom-only scenarios; demo scenario snapshot (sleep and blood pressure Attention, others Normal, no Escalate) and demo refresh; multi-indicator Log entry (partial failure saves nothing); Due marker outside the badge; activity graph and summary strip; Demo controls in Settings; keyboard (jsdom); token contrast; persistence.
 - Not done: manual keyboard pass in a real browser, screen reader, true 320 px render of seeded pages. No WCAG conformance is claimed.
 
 ## Next action
