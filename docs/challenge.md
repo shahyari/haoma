@@ -68,7 +68,7 @@ Classification is based on the statement's own wording:
 | S-02 | Use "NASA's Human Research Program resources, along with the publicly available resources from other space agencies" | Objectives | Suggested | `scientific-foundations.md` | Not started |
 | S-03a | "Which measurements can be performed in space?" | Objectives | Suggested | `scientific-foundations.md` | Not started |
 | S-03b | "Why is an exam needed?" | Objectives | Suggested | `scientific-foundations.md` | Not started |
-| S-03c | "How do spaceflight hazards affect these health indicators?" | Objectives | Suggested | `scientific-foundations.md` | Not started |
+| S-03c | "How do spaceflight hazards affect these health indicators?" | Objectives | Suggested | `scientific-foundations.md` → "Spaceflight hazards (RIDGE)" | Done (2026-11-15) |
 | S-03d | "When might a result warrant attention from the crew or from flight surgeons on the ground?" | Objectives | Suggested | `scientific-foundations.md` — see Q-01 | Not started |
 | S-03e | "What actions can be taken to prevent a critical health condition?" | Objectives | Suggested | `scientific-foundations.md` | Not started |
 | S-04 | "presenting metrics and diagnosis clearly"; consider "animations and interactivity" | Objectives | Suggested | TODO — see Q-01 | Not started |

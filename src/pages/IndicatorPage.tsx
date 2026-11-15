@@ -1,3 +1,4 @@
+import { HAZARDS, INDICATOR_HAZARDS } from '@/domain/hazards'
 import { sexNotesFor } from '@/domain/sex'
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
 import { lazy, Suspense, useMemo, useState } from 'react'
@@ -610,6 +611,25 @@ export function IndicatorPage() {
       </section>
 
       <CrewComparison indicator={indicator} entries={entries} source={crewSource} />
+
+      <section aria-labelledby="hazards-heading" className="space-y-2">
+        <h2 id="hazards-heading" className={sectionHeading}>
+          Spaceflight hazards
+        </h2>
+        <p className="text-sm">
+          Linked NASA HRP risk: {INDICATOR_HAZARDS[indicator].risk}. Hazards (RIDGE):{' '}
+          {INDICATOR_HAZARDS[indicator].hazards
+            .map(
+              (id) =>
+                `${HAZARDS[id].label}${INDICATOR_HAZARDS[indicator].indirect?.includes(id) ? ' (indirect, via the immune response)' : ''}`,
+            )
+            .join(', ')}
+          .
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Background only: hazards do not change any rule or status. See About for all five hazards.
+        </p>
+      </section>
 
       <section aria-labelledby="rules-heading" className="space-y-3">
         <h2 id="rules-heading" className={sectionHeading}>

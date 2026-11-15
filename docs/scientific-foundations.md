@@ -26,10 +26,10 @@
 | Indicator | Unit / input | How it's measured in space | HRP risk (hazard) | Preventive actions | Evidence | Status |
 |---|---|---|---|---|---|---|
 | Blood pressure | mmHg (systolic / diastolic), cuff reading at rest | ISS Crew Health Care System includes blood pressure cuffs and an ECG/BP monitor (JAXA). CSA Bio-Monitor wearable also records BP. | Risk of Cardiovascular Adaptations (altered gravity) | Regular exercise and a healthy diet; before landing, extra fluids and lower-body compression garments (NASA CV risk page). | REF-17, 18, 19, 20, 21, 44, 45 | Approved |
-| Heart rate | beats per minute, at rest (ideally first thing after waking) | ECG/BP monitor in the ISS Crew Health Care System; CSA Bio-Monitor records pulse and heart electrical activity; Polaris Dawn (2024) was planned to test a commercial device that collects blood pressure, heart rate, respiration rate and temperature in flight [REF-54]. | Risk of Cardiovascular Adaptations (altered gravity) | Same as blood pressure: exercise and diet; fluids and compression garments before gravity transitions. | REF-22, 18, 23, 21, 54 | Unverified (changed 2026-11-14, OD-13) |
+| Heart rate | beats per minute, at rest (ideally first thing after waking) | ECG/BP monitor in the ISS Crew Health Care System; CSA Bio-Monitor records pulse and heart electrical activity; Polaris Dawn (2024) was planned to test a commercial device that collects blood pressure, heart rate, respiration rate and temperature in flight [REF-54]. | Risk of Cardiovascular Adaptations (altered gravity) | Same as blood pressure: exercise and diet; fluids and compression garments before gravity transitions. | REF-22, 18, 23, 21, 54 | Approved (owner, 2026-11-15) |
 | Blood glucose | mg/dL, tagged Fasting / Non-fasting / Unknown and Fingerstick / CGM | Ax-4 (2025) "Suite Ride" demo: crew wore continuous glucose monitors all mission, checked against fingersticks and lab analysis; Axiom reported it as the first CGM of ISS crew. Not yet routine NASA operations. | Risk of Inadequate Food and Nutrition (closed environment, distance from Earth) | Regular meals with consistent carbohydrate; NASA notes reduced food variety lowers how much crews eat (HERA data). | REF-24, 25, 26, 27, 28, 29, 46 | Approved |
 | Body temperature | °C, with the method recorded (oral or forehead sensor) | Stahn et al. measured core temperature with forehead sensors on the ISS. CSA Bio-Monitor records skin temperature. | Risk of Altered Immune Response (radiation, closed environment): latent herpesviruses reactivate during 6-month ISS missions (HRP overview). | Fluids and rest for mild fever (Cleveland Clinic); cool down after exercise before measuring. | REF-30, 31, 32, 33, 21 | Approved |
-| Sleep | hours per night (self-report or actigraphy) | Wrist actigraphy plus a sleep diary (Barger 2014). | Risk of Performance Decrements and Adverse Health Outcomes from Sleep Loss, Circadian Desynchronization and Work Overload | LED lighting that mimics Earth's light-dark cycle and designated relaxation/self-care time (NASA); avoiding blue-wavelength light before bed (Barger). | REF-35, 36, 37, 38, 39 | Approved |
+| Sleep | hours per night (self-report or actigraphy) | Wrist actigraphy plus a sleep diary (Barger 2014). | Risk of Performance Decrements and Adverse Health Outcomes from Sleep Loss, Circadian Desynchronization and Work Overload (isolation and confinement: owner 2026-11-15, REF-63) | LED lighting that mimics Earth's light-dark cycle and designated relaxation/self-care time (NASA); avoiding blue-wavelength light before bed (Barger). | REF-35, 36, 37, 38, 39 | Approved |
 | Mood | PHQ-2 score (0–6) every 14 days, plus an optional daily 1–5 mood rating (trend only) | Self-report questionnaires; NASA also uses a cognitive test battery (WinSCAT) in flight (BMed evidence report). | Risk of Adverse Cognitive or Behavioral Conditions and Psychiatric Disorders (isolation and confinement, distance from Earth) | Designated relaxation and self-care time (NASA); sleep protection; crew communication. | REF-40, 41, 42, 43 | Approved |
 
 ## Indicators and interpretation rules
@@ -283,6 +283,22 @@ Evidence checked against the approved sources (the basis of OD-15):
 | SN-01 | Blood pressure | Female | Approaching landing, Post-landing | "After landing, lightheadedness or fainting on standing has been reported more often in female astronauts than in male astronauts. The rules and thresholds here are the same for everyone, and differences between individuals are often larger than differences between sexes." | REF-59, REF-60, REF-61 (context REF-47, REF-62) | Approved (owner, 2026-11-15) |
 
 Not proposed: a UTI note (no matching indicator in the MVP).
+
+## Spaceflight hazards (RIDGE) (owner decision 2026-11-15)
+
+NASA HRP groups spaceflight stressors into five hazards, **RIDGE**: space Radiation, Isolation and confinement, Distance from Earth, Gravity fields, hostile/closed Environments [REF-63; hazard pages REF-12–REF-16]. The app shows them as **background only**: they never change a rule, threshold, status, or baseline. Code: `src/domain/hazards.ts`; a "Spaceflight hazards" section on each indicator page and a RIDGE section on About. This answers S-03c (`challenge.md`).
+
+| Indicator | Hazards | Basis |
+|---|---|---|
+| Blood pressure | Gravity fields | Indicator summary (HRP risk: cardiovascular adaptations) |
+| Heart rate | Gravity fields | Indicator summary; row approved by the owner 2026-11-15 |
+| Blood glucose | Distance from Earth, Hostile/closed environments | Indicator summary (HRP risk: food and nutrition) |
+| Body temperature | Hostile/closed environments; Radiation (indirect, via the immune response) | Indicator summary (HRP risk: altered immune response) |
+| Sleep | Isolation and confinement | Owner decision 2026-11-15: circadian rhythm can be altered by light and dark cycles, a small and noisy environment, and the stress of prolonged isolation and confinement [REF-63] |
+| Mood | Isolation and confinement, Distance from Earth | Indicator summary (HRP risk: cognitive or behavioral conditions) |
+
+- **Radiation is not measured.** The app says so on About. The temperature link is indirect and is labeled as such; radiation monitoring stays open (SQ-08).
+- Hazard summaries on About paraphrase REF-63 and REF-12–REF-16 (Claude draft, owner to review).
 
 ## Challenge guiding questions → evidence
 

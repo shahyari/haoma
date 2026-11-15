@@ -14,6 +14,7 @@
 
 ## Completed
 
+- RIDGE hazards (owner 2026-11-15): "Spaceflight hazards" section on every indicator page (linked HRP risk and hazards; no REF IDs on screen) and a RIDGE section on About (radiation stated as not measured; links the NASA page); Sleep → Isolation and confinement (owner, REF-63); Heart rate row approved by the owner. Background only, no rule or status changed. Tests in `src/domain/hazards.test.ts`.
 - Sex as an optional profile attribute (owner 2026-11-15): `sex` in stored data (default Not set; older data reads as Not set), control in Settings → Demo controls, evidence note SN-01 on the blood pressure page approved by the owner 2026-11-15 and shown for Female in Approaching landing and Post-landing; no rule, threshold, or status changed. REF-59–REF-62 approved. Tests in `src/domain/sex.test.ts`.
 - UX copy review applied (owner, 2026-11-15; OD-17 for rule wording): action first with a "Why?" layer, no OD-/P- codes on screen, one form for contacting the flight surgeon, "Log reading", "Last measured …", "Check-ins", clearer errors; badges stay Normal / Attention / Escalate.
 - Settings → Appearance: Contrast labels "Normal" / "High" (no WCAG levels); "Monospaced numbers" option (on by default) between Text size and Assistive patterns, replacing the footer note (owner, 2026-11-15).
@@ -78,6 +79,7 @@
 | 2026-11-14 | Demo data loads on the first visit; 3D/2D toggle at the bottom right of the figure in the figure-button style | `design.md`, `data-and-limitations.md` |
 | 2026-11-14 | Body map: owner prototype `body-map.html` integrated in the Home figure area for self-reported pain; replaces the navigation proposal | `design.md` |
 | 2026-11-14 | Brainstorm Section 16: Home layout (cards, avatar card, Demo data chip, "Normal" label, full width, logo links Home) | `design.md` |
+| 2026-11-15 | RIDGE hazards shown as background on indicator pages and About; Sleep linked to isolation and confinement; Heart rate row approved | `scientific-foundations.md` → "Spaceflight hazards (RIDGE)" |
 | 2026-11-15 | Sex: optional profile attribute for evidence notes only; no split tool or sex-specific thresholds | `scientific-foundations.md` → "Sex as an optional profile attribute" |
 | 2026-11-14 | OD-16: RULE-17 split (≥ 40.6 °C urgent; RULE-31 review 39.4–40.5 °C), forehead explanation, REF-56 approved | `scientific-foundations.md`, `references.md` |
 | 2026-11-14 | OD-15: temperature method-specific rules, PHQ-2 single cutoff 3, RULE-08 symptom-based for any reading; owner logo | `scientific-foundations.md`, `references.md` |
@@ -91,7 +93,7 @@
 3. Proposals P16-1 to P16-4 (`scientific-foundations.md` → "OD-16 proposals"): symptom-only heart-rate rule (RULE-32), RULE-08 split and wording, RULE-17/RULE-31 wording, temperature symptom list.
 4. REF-57, REF-58 approved 2026-11-15. AHA warning-signs page: PDF export needed (automated access blocked).
 5. Body map: confirm the region → indicator links (`design.md` → "Body map").
-6. Evidence: approve C-5 and C-7 (Heart rate row is `Unverified` since OD-13).
+6. Evidence: approve C-5 and C-7 (the Heart rate row itself was approved 2026-11-15).
 7. Auto-mode source (LED lighting), zone source, condition-based suggestions.
 8. Berlin Local Event name and local judging times.
 9. Placement of the Sex control.
