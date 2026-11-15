@@ -386,6 +386,13 @@ describe('Monospaced numbers option (owner, 2026-11-15)', () => {
       order[1].compareDocumentPosition(order[2]) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
     expect(screen.queryByText(/Numbers always use a monospaced font/)).toBeNull()
+    expect(
+      within(appearances).getByText(
+        'Shows numbers in a fixed-width font, so readings line up and are easy to compare.',
+      ),
+    ).toBeTruthy()
+    expect(within(appearances).getByText('118/76').className).toContain('block')
+    expect(within(appearances).getByText('120/77').className).toContain('block')
     const box = screen.getByRole('checkbox', { name: 'Monospaced numbers' })
     expect(box.getAttribute('aria-checked')).toBe('true')
     await user.click(box)

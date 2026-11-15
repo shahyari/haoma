@@ -142,9 +142,12 @@ export function SettingsPage() {
             <Label htmlFor="monoNumbers">Monospaced numbers</Label>
           </div>
           <p id="monoNumbers-hint" className={rowHint}>
-            Shows numbers in a fixed-width font, for example{' '}
-            <span className="num text-foreground">118/76</span>, so readings line up and are easy to
-            compare.
+            Shows numbers in a fixed-width font, so readings line up and are easy to compare.
+          </p>
+          {/* Two example readings, one under the other, so the alignment shows (owner, 2026-11-15). */}
+          <p className="num text-sm">
+            <span className="block">118/76</span>
+            <span className="block">120/77</span>
           </p>
         </div>
         <div className={settingsRow}>
