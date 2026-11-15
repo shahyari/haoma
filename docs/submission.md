@@ -102,6 +102,81 @@ TODO: Brief fictional mission story and actual workflow. Explicitly label simula
 
 All 19 URLs returned 200 on 2026-11-15. Partner agencies (for the separate partner field): JAXA ISS medical equipment (REF-20) and CSA Bio-Monitor (REF-21), see `references.md`. Space Apps event pages (challenge statement, terms, guides) are not listed as resources used.
 
+## Space Agency Partner and other data (portal text)
+
+Portal field "Space Agency Partner & Other Data": partner-agency sources, the other references the rules use, and all code and tools. Sources from `references.md` (REF-34, superseded, is left out); code from `references.md` → "Third-party code, assets, and data". The logo and the body map are the team's own work (TP-16; body map prototype by the owner with the Claude app). Links checked 2026-11-15: all public; heart.org, cdc.gov, aasm.org, mayoclinic.org, jamanetwork.com, and one DOI block automated checks (403) but open in a browser.
+
+### Space agency partners
+
+| Link Text | Link Url |
+|---|---|
+| CSA: Bio-Monitor, astronaut vital signs | https://www.asc-csa.gc.ca/eng/sciences/bio-monitor.asp |
+| CSA: Monitoring Radiation for Astronaut Health | https://www.asc-csa.gc.ca/eng/news/articles/2026/2026-02-26-monitoring-radiation-astronaut-health.asp |
+| CSA: Why Do We Conduct Science Experiments in Space? | https://www.asc-csa.gc.ca/eng/iss/science/why-do-we-conduct-science-experiments-in-space.asp |
+| JAXA: ISS medical equipment | https://humans-in-space.jaxa.jp/en/biz-lab/med-in-space/healthcare/medops/system/ |
+
+### Clinical and scientific references
+
+| Link Text | Link Url |
+|---|---|
+| AHA: Understanding Blood Pressure Readings | https://www.heart.org/en/health-topics/high-blood-pressure/understanding-blood-pressure-readings |
+| AHA: Low Blood Pressure | https://www.heart.org/en/health-topics/high-blood-pressure/the-facts-about-high-blood-pressure/low-blood-pressure-when-blood-pressure-is-too-low |
+| AHA: Target Heart Rates | https://www.heart.org/en/healthy-living/exercise-and-physical-activity/fitness-basics/target-heart-rates |
+| Mayo Clinic: Low blood pressure (hypotension) | https://www.mayoclinic.org/diseases-conditions/low-blood-pressure/symptoms-causes/syc-20355465 |
+| NHLBI: Arrhythmia symptoms | https://www.nhlbi.nih.gov/health/arrhythmias/symptoms |
+| NHLBI: Heart attack symptoms | https://www.nhlbi.nih.gov/health/heart-attack/symptoms |
+| Norsk et al. 2015, J Physiol (ISS blood pressure) | https://pmc.ncbi.nlm.nih.gov/articles/PMC4324706/ |
+| Lee et al. 2020, Front Physiol (compression garments after spaceflight) | https://doi.org/10.3389/fphys.2020.00784 |
+| Cowings et al. 2015, Aerosp Med Hum Perform (fluid loading) | https://doi.org/10.3357/AMHP.4065.2015 |
+| ADA Standards of Care 2023, Section 2 | https://pmc.ncbi.nlm.nih.gov/articles/PMC9810477 |
+| ADA hypoglycemia levels, Table 6.4 | https://pmc.ncbi.nlm.nih.gov/articles/PMC10725808/table/T6.4 |
+| ADA 2010, Diagnosis and classification of diabetes | https://pmc.ncbi.nlm.nih.gov/articles/PMC2797383/ |
+| Endotext/NCBI: ADA diabetes criteria | https://www.ncbi.nlm.nih.gov/books/NBK538537 |
+| Endocrine Society 2009: adult hypoglycemic disorders guideline | https://doi.org/10.1210/jc.2008-1410 |
+| Commun Biol 2023: insulin signaling in spaceflight | https://link.springer.com/article/10.1038/s42003-023-05213-2 |
+| npj Microgravity 2024: ENERGY study | https://pmc.ncbi.nlm.nih.gov/articles/PMC10973451/ |
+| Axiom Space: Suite Ride results (diabetes) | https://axiomspace.com/release/suite-ride-research-unlocks-potential-for-first-astronaut-with-diabetes |
+| MedlinePlus: Fever | https://medlineplus.gov/ency/article/003090.htm |
+| CDC Port Health: signs and symptoms of ill travelers | https://www.cdc.gov/port-health/php/definitions-symptoms-reportable-illness/ |
+| Cleveland Clinic: Fever | https://my.clevelandclinic.org/health/symptoms/10880-fever |
+| Stahn et al. 2017, Sci Rep (core body temperature in space) | https://doi.org/10.1038/s41598-017-15560-w |
+| AASM/SRS consensus 2015: recommended sleep for adults | https://pmc.ncbi.nlm.nih.gov/articles/PMC4434546/ |
+| AASM: Seven or more hours of sleep per night | https://aasm.org/seven-or-more-hours-of-sleep-per-night-a-health-necessity-for-adults/ |
+| Barger et al. 2014, Lancet Neurology (astronaut sleep) | https://doi.org/10.1016/S1474-4422(14)70122-X |
+| Kroenke et al. 2003, Med Care (PHQ-2 validity) | https://doi.org/10.1097/01.MLR.0000093487.78664.3C |
+| Levis et al. 2020, JAMA (PHQ-2 accuracy) | https://jamanetwork.com/journals/jama/fullarticle/2766865 |
+| University of Washington: PHQ-2 | https://www.hiv.uw.edu/page/mental-health-screening/phq-2 |
+| NIDA CTN: PHQ-2 reuse terms | https://ctnlibrary.org/instrument/nida-clinical-trials-network-patient-health-questionnaire-2-phq-2 |
+
+### Code, tools, and license
+
+| Link Text | Link Url |
+|---|---|
+| React (MIT) | https://react.dev |
+| React Router (MIT) | https://reactrouter.com |
+| TypeScript (Apache-2.0) | https://www.typescriptlang.org |
+| Vite (MIT) | https://vite.dev |
+| Tailwind CSS (MIT) | https://tailwindcss.com |
+| shadcn/ui (MIT) | https://ui.shadcn.com |
+| Radix UI (MIT) | https://www.radix-ui.com |
+| class-variance-authority (Apache-2.0) | https://cva.style |
+| tw-animate-css (MIT) | https://github.com/Wombosvideo/tw-animate-css |
+| Lucide icons (ISC) | https://lucide.dev |
+| Recharts (MIT) | https://recharts.org |
+| React DayPicker (MIT) | https://daypicker.dev |
+| date-fns (MIT) | https://date-fns.org |
+| Vitest (MIT) | https://vitest.dev |
+| Testing Library (MIT) | https://testing-library.com |
+| jsdom (MIT) | https://github.com/jsdom/jsdom |
+| oxlint (MIT) | https://oxc.rs |
+| Prettier (MIT) | https://prettier.io |
+| DefinitelyTyped type definitions (MIT) | https://github.com/DefinitelyTyped/DefinitelyTyped |
+| Node.js and npm | https://nodejs.org |
+| Vercel (hosting) | https://vercel.com |
+| GitHub (code hosting) | https://github.com |
+| Claude Code (AI coding assistant, disclosed) | https://claude.com/claude-code |
+| Apache License 2.0 (project license) | https://www.apache.org/licenses/LICENSE-2.0 |
+
 ## Scientific and UX decisions
 TODO: Explain two or three major decisions, with links to evidence.
 
