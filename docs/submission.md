@@ -19,10 +19,10 @@
 | AI-use question | Use of AI tools |
 
 ## Project title
-TODO: final title
+HAOMA - Health Assessment, Observation & Mission Assistance (owner, 2026-11-15)
 
 ## Tagline / one-sentence summary
-TODO: one sentence
+A mission-aware health companion for astronauts.
 
 ## Team and challenge
 - Team: haoma
@@ -31,7 +31,9 @@ TODO: one sentence
 - Team members: Hossein Shahyari (solo team)
 
 ## Project summary
-TODO: 100–200 words: problem, user, solution, implemented capabilities, and demonstrated benefit. Do not overclaim.
+HAOMA is a web prototype that helps astronauts check the six health indicators named in the challenge: heart rate, blood pressure, blood glucose, body temperature, sleep, and mood. A short daily check-in logs one or more readings. Each reading is compared with evidence-labeled rules and the astronaut's own baseline, then shown as Normal, Attention, or Escalate. Every result says what to do first, such as re-measuring or telling the flight surgeon, and explains why, with the rule, its source, and the type of evidence behind it. Rules draw on general clinical references and NASA research, are marked as not validated for astronauts, and never diagnose. A history view charts each indicator. A 3D/2D body map records self-reported pain as reports for the flight surgeon. An optional crew comparison shows the crew average as context without changing any status. Mission phase (in flight, approaching landing, post-landing) adds landing-specific guidance. In space, early signs are easy to miss and care is far away. HAOMA makes self-assessment quick, consistent, and honest about its limits. The astronaut, crew, and demo readings are fictional and simulated, and all data stays in the browser.
+
+(188 words, 1,198 characters; portal limit 1,500 characters. Drafted with AI assistance from the implemented features, to be disclosed in the AI-use field.)
 
 ## Problem and intended users
 TODO: What astronauts need to assess; what decisions the prototype supports; mission constraints.
